@@ -187,7 +187,7 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
 .product-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;transition:all 0.2s}
 .product-card:active{transform:scale(0.97)}
 .product-img{width:100%;aspect-ratio:3/4;background:var(--bg3);display:flex;align-items:center;justify-content:center;overflow:hidden}
-.product-img img{width:100%;height:100%;object-fit:cover;object-position:center}
+.product-img img{width:100%;height:100%;object-fit:contain;object-position:center}
 .product-img-placeholder{font-size:28px;color:var(--text3)}
 .product-info{padding:8px 10px 10px}
 .product-name{font-size:11px;font-weight:500;color:var(--text);margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -232,7 +232,7 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
 .lib-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;transition:all 0.2s;position:relative}
 .lib-card:active{transform:scale(0.97);background:var(--bg3)}
 .lib-card-cover{width:100%;aspect-ratio:3/4;background:var(--bg3);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
-.lib-card-cover img{width:100%;height:100%;object-fit:cover;object-position:center}
+.lib-card-cover img{width:100%;height:100%;object-fit:contain;object-position:center}
 .lib-card-cover-placeholder{font-size:36px;color:var(--text3)}
 .lib-card-status{position:absolute;top:8px;right:8px;width:8px;height:8px;border-radius:50%}
 .lib-card-rating{position:absolute;bottom:8px;left:8px;background:rgba(8,8,8,0.85);padding:2px 7px;border-radius:10px;font-size:11px;color:var(--accent);font-weight:500;backdrop-filter:blur(4px)}
@@ -338,10 +338,10 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
 .form-chips-wrap{display:flex;flex-wrap:wrap;gap:6px}
 .form-chip{padding:6px 12px;border-radius:20px;border:0.5px solid var(--border);background:transparent;color:var(--text3);font-size:12px;cursor:pointer;transition:all 0.2s;font-family:var(--sans)}
 .form-chip.selected{background:var(--accent);border-color:var(--accent);color:var(--bg)}
-.form-image-zone{border:1.5px dashed var(--border2);border-radius:12px;padding:24px;text-align:center;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden}
+.form-image-zone{border:1.5px dashed var(--border2);border-radius:12px;padding:24px;text-align:center;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden;background:transparent}
 .form-image-zone:active{border-color:var(--accent)}
 .form-image-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
-.form-image-preview{width:100%;max-height:180px;object-fit:cover;border-radius:10px;display:none}
+.form-image-preview{width:100%;max-height:200px;object-fit:contain;border-radius:10px;display:none;background:transparent}
 .form-image-placeholder{font-size:28px;color:var(--text3);margin-bottom:6px}
 .form-image-label{font-size:12px;color:var(--text3)}
 .form-rating-row{display:flex;gap:6px;justify-content:center;padding:8px 0}
@@ -1566,54 +1566,82 @@ function removePriceEntry(i) {
 function handleImage(event, type) {
   const file = event.target.files[0];
   if(!file) return;
+
+  // Show instant preview using object URL — no canvas, no color change
+  const objectUrl = URL.createObjectURL(file);
+  const zoneId = type==='cover' ? 'coverZone' : 'productZone';
+  const zone = document.getElementById(zoneId);
+  if(zone) {
+    zone.querySelector('.form-image-placeholder')?.remove();
+    zone.querySelector('.form-image-label')?.remove();
+    let preview = zone.querySelector('.form-image-preview');
+    if(!preview) {
+      preview = document.createElement('img');
+      preview.className = 'form-image-preview';
+      zone.appendChild(preview);
+    }
+    preview.src = objectUrl;
+    preview.style.display = 'block';
+    preview.style.background = 'transparent';
+  }
+
+  // Process image in background for storage
   const reader = new FileReader();
   reader.onload = (e) => {
     const img = new Image();
     img.onload = () => {
-      const canvas = document.createElement('canvas');
-      let tw, th;
-      if(type==='cover') { tw=800; th=450; }
-      else { tw=600; th=600; }
-
-      canvas.width=tw; canvas.height=th;
-      const ctx=canvas.getContext('2d');
-
-      // Fill canvas completely — crop to target ratio from center
-      // This matches how Notion displays images: full bleed, no black bars
-      const srcRatio = img.width / img.height;
-      const tgtRatio = tw / th;
-      let sx=0, sy=0, sw=img.width, sh=img.height;
-      if(srcRatio > tgtRatio) {
-        // Image is wider — crop sides
-        sw = img.height * tgtRatio;
-        sx = (img.width - sw) / 2;
+      if(type === 'cover') {
+        // Cover: crop center to 16:9
+        const canvas = document.createElement('canvas');
+        const tw=800, th=450;
+        canvas.width=tw; canvas.height=th;
+        const ctx=canvas.getContext('2d');
+        const srcRatio=img.width/img.height, tgtRatio=tw/th;
+        let sx=0,sy=0,sw=img.width,sh=img.height;
+        if(srcRatio>tgtRatio){sw=img.height*tgtRatio;sx=(img.width-sw)/2;}
+        else{sh=img.width/tgtRatio;sy=(img.height-sh)/2;}
+        ctx.drawImage(img,sx,sy,sw,sh,0,0,tw,th);
+        coverImageB64 = canvas.toDataURL('image/jpeg',0.85);
       } else {
-        // Image is taller — crop top/bottom
-        sh = img.width / tgtRatio;
-        sy = (img.height - sh) / 2;
-      }
-      ctx.drawImage(img, sx, sy, sw, sh, 0, 0, tw, th);
-      const b64=canvas.toDataURL('image/jpeg', 0.85);
+        // Product: check alpha to decide transparent or opaque
+        const tmp = document.createElement('canvas');
+        tmp.width=img.width; tmp.height=img.height;
+        const tCtx=tmp.getContext('2d');
+        tCtx.drawImage(img,0,0);
+        const corners=[
+          tCtx.getImageData(0,0,1,1).data,
+          tCtx.getImageData(img.width-1,0,1,1).data,
+          tCtx.getImageData(0,img.height-1,1,1).data,
+          tCtx.getImageData(img.width-1,img.height-1,1,1).data
+        ];
+        const avgAlpha=corners.reduce((s,c)=>s+c[3],0)/4;
+        const isTransparent=avgAlpha<10;
 
-      if(type==='cover') coverImageB64=b64;
-      else productImageB64=b64;
+        const canvas=document.createElement('canvas');
+        const size=800;
+        canvas.width=size; canvas.height=size;
+        const ctx=canvas.getContext('2d');
 
-      // Re-render image zone
-      const zoneId = type==='cover'?'coverZone':'productZone';
-      const zone = document.getElementById(zoneId);
-      if(zone) {
-        const preview = zone.querySelector('.form-image-preview')||document.createElement('img');
-        preview.className='form-image-preview';
-        preview.src=b64;
-        preview.style.display='block';
-        preview.style.width='100%';
-        const placeholder = zone.querySelector('.form-image-placeholder');
-        const label = zone.querySelector('.form-image-label');
-        if(placeholder) placeholder.style.display='none';
-        if(label) label.style.display='none';
-        if(!zone.contains(preview)) zone.appendChild(preview);
+        if(isTransparent) {
+          ctx.clearRect(0,0,size,size);
+        } else {
+          const r=Math.round(corners.reduce((s,c)=>s+c[0],0)/4);
+          const g=Math.round(corners.reduce((s,c)=>s+c[1],0)/4);
+          const b2=Math.round(corners.reduce((s,c)=>s+c[2],0)/4);
+          ctx.fillStyle=`rgb(${r},${g},${b2})`;
+          ctx.fillRect(0,0,size,size);
+        }
+
+        const pad=size*0.04;
+        const avail=size-pad*2;
+        const scale=Math.min(avail/img.width,avail/img.height);
+        ctx.drawImage(img,(size-img.width*scale)/2,(size-img.height*scale)/2,img.width*scale,img.height*scale);
+        productImageB64=isTransparent
+          ? canvas.toDataURL('image/png')
+          : canvas.toDataURL('image/jpeg',0.88);
       }
-      showToast('Image resized ✓');
+      showToast('✓ Image ready');
+      URL.revokeObjectURL(objectUrl);
     };
     img.src=e.target.result;
   };
