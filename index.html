@@ -9,6 +9,7 @@
 <meta name="theme-color" content="#080808">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon.png">
+<script src="https://unpkg.com/@zxing/library@0.19.1/umd/index.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
 <title>LeoOS</title>
@@ -204,6 +205,7 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
 .loading-dot:nth-child(2){animation-delay:0.2s}
 .loading-dot:nth-child(3){animation-delay:0.4s}
 @keyframes pulse{0%,80%,100%{opacity:0.2;transform:scale(0.8)}40%{opacity:1;transform:scale(1)}}
+@keyframes scanAnim{0%,100%{top:4px}50%{top:calc(100% - 6px)}}
 
 /* LIBRARY */
 .lib-search-wrap{padding:10px 20px;flex-shrink:0}
@@ -580,12 +582,32 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
 
   <!-- BARCODE SCANNER -->
   <div id="barcodeOverlay" style="display:none;position:fixed;inset:0;background:#000;z-index:500;flex-direction:column;align-items:center;justify-content:center">
-    <video id="barcodeVideo" style="width:100%;max-width:400px;border-radius:12px" playsinline></video>
-    <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none">
-      <div style="width:220px;height:120px;border:2px solid var(--accent);border-radius:12px;opacity:0.8"></div>
+    <video id="barcodeVideo" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0" playsinline muted></video>
+    
+    <!-- Viewfinder -->
+    <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;width:100%;padding:0 30px">
+      <div style="width:100%;max-width:300px;height:130px;position:relative;margin-bottom:20px">
+        <div style="position:absolute;inset:0;border:2px solid var(--accent);border-radius:12px;opacity:0.9"></div>
+        <div style="position:absolute;top:-1px;left:-1px;width:24px;height:24px;border-top:3px solid var(--accent);border-left:3px solid var(--accent);border-radius:10px 0 0 0"></div>
+        <div style="position:absolute;top:-1px;right:-1px;width:24px;height:24px;border-top:3px solid var(--accent);border-right:3px solid var(--accent);border-radius:0 10px 0 0"></div>
+        <div style="position:absolute;bottom:-1px;left:-1px;width:24px;height:24px;border-bottom:3px solid var(--accent);border-left:3px solid var(--accent);border-radius:0 0 0 10px"></div>
+        <div style="position:absolute;bottom:-1px;right:-1px;width:24px;height:24px;border-bottom:3px solid var(--accent);border-right:3px solid var(--accent);border-radius:0 0 10px 0"></div>
+        <div id="scanLine" style="position:absolute;top:0;left:4px;right:4px;height:2px;background:var(--accent);border-radius:2px;opacity:0.8;animation:scanAnim 2s ease-in-out infinite"></div>
+      </div>
+      <div id="barcodeStatus" style="font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:24px;text-align:center">Point camera at barcode</div>
+      
+      <!-- Manual entry toggle -->
+      <div id="manualWrap" style="width:100%;max-width:300px;display:none;flex-direction:column;gap:8px">
+        <div style="display:flex;gap:8px">
+          <input id="manualBarcodeInput" style="flex:1;background:rgba(255,255,255,0.1);border:0.5px solid rgba(255,255,255,0.2);border-radius:10px;padding:10px 14px;color:#fff;font-size:14px;outline:none;font-family:var(--sans)" placeholder="Enter barcode number..." type="number">
+          <button onclick="submitManualBarcode()" style="background:var(--accent);border:none;color:var(--bg);padding:10px 16px;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);white-space:nowrap">Look up</button>
+        </div>
+      </div>
+
+      <button onclick="toggleManualEntry()" id="manualToggleBtn" style="font-size:12px;color:rgba(255,255,255,0.4);background:transparent;border:none;padding:8px;cursor:pointer;font-family:var(--sans)">Enter barcode manually</button>
     </div>
-    <div style="position:absolute;bottom:60px;font-size:13px;color:var(--text2)">Point at barcode</div>
-    <button onclick="closeBarcodeScanner()" style="position:absolute;top:20px;right:20px;background:var(--bg3);border:none;color:var(--text);width:36px;height:36px;border-radius:50%;font-size:16px;cursor:pointer">✕</button>
+
+    <button onclick="closeBarcodeScanner()" style="position:absolute;top:calc(20px + env(safe-area-inset-top,0px));right:20px;background:rgba(30,30,30,0.8);border:0.5px solid rgba(255,255,255,0.1);color:#fff;width:36px;height:36px;border-radius:50%;font-size:16px;cursor:pointer;z-index:3;backdrop-filter:blur(4px)">✕</button>
   </div>
 
   <!-- PLACEHOLDER TAB 5 -->
@@ -2071,53 +2093,70 @@ async function deleteProduct() {
 }
 
 // ============================================================
-// BARCODE SCANNER
+// BARCODE SCANNER (ZXing — works on Safari)
 // ============================================================
-let barcodeStream = null;
+let zxingReader = null;
+let barcodeScanning = false;
+let manualVisible = false;
 
 async function openBarcodeScanner() {
+  manualVisible = false;
   const overlay = document.getElementById('barcodeOverlay');
   overlay.style.display = 'flex';
+  document.getElementById('manualWrap').style.display = 'none';
+  document.getElementById('manualToggleBtn').textContent = 'Enter barcode manually';
+  document.getElementById('barcodeStatus').textContent = 'Point camera at barcode';
+
   try {
-    barcodeStream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
-    document.getElementById('barcodeVideo').srcObject = barcodeStream;
-    document.getElementById('barcodeVideo').play();
-    scanBarcode();
+    const hints = new Map();
+    const formats = [
+      ZXing.BarcodeFormat.EAN_13,
+      ZXing.BarcodeFormat.EAN_8,
+      ZXing.BarcodeFormat.UPC_A,
+      ZXing.BarcodeFormat.UPC_E,
+      ZXing.BarcodeFormat.CODE_128,
+    ];
+    hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, formats);
+    zxingReader = new ZXing.BrowserMultiFormatReader(hints);
+    barcodeScanning = true;
+
+    await zxingReader.decodeFromVideoDevice(null, 'barcodeVideo', async (result, err) => {
+      if(result && barcodeScanning) {
+        barcodeScanning = false;
+        const barcode = result.getText();
+        closeBarcodeScanner();
+        showToast('Looking up product...');
+        await lookupBarcode(barcode);
+      }
+      if(err && !(err instanceof ZXing.NotFoundException)) {
+        document.getElementById('barcodeStatus').textContent = 'Scanning... move closer';
+      }
+    });
   } catch(e) {
-    showToast('Camera not available');
-    closeBarcodeScanner();
+    document.getElementById('barcodeStatus').textContent = 'Camera unavailable — use manual entry';
+    toggleManualEntry();
   }
 }
 
 function closeBarcodeScanner() {
-  if(barcodeStream) { barcodeStream.getTracks().forEach(t=>t.stop()); barcodeStream=null; }
+  barcodeScanning = false;
+  if(zxingReader) { zxingReader.reset(); zxingReader=null; }
   document.getElementById('barcodeOverlay').style.display = 'none';
 }
 
-async function scanBarcode() {
-  if(!('BarcodeDetector' in window)) {
-    showToast('Barcode scanning not supported on this browser');
-    closeBarcodeScanner();
-    return;
-  }
-  const detector = new BarcodeDetector({formats:['ean_13','ean_8','upc_a','upc_e']});
-  const video = document.getElementById('barcodeVideo');
+function toggleManualEntry() {
+  manualVisible = !manualVisible;
+  document.getElementById('manualWrap').style.display = manualVisible ? 'flex' : 'none';
+  document.getElementById('manualToggleBtn').textContent = manualVisible ? 'Use camera instead' : 'Enter barcode manually';
+  if(manualVisible) document.getElementById('manualBarcodeInput').focus();
+}
 
-  const tick = async () => {
-    if(!barcodeStream) return;
-    try {
-      const codes = await detector.detect(video);
-      if(codes.length) {
-        const barcode = codes[0].rawValue;
-        closeBarcodeScanner();
-        showToast('Looking up product...');
-        await lookupBarcode(barcode);
-        return;
-      }
-    } catch(e) {}
-    requestAnimationFrame(tick);
-  };
-  requestAnimationFrame(tick);
+async function submitManualBarcode() {
+  const val = document.getElementById('manualBarcodeInput').value.trim();
+  if(!val) { showToast('Enter a barcode number'); return; }
+  closeBarcodeScanner();
+  showToast('Looking up product...');
+  await lookupBarcode(val);
 }
 
 async function lookupBarcode(barcode) {
