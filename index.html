@@ -186,7 +186,7 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
 .kit-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:8px 14px 20px}
 .product-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;transition:all 0.2s}
 .product-card:active{transform:scale(0.97)}
-.product-img{width:100%;aspect-ratio:3/4;background:var(--bg3);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.product-img{width:100%;aspect-ratio:3/4;background:#f5f5f5;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .product-img img{width:100%;height:100%;object-fit:contain;object-position:center}
 .product-img-placeholder{font-size:28px;color:var(--text3)}
 .product-info{padding:8px 10px 10px}
@@ -231,7 +231,7 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
 .lib-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:4px 14px 20px}
 .lib-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;transition:all 0.2s;position:relative}
 .lib-card:active{transform:scale(0.97);background:var(--bg3)}
-.lib-card-cover{width:100%;aspect-ratio:3/4;background:var(--bg3);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.lib-card-cover{width:100%;aspect-ratio:3/4;background:#f5f5f5;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
 .lib-card-cover img{width:100%;height:100%;object-fit:contain;object-position:center}
 .lib-card-cover-placeholder{font-size:36px;color:var(--text3)}
 .lib-card-status{position:absolute;top:8px;right:8px;width:8px;height:8px;border-radius:50%}
@@ -259,7 +259,7 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
 .detail-routine-steps{display:flex;flex-wrap:wrap;gap:6px}
 .routine-step-chip{padding:5px 10px;border-radius:12px;border:0.5px solid var(--border);background:transparent;color:var(--text3);font-size:11px;cursor:pointer;transition:all 0.2s;font-family:var(--sans)}
 .routine-step-chip.linked{background:var(--bg3);color:var(--accent);border-color:var(--accent2)}
-.detail-cover{width:100%;aspect-ratio:16/9;background:var(--bg2);overflow:hidden;border-radius:20px 20px 0 0;display:flex;align-items:center;justify-content:center}
+.detail-cover{width:100%;aspect-ratio:16/9;background:#f5f5f5;overflow:hidden;border-radius:20px 20px 0 0;display:flex;align-items:center;justify-content:center}
 .detail-cover img{width:100%;height:100%;object-fit:cover}
 .detail-cover-placeholder{font-size:56px;color:var(--text3)}
 .detail-body{padding:20px}
@@ -1603,42 +1603,9 @@ function handleImage(event, type) {
         ctx.drawImage(img,sx,sy,sw,sh,0,0,tw,th);
         coverImageB64 = canvas.toDataURL('image/jpeg',0.85);
       } else {
-        // Product: check alpha to decide transparent or opaque
-        const tmp = document.createElement('canvas');
-        tmp.width=img.width; tmp.height=img.height;
-        const tCtx=tmp.getContext('2d');
-        tCtx.drawImage(img,0,0);
-        const corners=[
-          tCtx.getImageData(0,0,1,1).data,
-          tCtx.getImageData(img.width-1,0,1,1).data,
-          tCtx.getImageData(0,img.height-1,1,1).data,
-          tCtx.getImageData(img.width-1,img.height-1,1,1).data
-        ];
-        const avgAlpha=corners.reduce((s,c)=>s+c[3],0)/4;
-        const isTransparent=avgAlpha<10;
-
-        const canvas=document.createElement('canvas');
-        const size=800;
-        canvas.width=size; canvas.height=size;
-        const ctx=canvas.getContext('2d');
-
-        if(isTransparent) {
-          ctx.clearRect(0,0,size,size);
-        } else {
-          const r=Math.round(corners.reduce((s,c)=>s+c[0],0)/4);
-          const g=Math.round(corners.reduce((s,c)=>s+c[1],0)/4);
-          const b2=Math.round(corners.reduce((s,c)=>s+c[2],0)/4);
-          ctx.fillStyle=`rgb(${r},${g},${b2})`;
-          ctx.fillRect(0,0,size,size);
-        }
-
-        const pad=size*0.04;
-        const avail=size-pad*2;
-        const scale=Math.min(avail/img.width,avail/img.height);
-        ctx.drawImage(img,(size-img.width*scale)/2,(size-img.height*scale)/2,img.width*scale,img.height*scale);
-        productImageB64=isTransparent
-          ? canvas.toDataURL('image/png')
-          : canvas.toDataURL('image/jpeg',0.88);
+        // Product image — store raw base64, no canvas processing
+        // CSS handles display (object-fit: contain on white background)
+        productImageB64 = e.target.result;
       }
       showToast('✓ Image ready');
       URL.revokeObjectURL(objectUrl);
