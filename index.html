@@ -123,7 +123,8 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
 /* FOOTER */
 .routine-footer{padding:12px 20px calc(12px + var(--safe-bot));border-top:0.5px solid var(--border);display:flex;gap:10px;flex-shrink:0}
 .skip-all-btn{flex:1;padding:13px;border-radius:12px;border:0.5px solid var(--border2);background:transparent;color:var(--text3);font-size:13px;cursor:pointer;font-family:var(--sans);transition:all 0.2s}
-.save-btn{flex:1;padding:13px;border-radius:12px;border:none;background:var(--accent);color:var(--bg);font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);transition:all 0.2s}
+.save-btn{flex:1;padding:13px;border-radius:12px;border:none;background:var(--accent);color:var(--bg);font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);transition:all 0.2s;opacity:0.35;pointer-events:none}
+.save-btn.active{opacity:1;pointer-events:all}
 .save-btn:active{transform:scale(0.98)}
 .save-btn:disabled{opacity:0.4}
 
@@ -306,6 +307,7 @@ let currentSession = (now.getHours() >= 3 && now.getHours() < 15) ? 'Morning' : 
 let steps = [];
 let stepState = {};
 let stepProducts = {}; // id -> selected product id
+let hasChanges = false;
 let ownedProducts = [];
 let kitFilter = 'All';
 let products = [];
@@ -450,7 +452,7 @@ function buildProductPicker(stepId, show) {
 
 function selectProduct(stepId, productId) {
   stepProducts[stepId]=stepProducts[stepId]===productId?null:productId;
-  // re-render just that picker
+  activateSave();
   const picker=document.getElementById(`picker-${stepId}`);
   if(picker) picker.outerHTML=buildProductPicker(stepId,true);
 }
@@ -458,16 +460,19 @@ function selectProduct(stepId, productId) {
 function toggleStep(id) {
   stepState[id]=stepState[id]==='done'?'pending':'done';
   if(stepState[id]==='pending') delete stepProducts[id];
+  activateSave();
   renderSteps();
 }
 
 function toggleSkip(id) {
   stepState[id]=stepState[id]==='skipped'?'pending':'skipped';
+  activateSave();
   renderSteps();
 }
 
 function skipAll() {
   steps.forEach(s=>stepState[s.id]='skipped');
+  activateSave();
   renderSteps();
 }
 
@@ -479,6 +484,7 @@ function resetRoutine() {
 }
 
 async function saveRoutine() {
+  if(!hasChanges) return;
   const btn=document.getElementById('saveBtn');
   btn.disabled=true;btn.textContent='Saving...';
 
@@ -493,12 +499,24 @@ async function saveRoutine() {
       product_used:stepProducts[s.id]||null
     }));
 
-  if(!entries.length){showToast('Nothing to save yet');btn.disabled=false;btn.textContent='Save Routine';return;}
+  if(!entries.length){showToast('Nothing to save yet');btn.disabled=false;btn.classList.remove('active');return;}
+
+  // Delete existing entries for today + this session first
+  await fetch(`${SUPABASE_URL}/rest/v1/daily_log?date=eq.${todayDate}&time_of_day=eq.${currentSession}`, {
+    method:'DELETE',
+    headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`}
+  });
 
   const ok=await apiPost('daily_log',entries);
-  btn.disabled=false;btn.textContent='Save Routine';
-  if(ok) showToast(`✓ ${entries.length} steps logged`);
-  else showToast('Something went wrong');
+  btn.disabled=false;
+  btn.textContent='Save Routine';
+  if(ok){
+    deactivateSave();
+    showToast(`✓ ${entries.length} steps logged`);
+  } else {
+    btn.classList.add('active');
+    showToast('Something went wrong');
+  }
 }
 
 // KIT
@@ -533,6 +551,19 @@ function renderKit() {
         <div style="margin-top:4px"><span class="stock-dot stock-${(p.stock||'Full').toLowerCase()}"></span><span style="font-size:10px;color:var(--text3)">${p.stock||'Full'}</span></div>
       </div>
     </div>`).join('');
+}
+
+// SAVE STATE
+function activateSave() {
+  hasChanges = true;
+  const btn = document.getElementById('saveBtn');
+  btn.classList.add('active');
+}
+
+function deactivateSave() {
+  hasChanges = false;
+  const btn = document.getElementById('saveBtn');
+  btn.classList.remove('active');
 }
 
 // TOAST
