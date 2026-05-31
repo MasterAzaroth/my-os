@@ -5,135 +5,588 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="My OS">
-<meta name="theme-color" content="#0e0e0e">
+<meta name="apple-mobile-web-app-title" content="LeoOS">
+<meta name="theme-color" content="#080808">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon.png">
-<title>My OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<title>LeoOS</title>
 <style>
-  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-  html,body{height:100%;background:#0e0e0e;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#e8e8e8;overflow:hidden}
-  .screen{height:100vh;height:100dvh;display:flex;flex-direction:column;padding:env(safe-area-inset-top,20px) 0 env(safe-area-inset-bottom,20px)}
-  .header{padding:24px 24px 16px;border-bottom:0.5px solid #1e1e1e}
-  .header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
-  .app-label{font-size:11px;color:#444;letter-spacing:0.1em;text-transform:uppercase}
-  .date{font-size:13px;color:#444}
-  .title{font-size:22px;font-weight:600;color:#e8e8e8}
-  .progress-wrap{padding:16px 24px;border-bottom:0.5px solid #1a1a1a}
-  .progress-meta{display:flex;justify-content:space-between;margin-bottom:8px}
-  .progress-label{font-size:11px;color:#555}
-  .progress-count{font-size:11px;color:#777;font-weight:500}
-  .progress-track{height:2px;background:#1e1e1e;border-radius:2px}
-  .progress-fill{height:100%;border-radius:2px;background:#e8e8e8;transition:width 0.4s cubic-bezier(0.4,0,0.2,1)}
-  .list{flex:1;overflow-y:auto;padding:8px 0}
-  .list::-webkit-scrollbar{display:none}
-  .item{display:flex;align-items:center;padding:14px 24px;gap:14px;border-bottom:0.5px solid #141414;transition:opacity 0.2s;cursor:pointer;-webkit-user-select:none;user-select:none}
-  .item:active{background:#141414}
-  .item.checked{opacity:0.3}
-  .check{width:22px;height:22px;border-radius:50%;border:1.5px solid #2e2e2e;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
-  .item.checked .check{background:#e8e8e8;border-color:#e8e8e8}
-  .checkmark{display:none;width:6px;height:10px;border:1.5px solid #0e0e0e;border-top:none;border-left:none;transform:rotate(45deg) translate(-1px,-1px)}
-  .item.checked .checkmark{display:block}
-  .item-name{flex:1;font-size:15px;color:#c8c8c8;line-height:1.3}
-  .item.checked .item-name{text-decoration:line-through;color:#333}
-  .done-screen{display:none;flex:1;flex-direction:column;align-items:center;justify-content:center;padding:40px}
-  .done-icon{font-size:48px;margin-bottom:20px}
-  .done-title{font-size:20px;font-weight:600;color:#e8e8e8;margin-bottom:8px;text-align:center}
-  .done-sub{font-size:14px;color:#555;text-align:center}
-  .reset-btn{margin-top:32px;padding:12px 28px;border-radius:24px;border:0.5px solid #2a2a2a;background:transparent;color:#555;font-size:13px;cursor:pointer;transition:all 0.2s}
-  .reset-btn:active{background:#1a1a1a;color:#888}
+:root {
+  --bg: #080808;
+  --bg2: #111111;
+  --bg3: #181818;
+  --border: #1f1f1f;
+  --border2: #2a2a2a;
+  --text: #e8e6e0;
+  --text2: #888880;
+  --text3: #444440;
+  --accent: #c8b89a;
+  --accent2: #8a7a64;
+  --green: #4a7c59;
+  --yellow: #8a7a40;
+  --red: #7a3a3a;
+  --sans: 'DM Sans', sans-serif;
+  --serif: 'DM Serif Display', serif;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bot: env(safe-area-inset-bottom, 0px);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; background: var(--bg); font-family: var(--sans); color: var(--text); overflow: hidden; }
+
+/* APP SHELL */
+.app { height: 100vh; height: 100dvh; display: flex; flex-direction: column; }
+.screen { display: none; flex: 1; flex-direction: column; overflow: hidden; padding-top: var(--safe-top); }
+.screen.active { display: flex; }
+
+/* NAV BAR */
+.navbar {
+  display: flex; justify-content: space-around; align-items: center;
+  padding: 10px 0 calc(10px + var(--safe-bot));
+  border-top: 0.5px solid var(--border);
+  background: var(--bg);
+  flex-shrink: 0;
+}
+.nav-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  background: none; border: none; cursor: pointer; padding: 4px 16px;
+  color: var(--text3); transition: color 0.2s;
+}
+.nav-btn.active { color: var(--accent); }
+.nav-icon { font-size: 20px; line-height: 1; }
+.nav-label { font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 500; }
+
+/* SCROLLABLE CONTENT */
+.scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.scroll::-webkit-scrollbar { display: none; }
+
+/* PAGE HEADER */
+.page-header {
+  padding: 20px 20px 16px;
+  border-bottom: 0.5px solid var(--border);
+  flex-shrink: 0;
+}
+.page-label { font-size: 10px; color: var(--text3); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 4px; }
+.page-title { font-family: var(--serif); font-size: 26px; color: var(--text); }
+.page-subtitle { font-size: 12px; color: var(--text2); margin-top: 2px; }
+
+/* HOME SCREEN */
+.home-hero {
+  padding: 32px 20px 24px;
+  border-bottom: 0.5px solid var(--border);
+}
+.home-greeting { font-size: 12px; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px; }
+.home-date { font-family: var(--serif); font-size: 32px; color: var(--text); line-height: 1.1; }
+.home-day { font-size: 13px; color: var(--text2); margin-top: 4px; }
+.home-grid { padding: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.home-card {
+  background: var(--bg2); border: 0.5px solid var(--border); border-radius: 16px;
+  padding: 18px 16px; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden;
+}
+.home-card:active { background: var(--bg3); transform: scale(0.98); }
+.home-card-icon { font-size: 24px; margin-bottom: 12px; }
+.home-card-title { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
+.home-card-sub { font-size: 11px; color: var(--text3); }
+.home-card.wide { grid-column: span 2; }
+
+/* SELF CARE — ROUTINE */
+.session-toggle {
+  display: flex; background: var(--bg2); border-radius: 20px; padding: 3px; margin: 16px 20px;
+  border: 0.5px solid var(--border); flex-shrink: 0;
+}
+.sess-btn {
+  flex: 1; padding: 8px; border-radius: 16px; border: none; font-size: 12px;
+  font-weight: 500; cursor: pointer; transition: all 0.2s; background: transparent;
+  color: var(--text3); font-family: var(--sans);
+}
+.sess-btn.active { background: var(--bg3); color: var(--text); border: 0.5px solid var(--border2); }
+
+.day-strip {
+  display: flex; gap: 6px; padding: 0 20px 16px; overflow-x: auto; flex-shrink: 0;
+}
+.day-strip::-webkit-scrollbar { display: none; }
+.day-btn {
+  flex-shrink: 0; padding: 6px 12px; border-radius: 20px; border: 0.5px solid var(--border);
+  background: transparent; color: var(--text3); font-size: 11px; font-weight: 500;
+  cursor: pointer; transition: all 0.2s; font-family: var(--sans);
+}
+.day-btn.active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+
+.progress-bar-wrap { padding: 0 20px 12px; flex-shrink: 0; }
+.progress-meta { display: flex; justify-content: space-between; margin-bottom: 6px; }
+.progress-label { font-size: 11px; color: var(--text3); }
+.progress-count { font-size: 11px; color: var(--text2); font-weight: 500; }
+.progress-track { height: 2px; background: var(--border); border-radius: 2px; }
+.progress-fill { height: 100%; border-radius: 2px; background: var(--accent); transition: width 0.4s cubic-bezier(0.4,0,0.2,1); }
+
+.step-list { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.step-list::-webkit-scrollbar { display: none; }
+.step-row {
+  display: flex; align-items: center; padding: 13px 20px; gap: 13px;
+  border-bottom: 0.5px solid var(--border); cursor: pointer; transition: background 0.15s;
+}
+.step-row:active { background: var(--bg2); }
+.step-row.done { opacity: 0.3; }
+.step-row.skipped { opacity: 0.2; }
+.step-num { font-size: 10px; color: var(--text3); width: 16px; text-align: right; flex-shrink: 0; }
+.check-circle {
+  width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--border2);
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+}
+.step-row.done .check-circle { background: var(--accent); border-color: var(--accent); }
+.checkmark { display: none; width: 6px; height: 9px; border: 1.5px solid var(--bg); border-top: none; border-left: none; transform: rotate(45deg) translate(-1px,-1px); }
+.step-row.done .checkmark { display: block; }
+.step-name { flex: 1; font-size: 14px; color: var(--text2); }
+.step-row.done .step-name { text-decoration: line-through; color: var(--text3); }
+.step-row.skipped .step-name { color: var(--text3); }
+.skip-btn {
+  font-size: 10px; color: var(--text3); border: 0.5px solid var(--border); background: transparent;
+  cursor: pointer; padding: 3px 8px; border-radius: 6px; flex-shrink: 0; transition: all 0.15s;
+  font-family: var(--sans);
+}
+.step-row.skipped .skip-btn { color: var(--accent2); border-color: var(--accent2); }
+
+.routine-footer {
+  padding: 12px 20px calc(12px + var(--safe-bot)); border-top: 0.5px solid var(--border);
+  display: flex; gap: 10px; flex-shrink: 0;
+}
+.skip-all-btn {
+  flex: 1; padding: 13px; border-radius: 12px; border: 0.5px solid var(--border2);
+  background: transparent; color: var(--text3); font-size: 13px; cursor: pointer;
+  font-family: var(--sans); transition: all 0.2s;
+}
+.save-btn {
+  flex: 2; padding: 13px; border-radius: 12px; border: none;
+  background: var(--accent); color: var(--bg); font-size: 13px; font-weight: 500;
+  cursor: pointer; font-family: var(--sans); transition: all 0.2s;
+}
+.save-btn:active { transform: scale(0.98); }
+.save-btn:disabled { opacity: 0.4; }
+
+/* DONE OVERLAY */
+.done-overlay {
+  display: none; flex-direction: column; align-items: center; justify-content: center;
+  flex: 1; padding: 40px; text-align: center;
+}
+.done-glyph { font-family: var(--serif); font-size: 64px; color: var(--accent); margin-bottom: 20px; font-style: italic; }
+.done-title { font-family: var(--serif); font-size: 24px; color: var(--text); margin-bottom: 8px; }
+.done-sub { font-size: 13px; color: var(--text3); }
+.done-reset { margin-top: 28px; padding: 10px 24px; border-radius: 20px; border: 0.5px solid var(--border2); background: transparent; color: var(--text3); font-size: 12px; cursor: pointer; font-family: var(--sans); }
+
+/* KIT SCREEN */
+.kit-filter {
+  display: flex; gap: 6px; padding: 12px 20px; overflow-x: auto; flex-shrink: 0;
+}
+.kit-filter::-webkit-scrollbar { display: none; }
+.filter-btn {
+  flex-shrink: 0; padding: 5px 12px; border-radius: 16px; border: 0.5px solid var(--border);
+  background: transparent; color: var(--text3); font-size: 11px; cursor: pointer;
+  transition: all 0.2s; font-family: var(--sans);
+}
+.filter-btn.active { background: var(--bg3); color: var(--text); border-color: var(--border2); }
+.kit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px 16px 20px; }
+.product-card {
+  background: var(--bg2); border: 0.5px solid var(--border); border-radius: 14px;
+  overflow: hidden; cursor: pointer; transition: all 0.2s;
+}
+.product-card:active { transform: scale(0.97); }
+.product-img {
+  width: 100%; aspect-ratio: 1; object-fit: cover; background: var(--bg3);
+  display: flex; align-items: center; justify-content: center;
+}
+.product-img-placeholder { font-size: 32px; color: var(--text3); }
+.product-info { padding: 10px 12px; }
+.product-name { font-size: 12px; font-weight: 500; color: var(--text); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.product-brand { font-size: 10px; color: var(--text3); }
+.product-price { font-size: 11px; color: var(--accent); margin-top: 4px; }
+.stock-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; margin-right: 4px; }
+.stock-full { background: var(--green); }
+.stock-low { background: var(--yellow); }
+.stock-empty { background: var(--red); }
+
+/* EMPTY STATE */
+.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 40px; text-align: center; flex: 1; }
+.empty-glyph { font-family: var(--serif); font-size: 48px; color: var(--text3); margin-bottom: 16px; font-style: italic; }
+.empty-title { font-size: 15px; color: var(--text2); margin-bottom: 6px; }
+.empty-sub { font-size: 12px; color: var(--text3); line-height: 1.6; }
+
+/* TOAST */
+.toast {
+  position: fixed; bottom: calc(80px + var(--safe-bot)); left: 50%; transform: translateX(-50%) translateY(20px);
+  background: var(--bg3); border: 0.5px solid var(--border2); border-radius: 20px;
+  padding: 10px 20px; font-size: 13px; color: var(--text); opacity: 0;
+  transition: all 0.3s; pointer-events: none; white-space: nowrap; z-index: 100;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* LOADING */
+.loading { display: flex; align-items: center; justify-content: center; flex: 1; }
+.loading-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text3); margin: 0 3px; animation: pulse 1.2s ease-in-out infinite; }
+.loading-dot:nth-child(2) { animation-delay: 0.2s; }
+.loading-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes pulse { 0%,80%,100%{opacity:0.2;transform:scale(0.8)} 40%{opacity:1;transform:scale(1)} }
 </style>
 </head>
 <body>
-<div class="screen">
-  <div class="header">
-    <div class="header-top">
-      <span class="app-label">my os</span>
-      <span class="date" id="dateEl"></span>
+<div class="app">
+
+  <!-- HOME -->
+  <div class="screen active" id="screen-home">
+    <div class="scroll">
+      <div class="home-hero">
+        <div class="home-greeting">good <span id="timeGreeting">morning</span></div>
+        <div class="home-date" id="homeDate"></div>
+        <div class="home-day" id="homeDay"></div>
+      </div>
+      <div class="home-grid">
+        <div class="home-card wide" onclick="navigate('selfcare')">
+          <div class="home-card-icon">🪞</div>
+          <div class="home-card-title">Self Care</div>
+          <div class="home-card-sub">AM · PM routine</div>
+        </div>
+        <div class="home-card" onclick="navigate('kit')">
+          <div class="home-card-icon">🧴</div>
+          <div class="home-card-title">My Kit</div>
+          <div class="home-card-sub">Products</div>
+        </div>
+        <div class="home-card" onclick="showToast('Coming soon')">
+          <div class="home-card-icon">🏋️</div>
+          <div class="home-card-title">Fitness</div>
+          <div class="home-card-sub">Coming soon</div>
+        </div>
+        <div class="home-card" onclick="showToast('Coming soon')">
+          <div class="home-card-icon">🎵</div>
+          <div class="home-card-title">Music</div>
+          <div class="home-card-sub">Coming soon</div>
+        </div>
+        <div class="home-card" onclick="showToast('Coming soon')">
+          <div class="home-card-icon">🎨</div>
+          <div class="home-card-title">Creative</div>
+          <div class="home-card-sub">Coming soon</div>
+        </div>
+        <div class="home-card" onclick="showToast('Coming soon')">
+          <div class="home-card-icon">💻</div>
+          <div class="home-card-title">Projects</div>
+          <div class="home-card-sub">Coming soon</div>
+        </div>
+      </div>
     </div>
-    <div class="title">Test Checklist</div>
   </div>
 
-  <div class="progress-wrap" id="progressWrap">
-    <div class="progress-meta">
-      <span class="progress-label">progress</span>
-      <span class="progress-count" id="countEl">0 / 5</span>
+  <!-- SELF CARE -->
+  <div class="screen" id="screen-selfcare">
+    <div class="page-header">
+      <div class="page-label">Leo OS</div>
+      <div class="page-title">Self Care</div>
     </div>
-    <div class="progress-track">
-      <div class="progress-fill" id="progressFill" style="width:0%"></div>
+    <div class="session-toggle">
+      <button class="sess-btn active" id="amBtn" onclick="setSession('Morning')">🌅 Morning</button>
+      <button class="sess-btn" id="pmBtn" onclick="setSession('Evening')">🌙 Evening</button>
+    </div>
+    <div class="day-strip" id="dayStrip"></div>
+    <div class="progress-bar-wrap">
+      <div class="progress-meta">
+        <span class="progress-label" id="progressLabel">morning routine</span>
+        <span class="progress-count" id="progressCount">0 / 0</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    </div>
+    <div class="step-list" id="stepList">
+      <div class="loading"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div>
+    </div>
+    <div class="done-overlay" id="doneOverlay">
+      <div class="done-glyph">✦</div>
+      <div class="done-title">All done.</div>
+      <div class="done-sub" id="doneSub"></div>
+      <button class="done-reset" onclick="resetRoutine()">reset</button>
+    </div>
+    <div class="routine-footer">
+      <button class="skip-all-btn" onclick="skipAll()">skip all</button>
+      <button class="save-btn" id="saveBtn" onclick="saveRoutine()">Save Routine</button>
     </div>
   </div>
 
-  <div class="list" id="list"></div>
-
-  <div class="done-screen" id="doneScreen">
-    <div class="done-icon">✦</div>
-    <div class="done-title">All done.</div>
-    <div class="done-sub">Everything checked off.</div>
-    <button class="reset-btn" onclick="reset()">start over</button>
+  <!-- KIT -->
+  <div class="screen" id="screen-kit">
+    <div class="page-header">
+      <div class="page-label">Self Care</div>
+      <div class="page-title">My Kit</div>
+      <div class="page-subtitle" id="kitSubtitle">Loading...</div>
+    </div>
+    <div class="kit-filter" id="kitFilter"></div>
+    <div class="scroll">
+      <div class="kit-grid" id="kitGrid">
+        <div style="grid-column:span 2" class="loading"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div>
+      </div>
+    </div>
   </div>
+
+  <!-- NAV -->
+  <nav class="navbar">
+    <button class="nav-btn active" id="nav-home" onclick="navigate('home')">
+      <span class="nav-icon">⌂</span>
+      <span class="nav-label">Home</span>
+    </button>
+    <button class="nav-btn" id="nav-selfcare" onclick="navigate('selfcare')">
+      <span class="nav-icon">🪞</span>
+      <span class="nav-label">Self Care</span>
+    </button>
+    <button class="nav-btn" id="nav-kit" onclick="navigate('kit')">
+      <span class="nav-icon">🧴</span>
+      <span class="nav-label">Kit</span>
+    </button>
+  </nav>
 </div>
 
+<div class="toast" id="toast"></div>
+
 <script>
-const ITEMS = [
-  "Drink a glass of water",
-  "5 minutes of stretching",
-  "Review today's goals",
-  "Take vitamins",
-  "Gratitude — one thing"
-];
+const SUPABASE_URL = 'https://dcchjwowwdkpdyxaopic.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRjY2hqd293d2RrcGR5eGFvcGljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyNDM0NzUsImV4cCI6MjA5NTgxOTQ3NX0.FxozE-chmtrJcsZSiu4WYwn-GsrqYOQzgDA0pqPQbGc';
 
-const DAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
-let checked = new Array(ITEMS.length).fill(false);
+let currentSession = 'Morning';
+let currentDay = DAYS[new Date().getDay()];
+let steps = [];
+let stepState = {};
+let products = [];
+let kitFilter = 'All';
 
-function setDate(){
-  const n = new Date();
-  document.getElementById("dateEl").textContent = DAYS[n.getDay()] + ", " + MONTHS[n.getMonth()] + " " + n.getDate();
+async function api(table, params = '') {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}${params}`, {
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+  });
+  return res.json();
 }
 
-function render(){
-  const total = ITEMS.length;
-  const done = checked.filter(Boolean).length;
-  const pct = Math.round((done/total)*100);
+async function apiPost(table, data) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+    method: 'POST',
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=minimal'
+    },
+    body: JSON.stringify(data)
+  });
+  return res.ok;
+}
 
-  document.getElementById("countEl").textContent = done + " / " + total;
-  document.getElementById("progressFill").style.width = pct + "%";
+// NAVIGATION
+function navigate(screen) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`screen-${screen}`).classList.add('active');
+  document.getElementById(`nav-${screen}`)?.classList.add('active');
+  if(screen === 'selfcare') initSelfCare();
+  if(screen === 'kit') initKit();
+}
 
-  if(done === total){
-    document.getElementById("list").style.display = "none";
-    document.getElementById("progressWrap").style.display = "none";
-    const ds = document.getElementById("doneScreen");
-    ds.style.display = "flex";
-    ds.style.flexDirection = "column";
+// HOME
+function initHome() {
+  const now = new Date();
+  const h = now.getHours();
+  const greeting = h < 12 ? 'morning' : h < 17 ? 'afternoon' : 'evening';
+  document.getElementById('timeGreeting').textContent = greeting;
+  document.getElementById('homeDate').textContent = MONTHS[now.getMonth()] + ' ' + now.getDate();
+  document.getElementById('homeDay').textContent = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][now.getDay()];
+}
+
+// SELF CARE
+function initSelfCare() {
+  const h = new Date().getHours();
+  currentSession = (h >= 3 && h < 15) ? 'Morning' : 'Evening';
+  document.getElementById('amBtn').classList.toggle('active', currentSession === 'Morning');
+  document.getElementById('pmBtn').classList.toggle('active', currentSession === 'Evening');
+  renderDayStrip();
+  loadSteps();
+}
+
+function setSession(s) {
+  currentSession = s;
+  document.getElementById('amBtn').classList.toggle('active', s === 'Morning');
+  document.getElementById('pmBtn').classList.toggle('active', s === 'Evening');
+  stepState = {};
+  loadSteps();
+}
+
+function renderDayStrip() {
+  const strip = document.getElementById('dayStrip');
+  strip.innerHTML = DAYS.map(d =>
+    `<button class="day-btn${d === currentDay ? ' active' : ''}" onclick="selectDay('${d}')">${d}</button>`
+  ).join('');
+}
+
+function selectDay(d) {
+  currentDay = d;
+  renderDayStrip();
+  stepState = {};
+  loadSteps();
+}
+
+async function loadSteps() {
+  document.getElementById('doneOverlay').style.display = 'none';
+  document.getElementById('stepList').innerHTML = '<div class="loading"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div>';
+
+  const data = await api('routine_tasks', `?time_of_day=eq.${currentSession}&days=cs.{"${currentDay}"}&order=order.asc`);
+  steps = data || [];
+
+  if(!steps.length) {
+    document.getElementById('stepList').innerHTML = '<div class="empty-state"><div class="empty-glyph">∅</div><div class="empty-title">No steps for this day</div><div class="empty-sub">Add steps in your routine settings</div></div>';
     return;
   }
 
-  document.getElementById("doneScreen").style.display = "none";
-  document.getElementById("progressWrap").style.display = "block";
-  document.getElementById("list").style.display = "block";
-
-  document.getElementById("list").innerHTML = ITEMS.map((name, i) =>
-    `<div class="item${checked[i]?' checked':''}" onclick="toggle(${i})">
-      <div class="check"><div class="checkmark"></div></div>
-      <span class="item-name">${name}</span>
-    </div>`
-  ).join("");
+  steps.forEach(s => { if(!stepState[s.id]) stepState[s.id] = 'pending'; });
+  renderSteps();
 }
 
-function toggle(i){
-  checked[i] = !checked[i];
-  render();
+function renderSteps() {
+  const total = steps.length;
+  const done = steps.filter(s => stepState[s.id] === 'done').length;
+  const skipped = steps.filter(s => stepState[s.id] === 'skipped').length;
+  const pct = Math.round((done / total) * 100);
+
+  document.getElementById('progressLabel').textContent = currentSession === 'Morning' ? 'morning routine' : 'evening routine';
+  document.getElementById('progressCount').textContent = `${done} / ${total}`;
+  document.getElementById('progressFill').style.width = pct + '%';
+
+  if(done + skipped === total && total > 0) {
+    document.getElementById('stepList').style.display = 'none';
+    const o = document.getElementById('doneOverlay');
+    o.style.display = 'flex'; o.style.flexDirection = 'column';
+    document.getElementById('doneSub').textContent = `${done} done · ${skipped} skipped`;
+    return;
+  }
+
+  document.getElementById('doneOverlay').style.display = 'none';
+  document.getElementById('stepList').style.display = 'block';
+  document.getElementById('stepList').innerHTML = steps.map((s, i) => {
+    const st = stepState[s.id];
+    return `<div class="step-row${st==='done'?' done':st==='skipped'?' skipped':''}" onclick="toggleStep('${s.id}')">
+      <span class="step-num">${i+1}</span>
+      <div class="check-circle"><div class="checkmark"></div></div>
+      <span class="step-name">${s.name}</span>
+      <button class="skip-btn" onclick="event.stopPropagation();toggleSkip('${s.id}')">${st==='skipped'?'undo':'skip'}</button>
+    </div>`;
+  }).join('');
 }
 
-function reset(){
-  checked = new Array(ITEMS.length).fill(false);
-  render();
+function toggleStep(id) {
+  stepState[id] = stepState[id] === 'done' ? 'pending' : 'done';
+  renderSteps();
 }
 
-setDate();
-render();
+function toggleSkip(id) {
+  stepState[id] = stepState[id] === 'skipped' ? 'pending' : 'skipped';
+  renderSteps();
+}
+
+function skipAll() {
+  steps.forEach(s => stepState[s.id] = 'skipped');
+  renderSteps();
+}
+
+function resetRoutine() {
+  steps.forEach(s => stepState[s.id] = 'pending');
+  document.getElementById('stepList').style.display = 'block';
+  document.getElementById('doneOverlay').style.display = 'none';
+  renderSteps();
+}
+
+async function saveRoutine() {
+  const btn = document.getElementById('saveBtn');
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+
+  const today = new Date().toISOString().split('T')[0];
+  const entries = steps
+    .filter(s => stepState[s.id] !== 'pending')
+    .map(s => ({
+      date: today,
+      step_name: s.name,
+      time_of_day: currentSession,
+      status: stepState[s.id] === 'done' ? 'Done' : 'Skipped',
+      order: s.order
+    }));
+
+  if(!entries.length) {
+    showToast('Nothing to save yet');
+    btn.disabled = false;
+    btn.textContent = 'Save Routine';
+    return;
+  }
+
+  const ok = await apiPost('daily_log', entries);
+  btn.disabled = false;
+  btn.textContent = 'Save Routine';
+
+  if(ok) showToast(`✓ ${entries.length} steps logged`);
+  else showToast('Something went wrong');
+}
+
+// KIT
+async function initKit() {
+  const data = await api('products', `?status=eq.Owned&order=category.asc,name.asc`);
+  products = data || [];
+
+  const cats = ['All', ...new Set(products.map(p => p.category).filter(Boolean))];
+  document.getElementById('kitFilter').innerHTML = cats.map(c =>
+    `<button class="filter-btn${c === kitFilter ? ' active' : ''}" onclick="setKitFilter('${c}')">${c}</button>`
+  ).join('');
+
+  document.getElementById('kitSubtitle').textContent = `${products.length} products owned`;
+  renderKit();
+}
+
+function setKitFilter(cat) {
+  kitFilter = cat;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.textContent === cat));
+  renderKit();
+}
+
+function renderKit() {
+  const filtered = kitFilter === 'All' ? products : products.filter(p => p.category === kitFilter);
+
+  if(!filtered.length) {
+    document.getElementById('kitGrid').innerHTML = `<div style="grid-column:span 2"><div class="empty-state"><div class="empty-glyph">∅</div><div class="empty-title">No products here</div><div class="empty-sub">Add products to your kit</div></div></div>`;
+    return;
+  }
+
+  document.getElementById('kitGrid').innerHTML = filtered.map(p => `
+    <div class="product-card">
+      <div class="product-img">
+        ${p.image_url
+          ? `<img src="${p.image_url}" style="width:100%;height:100%;object-fit:cover">`
+          : `<div class="product-img-placeholder">🧴</div>`}
+      </div>
+      <div class="product-info">
+        <div class="product-name">${p.name}</div>
+        <div class="product-brand">${p.brand || ''}</div>
+        ${p.price ? `<div class="product-price">€${p.price.toFixed(2)}</div>` : ''}
+        <div style="margin-top:4px">
+          <span class="stock-dot stock-${(p.stock||'full').toLowerCase()}"></span>
+          <span style="font-size:10px;color:var(--text3)">${p.stock || 'Full'}</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// TOAST
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+initHome();
 </script>
 </body>
 </html>
