@@ -2137,89 +2137,150 @@ async function openBarcodeScanner() {
   overlay.style.display = 'flex';
   document.getElementById('manualWrap').style.display = 'none';
   document.getElementById('manualToggleBtn').textContent = 'Enter barcode manually';
-  document.getElementById('barcodeStatus').textContent = 'Point camera at barcode';
+  setBarcodeStatus('🔍 Initializing camera...', 'dim');
 
   try {
+    if(typeof ZXing === 'undefined') {
+      setBarcodeStatus('⚠️ Scanner library not loaded — use manual entry', 'warn');
+      toggleManualEntry(); return;
+    }
+
     const hints = new Map();
-    const formats = [
+    hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [
       ZXing.BarcodeFormat.EAN_13,
       ZXing.BarcodeFormat.EAN_8,
       ZXing.BarcodeFormat.UPC_A,
       ZXing.BarcodeFormat.UPC_E,
       ZXing.BarcodeFormat.CODE_128,
-    ];
-    hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, formats);
-    zxingReader = new ZXing.BrowserMultiFormatReader(hints);
+    ]);
+    hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
+
+    zxingReader = new ZXing.BrowserMultiFormatReader(hints, 500);
     barcodeScanning = true;
 
-    await zxingReader.decodeFromVideoDevice(null, 'barcodeVideo', async (result, err) => {
+    const devices = await ZXing.BrowserMultiFormatReader.listVideoInputDevices();
+    // prefer back camera
+    const backCam = devices.find(d => /back|rear|environment/i.test(d.label)) || devices[devices.length-1];
+    const deviceId = backCam?.deviceId || undefined;
+
+    setBarcodeStatus('📷 Camera ready — point at barcode', 'ok');
+
+    await zxingReader.decodeFromVideoDevice(deviceId, 'barcodeVideo', async (result, err) => {
       if(result && barcodeScanning) {
         barcodeScanning = false;
         const barcode = result.getText();
+        const format = result.getBarcodeFormat();
+        setBarcodeStatus(`✓ Barcode detected: ${barcode}`, 'ok');
+        if(navigator.vibrate) navigator.vibrate([30,30,60]);
+        await new Promise(r=>setTimeout(r,600)); // brief moment to show detection
         closeBarcodeScanner();
-        showToast('Looking up product...');
         await lookupBarcode(barcode);
+        return;
       }
-      if(err && !(err instanceof ZXing.NotFoundException)) {
-        document.getElementById('barcodeStatus').textContent = 'Scanning... move closer';
+      if(err && !(err instanceof ZXing.NotFoundException) && !(err instanceof ZXing.ChecksumException)) {
+        setBarcodeStatus('⚠️ Scan error — try manual entry', 'warn');
       }
     });
   } catch(e) {
-    document.getElementById('barcodeStatus').textContent = 'Camera unavailable — use manual entry';
-    toggleManualEntry();
+    console.error('Scanner error:', e);
+    if(e.name === 'NotAllowedError') {
+      setBarcodeStatus('🚫 Camera permission denied', 'warn');
+    } else if(e.name === 'NotFoundError') {
+      setBarcodeStatus('📷 No camera found', 'warn');
+    } else {
+      setBarcodeStatus('⚠️ Camera error: ' + e.message, 'warn');
+    }
+    setTimeout(toggleManualEntry, 800);
   }
+}
+
+function setBarcodeStatus(msg, type) {
+  const el = document.getElementById('barcodeStatus');
+  if(!el) return;
+  el.textContent = msg;
+  el.style.color = type==='ok' ? 'rgba(200,184,154,0.9)' : type==='warn' ? 'rgba(255,180,100,0.9)' : 'rgba(255,255,255,0.5)';
 }
 
 function closeBarcodeScanner() {
   barcodeScanning = false;
-  if(zxingReader) { zxingReader.reset(); zxingReader=null; }
+  if(zxingReader) { try { zxingReader.reset(); } catch(e){} zxingReader=null; }
   document.getElementById('barcodeOverlay').style.display = 'none';
 }
 
 function toggleManualEntry() {
   manualVisible = !manualVisible;
-  document.getElementById('manualWrap').style.display = manualVisible ? 'flex' : 'none';
-  document.getElementById('manualToggleBtn').textContent = manualVisible ? 'Use camera instead' : 'Enter barcode manually';
-  if(manualVisible) document.getElementById('manualBarcodeInput').focus();
+  const wrap = document.getElementById('manualWrap');
+  const btn = document.getElementById('manualToggleBtn');
+  wrap.style.display = manualVisible ? 'flex' : 'none';
+  btn.textContent = manualVisible ? 'Use camera instead' : 'Enter barcode manually';
+  if(manualVisible) setTimeout(()=>document.getElementById('manualBarcodeInput')?.focus(), 100);
 }
 
 async function submitManualBarcode() {
-  const val = document.getElementById('manualBarcodeInput').value.trim();
+  const val = document.getElementById('manualBarcodeInput')?.value.trim();
   if(!val) { showToast('Enter a barcode number'); return; }
+  if(!/^[0-9]{6,14}$/.test(val)) { showToast('Barcodes are 6-14 digits'); return; }
   closeBarcodeScanner();
-  showToast('Looking up product...');
   await lookupBarcode(val);
 }
 
 async function lookupBarcode(barcode) {
+  showToast('🔍 Looking up barcode ' + barcode + '...');
+
+  // Try Open Beauty Facts first (cosmetics/skincare)
   try {
-    const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
-    const data = await res.json();
-    if(data.status === 1 && data.product) {
-      const p = data.product;
-      formData.name = p.product_name||'';
-      formData.brand = p.brands||'';
-      showToast(`Found: ${formData.name}`);
+    const r1 = await fetch(`https://world.openbeautyfacts.org/api/v2/product/${barcode}?fields=product_name,brands,ingredients_text,categories_tags,image_url`, {
+      headers: {'User-Agent': 'LeoOS/1.0'}
+    });
+    const d1 = await r1.json();
+    if(d1.status === 1 && d1.product?.product_name) {
+      const p = d1.product;
+      prefillFormFromBarcode(p, 'beauty');
+      showToast(`✓ Found on Open Beauty Facts`);
       openProductForm();
-    } else {
-      // Try Open Beauty Facts
-      const res2 = await fetch(`https://world.openbeautyfacts.org/api/v0/product/${barcode}.json`);
-      const data2 = await res2.json();
-      if(data2.status === 1 && data2.product) {
-        const p = data2.product;
-        formData.name = p.product_name||'';
-        formData.brand = p.brands||'';
-        formData.ingredients = p.ingredients_text||'';
-        showToast(`Found: ${formData.name}`);
-        openProductForm();
-      } else {
-        showToast('Product not found in database');
-      }
+      return;
     }
-  } catch(e) {
-    showToast('Lookup failed — fill in manually');
-    openProductForm();
-  }
+  } catch(e) { console.warn('Beauty Facts failed:', e); }
+
+  // Try Open Food Facts (supplements, oral care etc.)
+  try {
+    const r2 = await fetch(`https://world.openfoodfacts.org/api/v2/product/${barcode}?fields=product_name,brands,ingredients_text,categories_tags,image_url`, {
+      headers: {'User-Agent': 'LeoOS/1.0'}
+    });
+    const d2 = await r2.json();
+    if(d2.status === 1 && d2.product?.product_name) {
+      const p = d2.product;
+      prefillFormFromBarcode(p, 'food');
+      showToast(`✓ Found on Open Food Facts`);
+      openProductForm();
+      return;
+    }
+  } catch(e) { console.warn('Food Facts failed:', e); }
+
+  // Nothing found — open blank form with barcode pre-noted
+  showToast(`⚠️ Barcode ${barcode} not found in databases`);
+  setTimeout(() => {
+    if(confirm(`Product not found for barcode ${barcode}.\nOpen blank form to add manually?`)) {
+      formData = {};
+      formData._barcode = barcode;
+      openProductForm();
+    }
+  }, 400);
+}
+
+function prefillFormFromBarcode(p, source) {
+  formData = {};
+  formData.name = p.product_name || '';
+  formData.brand = (p.brands || '').split(',')[0].trim();
+  formData.ingredients = p.ingredients_text || '';
+  // Guess category from tags
+  const cats = (p.categories_tags || []).join(' ').toLowerCase();
+  if(/supplement|vitamin|mineral|protein/.test(cats)) formData.category = '💊 Supplement';
+  else if(/fragrance|perfume|cologne/.test(cats)) formData.category = '🌸 Fragrance';
+  else if(/cosmetic|skincare|haircare|shampoo|cream|lotion|serum/.test(cats)) formData.category = '🪥 Self Care';
+  else if(source === 'food') formData.category = '💊 Supplement';
+  else formData.category = '🪥 Self Care';
+  if(p.image_url) formData._imageUrl = p.image_url;
 }
 
 // ============================================================
