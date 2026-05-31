@@ -1337,6 +1337,13 @@ function renderFormStep() {
           ${BODY_AREAS.map(a => `<button class="form-chip${(formData.body_areas||[]).includes(a)?' selected':''}" onclick="toggleMultiChip('body_areas','${a}',this)">${a}</button>`).join('')}
         </div>
       </div>` : ''}
+      ${formData._barcode ? `<div class="form-field">
+        <div class="form-label">Barcode</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="padding:8px 14px;background:var(--bg2);border:0.5px solid var(--border);border-radius:10px;font-size:13px;color:var(--text2);font-family:monospace;letter-spacing:0.05em">${formData._barcode}</div>
+          <span style="font-size:11px;color:var(--text3)">saved for future scans</span>
+        </div>
+      </div>` : ''}
       <div class="form-field" id="statusStockRow">
         <div class="form-row-2">
           <div>
@@ -1644,7 +1651,8 @@ async function submitProduct() {
     gender_impression: formData.gender_impression||null,
     container_size: formData.container_size||null,
     container_unit: formData.container_unit||'ml',
-    body_areas: formData.body_areas?.length ? formData.body_areas : null
+    body_areas: formData.body_areas?.length ? formData.body_areas : null,
+    barcode: formData._barcode || null
   };
 
   const isEdit = !!formData._editId;
@@ -2317,7 +2325,20 @@ async function submitManualBarcode() {
 }
 
 async function lookupBarcode(barcode) {
-  showToast('🔍 Searching databases...');
+  showToast('🔍 Searching...');
+
+  // Check local Supabase database first
+  try {
+    const local = await api('products', `?barcode=eq.${barcode}&limit=1`);
+    if(local && local.length) {
+      const p = local[0];
+      showBarcodeSuccess('Your Library', p.name);
+      // Open detail directly — already in library
+      await initLibrary();
+      setTimeout(() => openDetail(p.id), 300);
+      return;
+    }
+  } catch(e) { console.warn('Local lookup failed:', e); }
 
   const sources = [
     {
@@ -2348,7 +2369,7 @@ async function lookupBarcode(barcode) {
 
       // Open Beauty/Food Facts format
       if(source.type !== 'upc' && d.status === 1 && d.product?.product_name) {
-        prefillFormFromBarcode(d.product, source.type);
+        prefillFormFromBarcode(d.product, source.type, barcode);
         showBarcodeSuccess(source.name, formData.name);
         openProductForm();
         return;
@@ -2357,10 +2378,14 @@ async function lookupBarcode(barcode) {
       // UPC Item DB format
       if(source.type === 'upc' && d.code === 'OK' && d.items?.length) {
         const item = d.items[0];
-        formData.name = item.title || '';
-        formData.brand = item.brand || '';
-        formData.description = item.description || '';
-        if(item.images?.length) formData._imageUrl = item.images[0];
+        formData = {
+          name: item.title || '',
+          brand: item.brand || '',
+          description: item.description || '',
+          _imageUrl: item.images?.[0] || null,
+          _prefilled: true,
+          _barcode: barcode
+        };
         showBarcodeSuccess('UPC Database', formData.name);
         openProductForm();
         return;
@@ -2373,7 +2398,7 @@ async function lookupBarcode(barcode) {
   // Nothing found anywhere
   showToast(`⚠️ Not found in any database`);
   setTimeout(() => {
-    if(confirm(`Barcode ${barcode} not found.\n\nThis can happen with regional products (e.g. dm, Rossmann). Open blank form to add manually?`)) {
+    if(confirm(`Barcode ${barcode} not found.\n\nOpen blank form? The barcode will be saved so next time you scan this product it's recognized instantly.`)) {
       formData = {};
       formData._barcode = barcode;
       openProductForm();
@@ -2381,7 +2406,7 @@ async function lookupBarcode(barcode) {
   }, 400);
 }
 
-function prefillFormFromBarcode(p, source) {
+function prefillFormFromBarcode(p, source, barcode) {
   // Clean brand — sometimes comes as "Brand1, Brand2" take first
   const brand = (p.brands || p.brand || '').split(/,|;/)[0].trim();
   // Clean name — sometimes has brand prepended, strip it
@@ -2405,7 +2430,8 @@ function prefillFormFromBarcode(p, source) {
     ingredients: p.ingredients_text || p.ingredients || '',
     description: p.description || '',
     _imageUrl: p.image_url || p.images_url_front || (p.images && p.images[0]) || null,
-    _prefilled: true
+    _prefilled: true,
+    _barcode: barcode || null
   };
 
   console.log('Prefilled formData:', JSON.stringify(formData));
