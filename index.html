@@ -72,11 +72,36 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
 .sess-btn{flex:1;padding:8px;border-radius:16px;border:none;font-size:12px;font-weight:500;cursor:pointer;transition:all 0.2s;background:transparent;color:var(--text3);font-family:var(--sans)}
 .sess-btn.active{background:var(--bg3);color:var(--text);border:0.5px solid var(--border2)}
 
-/* DATE DISPLAY */
-.date-display{padding:0 20px 12px;flex-shrink:0}
-.date-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;background:var(--bg2);border:0.5px solid var(--border);border-radius:20px}
-.date-pill-text{font-size:12px;color:var(--text2)}
-.date-pill-badge{font-size:10px;color:var(--text3);background:var(--bg3);padding:2px 6px;border-radius:10px}
+/* DATE NAV */
+.date-nav{display:flex;align-items:center;padding:0 20px 14px;gap:12px;flex-shrink:0}
+.date-arrow{background:none;border:0.5px solid var(--border);color:var(--text3);font-size:16px;width:32px;height:32px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;flex-shrink:0;font-family:var(--sans)}
+.date-arrow:active{background:var(--bg2);color:var(--text)}
+.date-arrow:disabled{opacity:0.2;pointer-events:none}
+.date-center{flex:1;text-align:center}
+.date-nav-text{font-size:14px;color:var(--text);font-weight:500}
+.date-nav-day{font-size:11px;color:var(--text3);margin-top:1px}
+
+/* PAST LOG VIEW */
+.past-log{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 20px}
+.past-log::-webkit-scrollbar{display:none}
+.past-header{font-size:11px;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:12px}
+.past-item{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:0.5px solid var(--border)}
+.past-item:last-child{border-bottom:none}
+.past-status-icon{width:20px;height:20px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px}
+.past-done-icon{background:var(--accent);color:var(--bg)}
+.past-skip-icon{background:var(--bg3);color:var(--text3)}
+.past-item-info{flex:1;min-width:0}
+.past-item-name{font-size:13px;color:var(--text2)}
+.past-item-product{font-size:11px;color:var(--text3);margin-top:2px}
+.past-item.was-skipped .past-item-name{color:var(--text3);text-decoration:line-through}
+.future-item{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:0.5px solid var(--border);opacity:0.5}
+.future-item:last-child{border-bottom:none}
+.future-dot{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border2);flex-shrink:0}
+.future-item-name{font-size:13px;color:var(--text3)}
+.freq-badge-small{font-size:9px;padding:2px 5px;border-radius:6px;margin-left:6px}
+.no-log{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;text-align:center;flex:1}
+.no-log-glyph{font-family:var(--serif);font-size:36px;color:var(--text3);margin-bottom:12px;font-style:italic}
+.no-log-text{font-size:13px;color:var(--text3)}
 
 /* PROGRESS */
 .progress-bar-wrap{padding:0 20px 12px;flex-shrink:0}
@@ -227,11 +252,13 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
       <button class="sess-btn active" id="amBtn" onclick="setSession('Morning')">🌅 Morning</button>
       <button class="sess-btn" id="pmBtn" onclick="setSession('Evening')">🌙 Evening</button>
     </div>
-    <div class="date-display">
-      <div class="date-pill">
-        <span class="date-pill-text" id="routineDateText"></span>
-        <span class="date-pill-badge" id="routineDayBadge"></span>
+    <div class="date-nav">
+      <button class="date-arrow" onclick="shiftDay(-1)">&#8592;</button>
+      <div class="date-center">
+        <div class="date-nav-text" id="routineDateText"></div>
+        <div class="date-nav-day" id="routineDayBadge"></div>
       </div>
+      <button class="date-arrow" onclick="shiftDay(1)" id="nextDayBtn">&#8594;</button>
     </div>
     <div class="progress-bar-wrap">
       <div class="progress-meta">
@@ -249,7 +276,7 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
       <div class="done-sub" id="doneSub"></div>
       <button class="done-reset" onclick="resetRoutine()">reset</button>
     </div>
-    <div class="routine-footer">
+    <div class="routine-footer" id="routineFooter">
       <button class="skip-all-btn" onclick="skipAll()">Skip All</button>
       <button class="save-btn" id="saveBtn" onclick="saveRoutine()">Save Routine</button>
     </div>
@@ -303,6 +330,43 @@ const todayFull = DAY_FULL[todayIdx];
 const todayDate = now.toISOString().split('T')[0];
 const dayOfMonth = now.getDate();
 
+let viewDate = new Date(now); // the date currently being viewed
+let isToday = true;
+let isPast = false;
+
+function getDateStr(d) { return d.toISOString().split('T')[0]; }
+function getDayShort(d) { return DAYS[d.getDay()]; }
+function getDayFull(d) { return DAY_FULL[d.getDay()]; }
+
+function shiftDay(delta) {
+  viewDate.setDate(viewDate.getDate() + delta);
+  isToday = getDateStr(viewDate) === todayDate;
+  isPast = viewDate < new Date(now.toDateString());
+  stepState = {}; stepProducts = {};
+  updateDateNav();
+  if(isToday) {
+    document.getElementById('routineFooter').style.display = 'flex';
+    deactivateSave();
+    loadSteps();
+  } else if(isPast) {
+    document.getElementById('routineFooter').style.display = 'none';
+    loadPastLog();
+  } else {
+    document.getElementById('routineFooter').style.display = 'none';
+    loadFuturePreview();
+  }
+}
+
+function updateDateNav() {
+  const d = viewDate;
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const isCurrentYear = d.getFullYear() === now.getFullYear();
+  document.getElementById('routineDateText').textContent = 
+    getDayFull(d) + ', ' + months[d.getMonth()] + ' ' + d.getDate() + (isCurrentYear ? '' : ' ' + d.getFullYear());
+  document.getElementById('routineDayBadge').textContent = isToday ? 'Today' : isPast ? 'Past' : 'Upcoming';
+  document.getElementById('nextDayBtn').disabled = false;
+}
+
 let currentSession = (now.getHours() >= 3 && now.getHours() < 15) ? 'Morning' : 'Evening';
 let steps = [];
 let stepState = {};
@@ -347,10 +411,11 @@ function initHome() {
 
 // SELF CARE
 async function initSelfCare() {
+  viewDate = new Date(now); isToday = true; isPast = false;
   document.getElementById('amBtn').classList.toggle('active', currentSession==='Morning');
   document.getElementById('pmBtn').classList.toggle('active', currentSession==='Evening');
-  document.getElementById('routineDateText').textContent = MONTHS[now.getMonth()]+' '+now.getDate();
-  document.getElementById('routineDayBadge').textContent = todayFull;
+  document.getElementById('routineFooter').style.display = 'flex';
+  updateDateNav();
   if(!ownedProducts.length) {
     const data = await api('products','?status=eq.Owned&order=name.asc');
     ownedProducts = data||[];
@@ -368,14 +433,18 @@ function setSession(s) {
 
 async function loadSteps() {
   document.getElementById('doneOverlay').style.display='none';
+  document.getElementById('stepList').style.display='block';
   document.getElementById('stepList').innerHTML='<div class="loading"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div>';
+  const existingPast = document.getElementById('pastView');
+  if(existingPast) existingPast.remove();
 
   // Fetch daily + weekly steps for today
+  const vDay = getDayShort(viewDate);
+  const vDayOfMonth = viewDate.getDate();
   const [daily, weekly, monthly] = await Promise.all([
     api('routine_tasks',`?time_of_day=eq.${currentSession}&frequency=eq.Daily&order=order.asc`),
-    api('routine_tasks',`?time_of_day=eq.${currentSession}&frequency=eq.Weekly&days=cs.{"${todayShort}"}&order=order.asc`),
-    // Monthly: show on 1st of month, or if day=1
-    dayOfMonth===1 ? api('routine_tasks',`?time_of_day=eq.${currentSession}&frequency=eq.Monthly&order=order.asc`) : Promise.resolve([])
+    api('routine_tasks',`?time_of_day=eq.${currentSession}&frequency=eq.Weekly&days=cs.{"${vDay}"}&order=order.asc`),
+    vDayOfMonth===1 ? api('routine_tasks',`?time_of_day=eq.${currentSession}&frequency=eq.Monthly&order=order.asc`) : Promise.resolve([])
   ]);
 
   // Merge and sort by order
@@ -483,6 +552,102 @@ function resetRoutine() {
   renderSteps();
 }
 
+async function loadPastLog() {
+  const dateStr = getDateStr(viewDate);
+  const vDay = getDayShort(viewDate);
+  const vDayOfMonth = viewDate.getDate();
+
+  // Get what was logged
+  const logged = await api('daily_log', `?date=eq.${dateStr}&time_of_day=eq.${currentSession}&order=order.asc`);
+
+  // Show step list area as past view
+  document.getElementById('doneOverlay').style.display = 'none';
+  document.getElementById('stepList').style.display = 'none';
+
+  // Remove old past view if exists
+  const existing = document.getElementById('pastView');
+  if(existing) existing.remove();
+
+  const container = document.createElement('div');
+  container.id = 'pastView';
+  container.className = 'past-log';
+
+  if(!logged || !logged.length) {
+    container.innerHTML = `<div class="no-log"><div class="no-log-glyph">∅</div><div class="no-log-text">Nothing was logged<br>on this day</div></div>`;
+  } else {
+    // Get product names for logged entries
+    const productIds = logged.map(l=>l.product_used).filter(Boolean);
+    let productMap = {};
+    if(productIds.length) {
+      const prods = await api('products', `?id=in.(${productIds.join(',')})&select=id,name`);
+      (prods||[]).forEach(p => productMap[p.id] = p.name);
+    }
+
+    const doneItems = logged.filter(l=>l.status==='Done');
+    const skippedItems = logged.filter(l=>l.status==='Skipped');
+
+    let html = '';
+    if(doneItems.length) {
+      html += `<div class="past-header">✓ Completed · ${doneItems.length}</div>`;
+      html += doneItems.map(l => `
+        <div class="past-item">
+          <div class="past-status-icon past-done-icon">✓</div>
+          <div class="past-item-info">
+            <div class="past-item-name">${l.step_name}</div>
+            ${l.product_used && productMap[l.product_used] ? `<div class="past-item-product">${productMap[l.product_used]}</div>` : ''}
+          </div>
+        </div>`).join('');
+    }
+    if(skippedItems.length) {
+      html += `<div class="past-header" style="margin-top:${doneItems.length?'20px':'0'}">Skipped · ${skippedItems.length}</div>`;
+      html += skippedItems.map(l => `
+        <div class="past-item was-skipped">
+          <div class="past-status-icon past-skip-icon">—</div>
+          <div class="past-item-info">
+            <div class="past-item-name">${l.step_name}</div>
+          </div>
+        </div>`).join('');
+    }
+    container.innerHTML = html;
+  }
+
+  document.getElementById('stepList').insertAdjacentElement('afterend', container);
+}
+
+async function loadFuturePreview() {
+  const vDay = getDayShort(viewDate);
+  const vDayOfMonth = viewDate.getDate();
+
+  const [daily, weekly, monthly] = await Promise.all([
+    api('routine_tasks',`?time_of_day=eq.${currentSession}&frequency=eq.Daily&order=order.asc`),
+    api('routine_tasks',`?time_of_day=eq.${currentSession}&frequency=eq.Weekly&days=cs.{"${vDay}"}&order=order.asc`),
+    vDayOfMonth===1 ? api('routine_tasks',`?time_of_day=eq.${currentSession}&frequency=eq.Monthly&order=order.asc`) : Promise.resolve([])
+  ]);
+
+  const all = [...(daily||[]),...(weekly||[]),...(monthly||[])];
+  all.sort((a,b)=>a.order-b.order);
+
+  document.getElementById('doneOverlay').style.display='none';
+  document.getElementById('stepList').style.display='none';
+  const existing = document.getElementById('pastView');
+  if(existing) existing.remove();
+
+  const container = document.createElement('div');
+  container.id = 'pastView';
+  container.className = 'past-log';
+
+  container.innerHTML = `<div class="past-header">Upcoming · ${all.length} steps</div>` +
+    all.map((s,i) => `
+      <div class="future-item">
+        <div class="future-dot"></div>
+        <div class="future-item-name">${i+1}. ${s.name}
+          ${s.frequency==='Weekly'?'<span class="freq-badge-small freq-weekly">weekly</span>':s.frequency==='Monthly'?'<span class="freq-badge-small freq-monthly">monthly</span>':''}
+        </div>
+      </div>`).join('');
+
+  document.getElementById('stepList').insertAdjacentElement('afterend', container);
+}
+
 async function saveRoutine() {
   if(!hasChanges) return;
   const btn=document.getElementById('saveBtn');
@@ -491,7 +656,7 @@ async function saveRoutine() {
   const entries=steps
     .filter(s=>stepState[s.id]!=='pending')
     .map(s=>({
-      date:todayDate,
+      date:saveDateStr,
       step_name:s.name,
       time_of_day:currentSession,
       status:stepState[s.id]==='done'?'Done':'Skipped',
@@ -502,7 +667,8 @@ async function saveRoutine() {
   if(!entries.length){showToast('Nothing to save yet');btn.disabled=false;btn.classList.remove('active');return;}
 
   // Delete existing entries for today + this session first
-  await fetch(`${SUPABASE_URL}/rest/v1/daily_log?date=eq.${todayDate}&time_of_day=eq.${currentSession}`, {
+  const saveDateStr = getDateStr(viewDate);
+  await fetch(`${SUPABASE_URL}/rest/v1/daily_log?date=eq.${saveDateStr}&time_of_day=eq.${currentSession}`, {
     method:'DELETE',
     headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`}
   });
