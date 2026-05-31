@@ -430,7 +430,14 @@ function setSession(s) {
   document.getElementById('amBtn').classList.toggle('active',s==='Morning');
   document.getElementById('pmBtn').classList.toggle('active',s==='Evening');
   stepState={};stepProducts={};
-  loadSteps();
+  if(isToday) {
+    deactivateSave();
+    loadSteps();
+  } else if(isPast) {
+    loadPastLog();
+  } else {
+    loadFuturePreview();
+  }
 }
 
 async function loadSteps() {
