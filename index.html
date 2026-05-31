@@ -1202,34 +1202,29 @@ function openProductForm() {
 
 async function fetchRemoteImage(url) {
   try {
+    // Upload remote image to our Supabase Storage
     const res = await fetch(url);
     const blob = await res.blob();
-    const reader = new FileReader();
-    reader.onload = e => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = 600; canvas.height = 600;
-        const ctx = canvas.getContext('2d');
-        const size = Math.min(img.width, img.height);
-        const sx = (img.width - size) / 2;
-        const sy = (img.height - size) / 2;
-        ctx.drawImage(img, sx, sy, size, size, 0, 0, 600, 600);
-        productImageB64 = canvas.toDataURL('image/jpeg', 0.82);
-        // Also use as cover (16:9)
-        const canvas2 = document.createElement('canvas');
-        canvas2.width = 800; canvas2.height = 450;
-        const ctx2 = canvas2.getContext('2d');
-        const sw = img.width;
-        const sh = img.width / (16/9);
-        const sy2 = Math.max(0, (img.height - sh) / 2);
-        ctx2.drawImage(img, 0, sy2, sw, Math.min(sh, img.height), 0, 0, 800, 450);
-        coverImageB64 = canvas2.toDataURL('image/jpeg', 0.82);
-        showToast('✓ Product image loaded');
-      };
-      img.src = e.target.result;
-    };
-    reader.readAsDataURL(blob);
+    const ext = blob.type.includes('png') ? 'png' : 'jpg';
+    const filename = `product-remote-${Date.now()}.${ext}`;
+
+    const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/product-images/${filename}`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': blob.type,
+        'x-upsert': 'true'
+      },
+      body: blob
+    });
+
+    if(uploadRes.ok) {
+      const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/product-images/${filename}`;
+      productImageB64 = publicUrl;
+      coverImageB64 = publicUrl;
+      showToast('✓ Product image loaded');
+    }
   } catch(e) {
     console.warn('Could not load remote image:', e);
   }
@@ -1563,11 +1558,11 @@ function removePriceEntry(i) {
 }
 
 // IMAGE RESIZER
-function handleImage(event, type) {
+async function handleImage(event, type) {
   const file = event.target.files[0];
   if(!file) return;
 
-  // Show instant preview using object URL — no canvas, no color change
+  // Show instant preview
   const objectUrl = URL.createObjectURL(file);
   const zoneId = type==='cover' ? 'coverZone' : 'productZone';
   const zone = document.getElementById(zoneId);
@@ -1582,37 +1577,37 @@ function handleImage(event, type) {
     }
     preview.src = objectUrl;
     preview.style.display = 'block';
-    preview.style.background = 'transparent';
   }
 
-  // Process image in background for storage
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const img = new Image();
-    img.onload = () => {
-      if(type === 'cover') {
-        // Cover: crop center to 16:9
-        const canvas = document.createElement('canvas');
-        const tw=800, th=450;
-        canvas.width=tw; canvas.height=th;
-        const ctx=canvas.getContext('2d');
-        const srcRatio=img.width/img.height, tgtRatio=tw/th;
-        let sx=0,sy=0,sw=img.width,sh=img.height;
-        if(srcRatio>tgtRatio){sw=img.height*tgtRatio;sx=(img.width-sw)/2;}
-        else{sh=img.width/tgtRatio;sy=(img.height-sh)/2;}
-        ctx.drawImage(img,sx,sy,sw,sh,0,0,tw,th);
-        coverImageB64 = canvas.toDataURL('image/jpeg',0.85);
-      } else {
-        // Product image — store raw base64, no canvas processing
-        // CSS handles display (object-fit: contain on white background)
-        productImageB64 = e.target.result;
-      }
-      showToast('✓ Image ready');
-      URL.revokeObjectURL(objectUrl);
-    };
-    img.src=e.target.result;
-  };
-  reader.readAsDataURL(file);
+  // Upload directly to Supabase Storage
+  showToast('Uploading image...');
+  const ext = file.name.split('.').pop() || 'png';
+  const filename = `${type}-${Date.now()}.${ext}`;
+
+  const res = await fetch(`${SUPABASE_URL}/storage/v1/object/product-images/${filename}`, {
+    method: 'POST',
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': file.type,
+      'x-upsert': 'true'
+    },
+    body: file
+  });
+
+  if(!res.ok) {
+    showToast('Upload failed — try again');
+    console.error('Storage upload failed:', await res.text());
+    return;
+  }
+
+  const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/product-images/${filename}`;
+
+  if(type === 'cover') coverImageB64 = publicUrl;
+  else productImageB64 = publicUrl;
+
+  showToast('✓ Image uploaded');
+  URL.revokeObjectURL(objectUrl);
 }
 
 async function submitProduct() {
