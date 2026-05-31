@@ -273,6 +273,61 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
 .notes-chip{font-size:10px;padding:3px 8px;background:var(--bg3);border-radius:8px;color:var(--text3);display:inline-block;margin:2px}
 .detail-tag-row{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
 
+/* ADD PRODUCT BUTTON */
+.add-product-btn{width:36px;height:36px;border-radius:50%;background:var(--accent);border:none;color:var(--bg);font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:300;line-height:1;flex-shrink:0;transition:all 0.2s}
+.add-product-btn:active{transform:scale(0.93)}
+
+/* FORM OVERLAY */
+.form-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:300;display:none;align-items:flex-end;backdrop-filter:blur(6px)}
+.form-overlay.open{display:flex}
+.form-sheet{background:var(--bg);border-radius:24px 24px 0 0;width:100%;max-height:94vh;display:flex;flex-direction:column;overflow:hidden;padding-bottom:env(safe-area-inset-bottom,20px)}
+.form-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 0}
+.form-back{background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer;padding:4px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-family:var(--sans)}
+.form-close{background:var(--bg3);border:0.5px solid var(--border2);color:var(--text3);width:30px;height:30px;border-radius:50%;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:var(--sans)}
+.form-step-indicator{display:flex;gap:4px}
+.form-step-dot{width:5px;height:5px;border-radius:50%;background:var(--border2);transition:all 0.2s}
+.form-step-dot.active{background:var(--accent);width:16px;border-radius:3px}
+.form-title-row{padding:16px 20px 12px}
+.form-step-label{font-size:10px;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px}
+.form-step-title{font-family:var(--serif);font-size:22px;color:var(--text)}
+.form-body{flex:1;overflow-y:auto;padding:0 20px;-webkit-overflow-scrolling:touch}
+.form-body::-webkit-scrollbar{display:none}
+.form-footer{padding:16px 20px 4px;flex-shrink:0}
+.form-next-btn{width:100%;padding:15px;border-radius:14px;border:none;background:var(--accent);color:var(--bg);font-size:14px;font-weight:500;cursor:pointer;font-family:var(--sans);transition:all 0.2s}
+.form-next-btn:active{transform:scale(0.98)}
+.form-next-btn.secondary{background:transparent;border:0.5px solid var(--border2);color:var(--text3)}
+
+/* FORM FIELDS */
+.form-field{margin-bottom:16px}
+.form-label{font-size:11px;color:var(--text3);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:4px}
+.form-required{color:var(--accent);font-size:10px}
+.form-input{width:100%;background:var(--bg2);border:0.5px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--text);font-size:14px;outline:none;font-family:var(--sans);transition:border-color 0.2s}
+.form-input:focus{border-color:var(--border2)}
+.form-input::placeholder{color:var(--text3)}
+.form-textarea{width:100%;background:var(--bg2);border:0.5px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--text);font-size:14px;outline:none;font-family:var(--sans);resize:none;min-height:90px;line-height:1.5;transition:border-color 0.2s}
+.form-textarea:focus{border-color:var(--border2)}
+.form-textarea::placeholder{color:var(--text3)}
+.form-chips-wrap{display:flex;flex-wrap:wrap;gap:6px}
+.form-chip{padding:6px 12px;border-radius:20px;border:0.5px solid var(--border);background:transparent;color:var(--text3);font-size:12px;cursor:pointer;transition:all 0.2s;font-family:var(--sans)}
+.form-chip.selected{background:var(--accent);border-color:var(--accent);color:var(--bg)}
+.form-image-zone{border:1.5px dashed var(--border2);border-radius:12px;padding:24px;text-align:center;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden}
+.form-image-zone:active{border-color:var(--accent)}
+.form-image-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.form-image-preview{width:100%;max-height:180px;object-fit:cover;border-radius:10px;display:none}
+.form-image-placeholder{font-size:28px;color:var(--text3);margin-bottom:6px}
+.form-image-label{font-size:12px;color:var(--text3)}
+.form-rating-row{display:flex;gap:6px;justify-content:center;padding:8px 0}
+.form-rating-star{font-size:28px;color:var(--border2);cursor:pointer;transition:color 0.1s}
+.form-rating-star.filled{color:var(--accent)}
+.form-price-entry{background:var(--bg2);border:0.5px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px;position:relative}
+.form-price-remove{position:absolute;top:10px;right:10px;background:none;border:none;color:var(--text3);font-size:14px;cursor:pointer}
+.form-add-price-btn{width:100%;padding:10px;border-radius:10px;border:0.5px dashed var(--border2);background:transparent;color:var(--text3);font-size:12px;cursor:pointer;font-family:var(--sans);transition:all 0.2s;margin-top:4px}
+.form-add-price-btn:active{background:var(--bg2)}
+.form-slider{width:100%;accent-color:var(--accent);margin:6px 0}
+.form-slider-val{font-size:12px;color:var(--accent);text-align:right;margin-top:2px}
+.form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-note{font-size:11px;color:var(--text3);margin-top:4px;line-height:1.5}
+
 /* TOAST */
 .toast{position:fixed;bottom:calc(80px + var(--safe-bot));left:50%;transform:translateX(-50%) translateY(20px);background:var(--bg3);border:0.5px solid var(--border2);border-radius:20px;padding:10px 20px;font-size:13px;color:var(--text);opacity:0;transition:all 0.3s;pointer-events:none;white-space:nowrap;z-index:100}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
@@ -381,9 +436,12 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
 
   <!-- LIBRARY -->
   <div class="screen" id="screen-library">
-    <div class="page-header" style="padding-bottom:12px">
-      <div class="page-label">Leo OS</div>
-      <div class="page-title">Library</div>
+    <div class="page-header" style="padding-bottom:12px;display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div class="page-label">Leo OS</div>
+        <div class="page-title">Library</div>
+      </div>
+      <button class="add-product-btn" onclick="openProductForm()">+</button>
     </div>
 
     <!-- Search -->
@@ -425,6 +483,25 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
       <button class="detail-close" onclick="closeDetail()">✕</button>
       <div class="detail-cover" id="detailCover"></div>
       <div class="detail-body" id="detailBody"></div>
+    </div>
+  </div>
+
+  <!-- ADD PRODUCT FORM OVERLAY -->
+  <div class="form-overlay" id="formOverlay">
+    <div class="form-sheet" id="formSheet">
+      <div class="form-header">
+        <button class="form-back" id="formBack" onclick="formPrev()">←</button>
+        <div class="form-step-indicator" id="formStepIndicator"></div>
+        <button class="form-close" onclick="closeProductForm()">✕</button>
+      </div>
+      <div class="form-title-row">
+        <div class="form-step-label" id="formStepLabel"></div>
+        <div class="form-step-title" id="formStepTitle"></div>
+      </div>
+      <div class="form-body" id="formBody"></div>
+      <div class="form-footer">
+        <button class="form-next-btn" id="formNextBtn" onclick="formNext()">Continue</button>
+      </div>
     </div>
   </div>
 
@@ -914,6 +991,471 @@ function showToast(msg){
   t.textContent=msg;t.classList.add('show');
   clearTimeout(toastTimer);
   toastTimer=setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ============================================================
+// PRODUCT FORM
+// ============================================================
+const CATEGORIES = ['🧴 Skincare','💆 Haircare','🫧 Body','🌸 Fragrance','💅 Nail','🦷 Oral Care','💊 Supplements','🧼 Soap'];
+const SUBCATEGORIES = {
+  '🧴 Skincare': ['Cleanser','Toner','Serum','Moisturizer','Sunscreen','Eye Cream','Mask','Exfoliator','Oil','Treatment'],
+  '💆 Haircare': ['Shampoo','Conditioner','Mask','Oil','Serum','Styling','Treatment','Scalp Care'],
+  '🫧 Body': ['Moisturizer','Body Wash','Scrub','Oil','Lotion','Deodorant'],
+  '🌸 Fragrance': ['EDP','EDT','Parfum','EDC','Extrait','Body Mist','Hair Mist'],
+  '💅 Nail': ['Nail Oil','Cuticle Cream','Nail Polish','Treatment'],
+  '🦷 Oral Care': ['Toothpaste','Mouthwash','Floss','Tongue Scraper','Whitening'],
+  '💊 Supplements': ['Vitamin','Mineral','Capsule','Powder'],
+  '🧼 Soap': ['Bar Soap','Liquid Soap','Antibacterial']
+};
+const STATUSES = ['Owned','Not Owned'];
+const STOCKS = ['Full','Low','Empty'];
+const CONCENTRATIONS = ['Parfum','EDP','EDT','EDC','Body Mist','Hair Mist'];
+const SCENT_FAMILIES = ['Floral','Woody','Oriental','Fresh','Citrus','Gourmand','Aquatic','Fougère','Chypre','Leather','Spicy','Herbal'];
+const SEASONS = ['Spring','Summer','Fall','Winter'];
+const OCCASIONS = ['Casual','Work','Evening','Sport','Special','Date'];
+const GENDERS = ['Feminine','Neutral','Masculine'];
+
+let formStep = 0;
+let formData = {};
+let formPrices = [];
+let formRating = 0;
+let coverImageB64 = null;
+let productImageB64 = null;
+let totalSteps = 6;
+
+function getSteps() {
+  const isFragrance = (formData.category||'').includes('Fragrance');
+  return isFragrance ? 6 : 5;
+}
+
+function openProductForm() {
+  formStep = 0;
+  formData = {};
+  formPrices = [];
+  formRating = 0;
+  coverImageB64 = null;
+  productImageB64 = null;
+  renderFormStep();
+  document.getElementById('formOverlay').classList.add('open');
+}
+
+function closeProductForm() {
+  document.getElementById('formOverlay').classList.remove('open');
+}
+
+function formNext() {
+  if(!validateStep()) return;
+  collectStep();
+  const total = getSteps();
+  if(formStep >= total - 1) {
+    submitProduct();
+    return;
+  }
+  formStep++;
+  renderFormStep();
+}
+
+function formPrev() {
+  if(formStep === 0) { closeProductForm(); return; }
+  collectStep();
+  formStep--;
+  renderFormStep();
+}
+
+function validateStep() {
+  if(formStep === 0) {
+    const name = document.getElementById('f_name')?.value.trim();
+    const brand = document.getElementById('f_brand')?.value.trim();
+    const cat = formData.category;
+    if(!name) { showToast('Product name is required'); return false; }
+    if(!brand) { showToast('Brand is required'); return false; }
+    if(!cat) { showToast('Please select a category'); return false; }
+  }
+  return true;
+}
+
+function collectStep() {
+  if(formStep === 0) {
+    formData.name = document.getElementById('f_name')?.value.trim();
+    formData.brand = document.getElementById('f_brand')?.value.trim();
+  }
+  if(formStep === 1) {
+    formData.subcategory = document.getElementById('f_subcat')?.value.trim();
+    formData.description = document.getElementById('f_desc')?.value.trim();
+  }
+  if(formStep === 3) {
+    formData.personal_notes = document.getElementById('f_notes')?.value.trim();
+    formData.rating = formRating || null;
+  }
+  if(formStep === 4) {
+    formPrices = formPrices; // already updated live
+  }
+}
+
+function renderFormStep() {
+  const total = getSteps();
+  // Step dots
+  document.getElementById('formStepIndicator').innerHTML =
+    Array.from({length:total},(_,i) =>
+      `<div class="form-step-dot${i===formStep?' active':''}"></div>`
+    ).join('');
+
+  document.getElementById('formBack').style.opacity = formStep===0?'0.3':'1';
+
+  const steps = [
+    { label: 'Step 1 of '+total, title: 'The Basics' },
+    { label: 'Step 2 of '+total, title: 'Details' },
+    { label: 'Step 3 of '+total, title: 'Images' },
+    { label: 'Step 4 of '+total, title: 'Rating & Notes' },
+    { label: 'Step 5 of '+total, title: 'Pricing' },
+    { label: 'Step 6 of '+total, title: 'Fragrance Profile' },
+  ];
+
+  document.getElementById('formStepLabel').textContent = steps[formStep].label;
+  document.getElementById('formStepTitle').textContent = steps[formStep].title;
+
+  const isLast = formStep === total - 1;
+  const btn = document.getElementById('formNextBtn');
+  btn.textContent = isLast ? 'Add to Library' : 'Continue';
+
+  const body = document.getElementById('formBody');
+
+  if(formStep === 0) {
+    body.innerHTML = `
+      <div class="form-field">
+        <div class="form-label">Product Name <span class="form-required">*</span></div>
+        <input class="form-input" id="f_name" placeholder="e.g. Moisturizing Cream" value="${formData.name||''}">
+      </div>
+      <div class="form-field">
+        <div class="form-label">Brand <span class="form-required">*</span></div>
+        <input class="form-input" id="f_brand" placeholder="e.g. La Roche-Posay" value="${formData.brand||''}">
+      </div>
+      <div class="form-field">
+        <div class="form-label">Category <span class="form-required">*</span></div>
+        <div class="form-chips-wrap" id="catChips">
+          ${CATEGORIES.map(c => `<button class="form-chip${formData.category===c?' selected':''}" onclick="selectCategory('${c}')">${c}</button>`).join('')}
+        </div>
+      </div>
+      <div class="form-field" id="statusStockRow">
+        <div class="form-row-2">
+          <div>
+            <div class="form-label">Status</div>
+            <div class="form-chips-wrap">
+              ${STATUSES.map(s => `<button class="form-chip${formData.status===s?' selected':''}" onclick="selectChip('status','${s}',this,'statusChips')">${s}</button>`).join('')}
+            </div>
+          </div>
+          <div>
+            <div class="form-label">Stock</div>
+            <div class="form-chips-wrap" id="stockChips">
+              ${STOCKS.map(s => `<button class="form-chip${formData.stock===s?' selected':''}" onclick="selectChip('stock','${s}',this,'stockChips')">${s}</button>`).join('')}
+            </div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  else if(formStep === 1) {
+    const subcats = SUBCATEGORIES[formData.category] || [];
+    body.innerHTML = `
+      ${subcats.length ? `<div class="form-field">
+        <div class="form-label">Subcategory</div>
+        <div class="form-chips-wrap">
+          ${subcats.map(s => `<button class="form-chip${formData.subcategory===s?' selected':''}" onclick="selectChip('subcategory','${s}',this,'subcatChips')" id="subcatChips">${s}</button>`).join('')}
+        </div>
+      </div>` : ''}
+      <div class="form-field">
+        <div class="form-label">Description</div>
+        <textarea class="form-textarea" id="f_desc" placeholder="What is this product? What does it do?">${formData.description||''}</textarea>
+      </div>
+      <div class="form-field">
+        <div class="form-label">Ingredients</div>
+        <textarea class="form-textarea" id="f_ingredients" placeholder="Paste ingredient list (optional)" style="min-height:70px">${formData.ingredients||''}</textarea>
+      </div>`;
+  }
+
+  else if(formStep === 2) {
+    body.innerHTML = `
+      <div class="form-field">
+        <div class="form-label">Cover Image</div>
+        <div class="form-image-zone" id="coverZone">
+          <input type="file" accept="image/*" onchange="handleImage(event,'cover')">
+          ${coverImageB64
+            ? `<img class="form-image-preview" src="${coverImageB64}" style="display:block;width:100%">`
+            : `<div class="form-image-placeholder">🖼</div><div class="form-image-label">Tap to upload cover photo</div>`}
+        </div>
+      </div>
+      <div class="form-field">
+        <div class="form-label">Product Photo</div>
+        <div class="form-image-zone" id="productZone">
+          <input type="file" accept="image/*" onchange="handleImage(event,'product')">
+          ${productImageB64
+            ? `<img class="form-image-preview" src="${productImageB64}" style="display:block;width:100%">`
+            : `<div class="form-image-placeholder">📷</div><div class="form-image-label">Tap to upload product photo</div>`}
+        </div>
+      </div>
+      <div class="form-note">Images are automatically resized and optimized for display.</div>`;
+  }
+
+  else if(formStep === 3) {
+    const stars = Array.from({length:10},(_,i) =>
+      `<span class="form-rating-star${formRating>i?' filled':''}" onclick="setRating(${i+1})">★</span>`
+    ).join('');
+    body.innerHTML = `
+      <div class="form-field">
+        <div class="form-label">Your Rating</div>
+        <div class="form-rating-row">${stars}</div>
+        <div style="text-align:center;font-size:12px;color:var(--text3);margin-top:4px">${formRating ? formRating+'/10' : 'Tap to rate'}</div>
+      </div>
+      <div class="form-field">
+        <div class="form-label">Personal Notes</div>
+        <textarea class="form-textarea" id="f_notes" placeholder="Your thoughts, observations, how it makes you feel...">${formData.personal_notes||''}</textarea>
+      </div>`;
+  }
+
+  else if(formStep === 4) {
+    body.innerHTML = `
+      <div class="form-field">
+        <div class="form-label">Where to Buy</div>
+        <div id="priceEntries">${renderPriceEntries()}</div>
+        <button class="form-add-price-btn" onclick="addPriceEntry()">+ Add source</button>
+      </div>`;
+  }
+
+  else if(formStep === 5) {
+    body.innerHTML = `
+      <div class="form-field">
+        <div class="form-label">Concentration</div>
+        <div class="form-chips-wrap">
+          ${CONCENTRATIONS.map(c => `<button class="form-chip${formData.concentration===c?' selected':''}" onclick="selectChip('concentration','${c}',this,'concChips')">${c}</button>`).join('')}
+        </div>
+      </div>
+      <div class="form-field">
+        <div class="form-label">Scent Family</div>
+        <div class="form-chips-wrap">
+          ${SCENT_FAMILIES.map(c => `<button class="form-chip${formData.scent_family===c?' selected':''}" onclick="selectChip('scent_family','${c}',this,'scentChips')">${c}</button>`).join('')}
+        </div>
+      </div>
+      <div class="form-field">
+        <div class="form-label">Top Notes</div>
+        <input class="form-input" id="f_top" placeholder="e.g. Bergamot, Lemon, Pink Pepper" value="${formData.top_notes||''}">
+        <div class="form-note">Separate with commas</div>
+      </div>
+      <div class="form-field">
+        <div class="form-label">Heart Notes</div>
+        <input class="form-input" id="f_heart" placeholder="e.g. Rose, Jasmine, Iris" value="${formData.heart_notes||''}">
+      </div>
+      <div class="form-field">
+        <div class="form-label">Base Notes</div>
+        <input class="form-input" id="f_base" placeholder="e.g. Sandalwood, Musk, Amber" value="${formData.base_notes||''}">
+      </div>
+      <div class="form-row-2" style="margin-bottom:16px">
+        <div class="form-field" style="margin-bottom:0">
+          <div class="form-label">Longevity</div>
+          <input type="range" class="form-slider" id="f_longevity" min="1" max="10" value="${formData.longevity||5}" oninput="document.getElementById('longevityVal').textContent=this.value+'/10'">
+          <div class="form-slider-val" id="longevityVal">${formData.longevity||5}/10</div>
+        </div>
+        <div class="form-field" style="margin-bottom:0">
+          <div class="form-label">Sillage</div>
+          <input type="range" class="form-slider" id="f_sillage" min="1" max="10" value="${formData.sillage||5}" oninput="document.getElementById('sillageVal').textContent=this.value+'/10'">
+          <div class="form-slider-val" id="sillageVal">${formData.sillage||5}/10</div>
+        </div>
+      </div>
+      <div class="form-field">
+        <div class="form-label">Season</div>
+        <div class="form-chips-wrap">
+          ${SEASONS.map(s => `<button class="form-chip${(formData.season||[]).includes(s)?' selected':''}" onclick="toggleMultiChip('season','${s}',this)">${s}</button>`).join('')}
+        </div>
+      </div>
+      <div class="form-field">
+        <div class="form-label">Occasion</div>
+        <div class="form-chips-wrap">
+          ${OCCASIONS.map(s => `<button class="form-chip${(formData.occasion||[]).includes(s)?' selected':''}" onclick="toggleMultiChip('occasion','${s}',this)">${s}</button>`).join('')}
+        </div>
+      </div>
+      <div class="form-field">
+        <div class="form-label">Character</div>
+        <div class="form-chips-wrap">
+          ${GENDERS.map(g => `<button class="form-chip${formData.gender_impression===g?' selected':''}" onclick="selectChip('gender_impression','${g}',this,'genderChips')">${g}</button>`).join('')}
+        </div>
+      </div>`;
+  }
+}
+
+function selectCategory(cat) {
+  formData.category = cat;
+  document.querySelectorAll('#catChips .form-chip').forEach(b => b.classList.toggle('selected', b.textContent===cat));
+}
+
+function selectChip(field, val, btn, groupId) {
+  formData[field] = val;
+  // Deselect siblings
+  btn.closest('.form-chips-wrap').querySelectorAll('.form-chip').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function toggleMultiChip(field, val, btn) {
+  if(!formData[field]) formData[field] = [];
+  const idx = formData[field].indexOf(val);
+  if(idx > -1) { formData[field].splice(idx,1); btn.classList.remove('selected'); }
+  else { formData[field].push(val); btn.classList.add('selected'); }
+}
+
+function setRating(val) {
+  formRating = val;
+  document.querySelectorAll('.form-rating-star').forEach((s,i) => s.classList.toggle('filled', i<val));
+  const el = document.querySelector('[style*="Tap to rate"]');
+  if(el) el.textContent = val+'/10';
+}
+
+function renderPriceEntries() {
+  if(!formPrices.length) return '';
+  return formPrices.map((p,i) => `
+    <div class="form-price-entry">
+      <button class="form-price-remove" onclick="removePriceEntry(${i})">✕</button>
+      <div class="form-field" style="margin-bottom:8px">
+        <div class="form-label">Source Name</div>
+        <input class="form-input" placeholder="e.g. Douglas, Amazon" value="${p.source_name||''}" oninput="formPrices[${i}].source_name=this.value" style="padding:9px 12px">
+      </div>
+      <div class="form-row-2">
+        <div>
+          <div class="form-label">Price (€)</div>
+          <input class="form-input" type="number" placeholder="0.00" value="${p.price||''}" oninput="formPrices[${i}].price=parseFloat(this.value)" style="padding:9px 12px">
+        </div>
+        <div>
+          <div class="form-label">URL</div>
+          <input class="form-input" placeholder="https://..." value="${p.url||''}" oninput="formPrices[${i}].url=this.value" style="padding:9px 12px">
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function addPriceEntry() {
+  formPrices.push({source_name:'',price:null,url:''});
+  document.getElementById('priceEntries').innerHTML = renderPriceEntries();
+}
+
+function removePriceEntry(i) {
+  formPrices.splice(i,1);
+  document.getElementById('priceEntries').innerHTML = renderPriceEntries();
+}
+
+// IMAGE RESIZER
+function handleImage(event, type) {
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      // Target sizes: cover = 16:9, product = 1:1
+      let tw, th;
+      if(type==='cover') { tw=800; th=450; }
+      else { tw=600; th=600; }
+
+      // Crop to target ratio
+      const srcRatio = img.width/img.height;
+      const tgtRatio = tw/th;
+      let sx=0,sy=0,sw=img.width,sh=img.height;
+      if(srcRatio>tgtRatio) { sw=img.height*tgtRatio; sx=(img.width-sw)/2; }
+      else { sh=img.width/tgtRatio; sy=(img.height-sh)/2; }
+
+      canvas.width=tw; canvas.height=th;
+      const ctx=canvas.getContext('2d');
+      ctx.drawImage(img,sx,sy,sw,sh,0,0,tw,th);
+      const b64=canvas.toDataURL('image/jpeg',0.82);
+
+      if(type==='cover') coverImageB64=b64;
+      else productImageB64=b64;
+
+      // Re-render image zone
+      const zoneId = type==='cover'?'coverZone':'productZone';
+      const zone = document.getElementById(zoneId);
+      if(zone) {
+        const preview = zone.querySelector('.form-image-preview')||document.createElement('img');
+        preview.className='form-image-preview';
+        preview.src=b64;
+        preview.style.display='block';
+        preview.style.width='100%';
+        const placeholder = zone.querySelector('.form-image-placeholder');
+        const label = zone.querySelector('.form-image-label');
+        if(placeholder) placeholder.style.display='none';
+        if(label) label.style.display='none';
+        if(!zone.contains(preview)) zone.appendChild(preview);
+      }
+      showToast('Image resized ✓');
+    };
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function submitProduct() {
+  // Collect last step
+  if(formStep===1) {
+    formData.ingredients = document.getElementById('f_ingredients')?.value.trim();
+  }
+  if(formStep===5) {
+    formData.top_notes = document.getElementById('f_top')?.value.trim();
+    formData.heart_notes = document.getElementById('f_heart')?.value.trim();
+    formData.base_notes = document.getElementById('f_base')?.value.trim();
+    formData.longevity = parseInt(document.getElementById('f_longevity')?.value)||null;
+    formData.sillage = parseInt(document.getElementById('f_sillage')?.value)||null;
+  }
+
+  const btn = document.getElementById('formNextBtn');
+  btn.disabled=true; btn.textContent='Saving...';
+
+  const productPayload = {
+    name: formData.name,
+    brand: formData.brand,
+    category: formData.category,
+    subcategory: formData.subcategory||null,
+    status: formData.status||'Not Owned',
+    stock: formData.stock||'Full',
+    description: formData.description||null,
+    personal_notes: formData.personal_notes||null,
+    ingredients: formData.ingredients||null,
+    rating: formData.rating||null,
+    cover_image_url: coverImageB64||null,
+    image_url: productImageB64||null,
+    concentration: formData.concentration||null,
+    scent_family: formData.scent_family||null,
+    top_notes: formData.top_notes||null,
+    heart_notes: formData.heart_notes||null,
+    base_notes: formData.base_notes||null,
+    longevity: formData.longevity||null,
+    sillage: formData.sillage||null,
+    season: formData.season||null,
+    occasion: formData.occasion||null,
+    gender_impression: formData.gender_impression||null
+  };
+
+  // Insert product
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/products`, {
+    method:'POST',
+    headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`,'Content-Type':'application/json','Prefer':'return=representation'},
+    body:JSON.stringify(productPayload)
+  });
+
+  if(!res.ok) { showToast('Error saving product'); btn.disabled=false; btn.textContent='Add to Library'; return; }
+
+  const [newProduct] = await res.json();
+
+  // Insert prices
+  if(formPrices.length && newProduct) {
+    const priceRows = formPrices.filter(p=>p.price||p.source_name).map(p=>({...p,product_id:newProduct.id,currency:'EUR'}));
+    if(priceRows.length) await apiPost('product_prices',priceRows);
+  }
+
+  showToast('✓ Product added to Library');
+  closeProductForm();
+
+  // Refresh library
+  allProducts.push(newProduct);
+  filterLibrary();
+
+  btn.disabled=false; btn.textContent='Add to Library';
 }
 
 // ============================================================
