@@ -996,16 +996,14 @@ function showToast(msg){
 // ============================================================
 // PRODUCT FORM
 // ============================================================
-const CATEGORIES = ['🧴 Skincare','💆 Haircare','🫧 Body','🌸 Fragrance','💅 Nail','🦷 Oral Care','💊 Supplements','🧼 Soap'];
+const CATEGORIES = ['🪥 Self Care','🌸 Fragrance','💊 Supplement','🏃 Movement & Exercise','🔧 Tool & Appliance'];
+const BODY_AREAS = ['🦱 Hair','🫧 Face','🧔 Facial Hair','👄 Lips','🦷 Oral','🫁 Body','🪒 Body Hair','🤲 Hands','💅 Nails','🦶 Feet'];
 const SUBCATEGORIES = {
-  '🧴 Skincare': ['Cleanser','Toner','Serum','Moisturizer','Sunscreen','Eye Cream','Mask','Exfoliator','Oil','Treatment'],
-  '💆 Haircare': ['Shampoo','Conditioner','Mask','Oil','Serum','Styling','Treatment','Scalp Care'],
-  '🫧 Body': ['Moisturizer','Body Wash','Scrub','Oil','Lotion','Deodorant'],
+  '🪥 Self Care': ['Cleanser','Toner','Serum','Moisturizer','Sunscreen','Eye Cream','Mask','Exfoliator','Oil','Treatment','Scrub','Body Wash','Shampoo','Conditioner','Deodorant','Lip Balm','Mouthwash','Toothpaste'],
   '🌸 Fragrance': ['EDP','EDT','Parfum','EDC','Extrait','Body Mist','Hair Mist'],
-  '💅 Nail': ['Nail Oil','Cuticle Cream','Nail Polish','Treatment'],
-  '🦷 Oral Care': ['Toothpaste','Mouthwash','Floss','Tongue Scraper','Whitening'],
-  '💊 Supplements': ['Vitamin','Mineral','Capsule','Powder'],
-  '🧼 Soap': ['Bar Soap','Liquid Soap','Antibacterial']
+  '💊 Supplement': ['Vitamin','Mineral','Protein','Capsule','Powder','Tablet','Liquid'],
+  '🏃 Movement & Exercise': ['Resistance Band','Weight','Mat','Clothing','Shoes','Equipment','Accessory'],
+  '🔧 Tool & Appliance': ['Hair Tool','Skin Tool','Nail Tool','Oral Tool','Body Tool','Electric','Manual']
 };
 const STATUSES = ['Owned','Not Owned'];
 const STOCKS = ['Full','Low','Empty'];
@@ -1136,6 +1134,12 @@ function renderFormStep() {
           ${CATEGORIES.map(c => `<button class="form-chip${formData.category===c?' selected':''}" onclick="selectCategory('${c}')">${c}</button>`).join('')}
         </div>
       </div>
+      ${formData.category==='🪥 Self Care' ? `<div class="form-field" id="bodyAreaField">
+        <div class="form-label">Body Area <span style="font-size:10px;color:var(--text3);text-transform:none;letter-spacing:0">(select all that apply)</span></div>
+        <div class="form-chips-wrap">
+          ${BODY_AREAS.map(a => `<button class="form-chip${(formData.body_areas||[]).includes(a)?' selected':''}" onclick="toggleMultiChip('body_areas','${a}',this)">${a}</button>`).join('')}
+        </div>
+      </div>` : ''}
       <div class="form-field" id="statusStockRow">
         <div class="form-row-2">
           <div>
@@ -1283,7 +1287,9 @@ function renderFormStep() {
 
 function selectCategory(cat) {
   formData.category = cat;
-  document.querySelectorAll('#catChips .form-chip').forEach(b => b.classList.toggle('selected', b.textContent===cat));
+  if(cat !== '🪥 Self Care') formData.body_areas = [];
+  // Re-render step to show/hide body area
+  renderFormStep();
 }
 
 function selectChip(field, val, btn, groupId) {
@@ -1428,7 +1434,8 @@ async function submitProduct() {
     sillage: formData.sillage||null,
     season: formData.season||null,
     occasion: formData.occasion||null,
-    gender_impression: formData.gender_impression||null
+    gender_impression: formData.gender_impression||null,
+    body_areas: formData.body_areas?.length ? formData.body_areas : null
   };
 
   // Insert product
