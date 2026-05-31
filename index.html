@@ -89,6 +89,8 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
 .past-item:last-child{border-bottom:none}
 .past-status-icon{width:20px;height:20px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px}
 .past-done-icon{background:var(--accent);color:var(--bg)}
+.past-missed-icon{background:var(--bg3);color:var(--text3);font-size:9px}
+.missed-header{color:var(--red)!important}
 .past-skip-icon{background:var(--bg3);color:var(--text3)}
 .past-item-info{flex:1;min-width:0}
 .past-item-name{font-size:13px;color:var(--text2)}
@@ -573,7 +575,26 @@ async function loadPastLog() {
   container.className = 'past-log';
 
   if(!logged || !logged.length) {
-    container.innerHTML = `<div class="no-log"><div class="no-log-glyph">∅</div><div class="no-log-text">Nothing was logged<br>on this day</div></div>`;
+    // Show what the routine would have been, all marked as not done
+    const vDay = getDayShort(viewDate);
+    const vDayOfMonth = viewDate.getDate();
+    const [daily, weekly, monthly] = await Promise.all([
+      api('routine_tasks',`?time_of_day=eq.${currentSession}&frequency=eq.Daily&order=order.asc`),
+      api('routine_tasks',`?time_of_day=eq.${currentSession}&frequency=eq.Weekly&days=cs.{"${vDay}"}&order=order.asc`),
+      vDayOfMonth===1 ? api('routine_tasks',`?time_of_day=eq.${currentSession}&frequency=eq.Monthly&order=order.asc`) : Promise.resolve([])
+    ]);
+    const all = [...(daily||[]),...(weekly||[]),...(monthly||[])];
+    all.sort((a,b)=>a.order-b.order);
+
+    container.innerHTML = `<div class="past-header missed-header">Not completed · ${all.length} steps</div>` +
+      all.map((s,i) => `
+        <div class="past-item was-skipped">
+          <div class="past-status-icon past-missed-icon">✕</div>
+          <div class="past-item-info">
+            <div class="past-item-name">${i+1}. ${s.name}</div>
+          </div>
+          ${s.frequency!=='Daily'?`<span class="freq-badge-small ${s.frequency==='Weekly'?'freq-weekly':'freq-monthly'}">${s.frequency.toLowerCase()}</span>`:''}
+        </div>`).join('');
   } else {
     // Get product names for logged entries
     const productIds = logged.map(l=>l.product_used).filter(Boolean);
