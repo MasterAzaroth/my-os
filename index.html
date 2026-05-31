@@ -1107,6 +1107,35 @@ function deactivateSave() {
   btn.classList.remove('active');
 }
 
+// BARCODE SUCCESS PILL
+function showBarcodeSuccess(source, productName) {
+  const existing = document.getElementById('barcodeSuccessPill');
+  if(existing) existing.remove();
+
+  const pill = document.createElement('div');
+  pill.id = 'barcodeSuccessPill';
+  pill.innerHTML = `<span style="color:#4a7c59;font-size:14px">●</span> Found on ${source}${productName ? ': <strong>' + productName + '</strong>' : ''}`;
+  pill.style.cssText = `
+    position:fixed;bottom:calc(80px + env(safe-area-inset-bottom,0px));left:50%;
+    transform:translateX(-50%) translateY(20px);
+    background:#0d1f14;border:0.5px solid #2a4a32;border-radius:20px;
+    padding:10px 18px;font-size:12px;color:#7ab98a;
+    opacity:0;transition:all 0.3s;pointer-events:none;
+    white-space:nowrap;z-index:100;max-width:90vw;
+    overflow:hidden;text-overflow:ellipsis;
+  `;
+  document.body.appendChild(pill);
+  requestAnimationFrame(() => {
+    pill.style.opacity = '1';
+    pill.style.transform = 'translateX(-50%) translateY(0)';
+  });
+  setTimeout(() => {
+    pill.style.opacity = '0';
+    pill.style.transform = 'translateX(-50%) translateY(20px)';
+    setTimeout(() => pill.remove(), 300);
+  }, 4000);
+}
+
 // TOAST
 let toastTimer;
 function showToast(msg){
@@ -1151,13 +1180,56 @@ function getSteps() {
 
 function openProductForm() {
   formStep = 0;
-  formData = {};
+  // Don't reset formData if it was prefilled from barcode scan
+  if(!formData._prefilled && !formData._editId) {
+    formData = {};
+  }
   formPrices = [];
-  formRating = 0;
+  formRating = formData.rating || 0;
   coverImageB64 = null;
   productImageB64 = null;
   renderFormStep();
   document.getElementById('formOverlay').classList.add('open');
+
+  // If we have an image URL from barcode, try to load it
+  if(formData._imageUrl) {
+    fetchRemoteImage(formData._imageUrl);
+  }
+}
+
+async function fetchRemoteImage(url) {
+  try {
+    const res = await fetch(url);
+    const blob = await res.blob();
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 600; canvas.height = 600;
+        const ctx = canvas.getContext('2d');
+        const size = Math.min(img.width, img.height);
+        const sx = (img.width - size) / 2;
+        const sy = (img.height - size) / 2;
+        ctx.drawImage(img, sx, sy, size, size, 0, 0, 600, 600);
+        productImageB64 = canvas.toDataURL('image/jpeg', 0.82);
+        // Also use as cover (16:9)
+        const canvas2 = document.createElement('canvas');
+        canvas2.width = 800; canvas2.height = 450;
+        const ctx2 = canvas2.getContext('2d');
+        const sw = img.width;
+        const sh = img.width / (16/9);
+        const sy2 = Math.max(0, (img.height - sh) / 2);
+        ctx2.drawImage(img, 0, sy2, sw, Math.min(sh, img.height), 0, 0, 800, 450);
+        coverImageB64 = canvas2.toDataURL('image/jpeg', 0.82);
+        showToast('✓ Product image loaded');
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(blob);
+  } catch(e) {
+    console.warn('Could not load remote image:', e);
+  }
 }
 
 function closeProductForm() {
@@ -2277,7 +2349,7 @@ async function lookupBarcode(barcode) {
       // Open Beauty/Food Facts format
       if(source.type !== 'upc' && d.status === 1 && d.product?.product_name) {
         prefillFormFromBarcode(d.product, source.type);
-        showToast(`✓ Found on ${source.name}`);
+        showBarcodeSuccess(source.name, formData.name);
         openProductForm();
         return;
       }
@@ -2289,7 +2361,7 @@ async function lookupBarcode(barcode) {
         formData.brand = item.brand || '';
         formData.description = item.description || '';
         if(item.images?.length) formData._imageUrl = item.images[0];
-        showToast(`✓ Found on UPC database`);
+        showBarcodeSuccess('UPC Database', formData.name);
         openProductForm();
         return;
       }
@@ -2310,18 +2382,33 @@ async function lookupBarcode(barcode) {
 }
 
 function prefillFormFromBarcode(p, source) {
-  formData = {};
-  formData.name = p.product_name || '';
-  formData.brand = (p.brands || '').split(',')[0].trim();
-  formData.ingredients = p.ingredients_text || '';
+  // Clean brand — sometimes comes as "Brand1, Brand2" take first
+  const brand = (p.brands || p.brand || '').split(/,|;/)[0].trim();
+  // Clean name — sometimes has brand prepended, strip it
+  let name = (p.product_name || p.title || '').trim();
+  if(brand && name.toLowerCase().startsWith(brand.toLowerCase())) {
+    name = name.slice(brand.length).trim().replace(/^[-–—·\s]+/, '');
+  }
+
   // Guess category from tags
-  const cats = (p.categories_tags || []).join(' ').toLowerCase();
-  if(/supplement|vitamin|mineral|protein/.test(cats)) formData.category = '💊 Supplement';
-  else if(/fragrance|perfume|cologne/.test(cats)) formData.category = '🌸 Fragrance';
-  else if(/cosmetic|skincare|haircare|shampoo|cream|lotion|serum/.test(cats)) formData.category = '🪥 Self Care';
-  else if(source === 'food') formData.category = '💊 Supplement';
-  else formData.category = '🪥 Self Care';
-  if(p.image_url) formData._imageUrl = p.image_url;
+  const cats = (p.categories_tags || p.categories || []);
+  const catsStr = (Array.isArray(cats) ? cats.join(' ') : cats).toLowerCase();
+  let category = '🪥 Self Care'; // default
+  if(/supplement|vitamin|mineral|protein|zinc|biotin|capsule/.test(catsStr)) category = '💊 Supplement';
+  else if(/fragrance|perfume|cologne|parfum/.test(catsStr)) category = '🌸 Fragrance';
+  else if(source === 'food') category = '💊 Supplement';
+
+  formData = {
+    name,
+    brand,
+    category,
+    ingredients: p.ingredients_text || p.ingredients || '',
+    description: p.description || '',
+    _imageUrl: p.image_url || p.images_url_front || (p.images && p.images[0]) || null,
+    _prefilled: true
+  };
+
+  console.log('Prefilled formData:', JSON.stringify(formData));
 }
 
 // ============================================================
