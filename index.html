@@ -2245,42 +2245,63 @@ async function submitManualBarcode() {
 }
 
 async function lookupBarcode(barcode) {
-  showToast('🔍 Looking up barcode ' + barcode + '...');
+  showToast('🔍 Searching databases...');
 
-  // Try Open Beauty Facts first (cosmetics/skincare)
-  try {
-    const r1 = await fetch(`https://world.openbeautyfacts.org/api/v2/product/${barcode}?fields=product_name,brands,ingredients_text,categories_tags,image_url`, {
-      headers: {'User-Agent': 'LeoOS/1.0'}
-    });
-    const d1 = await r1.json();
-    if(d1.status === 1 && d1.product?.product_name) {
-      const p = d1.product;
-      prefillFormFromBarcode(p, 'beauty');
-      showToast(`✓ Found on Open Beauty Facts`);
-      openProductForm();
-      return;
+  const sources = [
+    {
+      name: 'Open Beauty Facts',
+      url: `https://world.openbeautyfacts.org/api/v2/product/${barcode}?fields=product_name,brands,ingredients_text,categories_tags,image_url`,
+      type: 'beauty'
+    },
+    {
+      name: 'Open Food Facts',
+      url: `https://world.openfoodfacts.org/api/v2/product/${barcode}?fields=product_name,brands,ingredients_text,categories_tags,image_url`,
+      type: 'food'
+    },
+    {
+      name: 'Open Product Data',
+      url: `https://api.upcitemdb.com/prod/trial/lookup?upc=${barcode}`,
+      type: 'upc'
     }
-  } catch(e) { console.warn('Beauty Facts failed:', e); }
+  ];
 
-  // Try Open Food Facts (supplements, oral care etc.)
-  try {
-    const r2 = await fetch(`https://world.openfoodfacts.org/api/v2/product/${barcode}?fields=product_name,brands,ingredients_text,categories_tags,image_url`, {
-      headers: {'User-Agent': 'LeoOS/1.0'}
-    });
-    const d2 = await r2.json();
-    if(d2.status === 1 && d2.product?.product_name) {
-      const p = d2.product;
-      prefillFormFromBarcode(p, 'food');
-      showToast(`✓ Found on Open Food Facts`);
-      openProductForm();
-      return;
+  for(const source of sources) {
+    try {
+      showToast(`🔍 Checking ${source.name}...`);
+      const r = await fetch(source.url, {
+        headers: {'User-Agent': 'LeoOS/1.0'},
+        signal: AbortSignal.timeout(5000)
+      });
+      const d = await r.json();
+
+      // Open Beauty/Food Facts format
+      if(source.type !== 'upc' && d.status === 1 && d.product?.product_name) {
+        prefillFormFromBarcode(d.product, source.type);
+        showToast(`✓ Found on ${source.name}`);
+        openProductForm();
+        return;
+      }
+
+      // UPC Item DB format
+      if(source.type === 'upc' && d.code === 'OK' && d.items?.length) {
+        const item = d.items[0];
+        formData.name = item.title || '';
+        formData.brand = item.brand || '';
+        formData.description = item.description || '';
+        if(item.images?.length) formData._imageUrl = item.images[0];
+        showToast(`✓ Found on UPC database`);
+        openProductForm();
+        return;
+      }
+    } catch(e) {
+      console.warn(`${source.name} failed:`, e.message);
     }
-  } catch(e) { console.warn('Food Facts failed:', e); }
+  }
 
-  // Nothing found — open blank form with barcode pre-noted
-  showToast(`⚠️ Barcode ${barcode} not found in databases`);
+  // Nothing found anywhere
+  showToast(`⚠️ Not found in any database`);
   setTimeout(() => {
-    if(confirm(`Product not found for barcode ${barcode}.\nOpen blank form to add manually?`)) {
+    if(confirm(`Barcode ${barcode} not found.\n\nThis can happen with regional products (e.g. dm, Rossmann). Open blank form to add manually?`)) {
       formData = {};
       formData._barcode = barcode;
       openProductForm();
