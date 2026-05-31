@@ -183,15 +183,15 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
 .kit-filter::-webkit-scrollbar{display:none}
 .filter-btn{flex-shrink:0;padding:5px 12px;border-radius:16px;border:0.5px solid var(--border);background:transparent;color:var(--text3);font-size:11px;cursor:pointer;transition:all 0.2s;font-family:var(--sans)}
 .filter-btn.active{background:var(--bg3);color:var(--text);border-color:var(--border2)}
-.kit-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:8px 12px 20px}
-.product-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:all 0.2s}
+.kit-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:8px 14px 20px}
+.product-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;transition:all 0.2s}
 .product-card:active{transform:scale(0.97)}
-.product-img{width:100%;aspect-ratio:1;background:var(--bg3);display:flex;align-items:center;justify-content:center;padding:10px}
-.product-img img{width:100%;height:100%;object-fit:contain;object-position:center}
+.product-img{width:100%;aspect-ratio:3/4;background:var(--bg3);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.product-img img{width:100%;height:100%;object-fit:cover;object-position:center}
 .product-img-placeholder{font-size:28px;color:var(--text3)}
-.product-info{padding:7px 8px 9px}
-.product-name{font-size:10px;font-weight:500;color:var(--text);margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.product-brand{font-size:9px;color:var(--text3)}
+.product-info{padding:8px 10px 10px}
+.product-name{font-size:11px;font-weight:500;color:var(--text);margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.product-brand{font-size:10px;color:var(--text3)}
 .product-price{font-size:10px;color:var(--accent);margin-top:3px}
 .stock-dot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:4px}
 .stock-full{background:var(--green)}
@@ -228,23 +228,23 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
 .lib-sort-row{display:flex;align-items:center;gap:8px;padding:0 20px 10px;flex-shrink:0}
 .lib-sort-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em}
 .lib-sort-select{background:var(--bg2);border:0.5px solid var(--border);color:var(--text2);font-size:11px;padding:4px 8px;border-radius:8px;outline:none;font-family:var(--sans);cursor:pointer}
-.lib-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:4px 14px 20px}
+.lib-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:4px 14px 20px}
 .lib-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;transition:all 0.2s;position:relative}
 .lib-card:active{transform:scale(0.97);background:var(--bg3)}
-.lib-card-cover{width:100%;aspect-ratio:3/4;background:var(--bg3);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;padding:16px}
-.lib-card-cover img{width:100%;height:100%;object-fit:contain;object-position:center}
+.lib-card-cover{width:100%;aspect-ratio:3/4;background:var(--bg3);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.lib-card-cover img{width:100%;height:100%;object-fit:cover;object-position:center}
 .lib-card-cover-placeholder{font-size:36px;color:var(--text3)}
 .lib-card-status{position:absolute;top:8px;right:8px;width:8px;height:8px;border-radius:50%}
 .lib-card-rating{position:absolute;bottom:8px;left:8px;background:rgba(8,8,8,0.85);padding:2px 7px;border-radius:10px;font-size:11px;color:var(--accent);font-weight:500;backdrop-filter:blur(4px)}
 .lib-card-lists{position:absolute;bottom:8px;right:8px;display:flex;gap:3px}
 .lib-card-list-dot{font-size:11px}
-.lib-card-info{padding:10px 12px 12px}
-.lib-card-name{font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
-.lib-card-brand{font-size:11px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lib-card-info{padding:8px 10px 10px}
+.lib-card-name{font-size:11px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:1px}
+.lib-card-brand{font-size:10px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .lib-card-cat{display:none}
-.lib-card-price-row{display:flex;align-items:center;gap:8px;margin-top:6px;flex-wrap:wrap}
-.lib-card-price{font-size:12px;color:var(--text2);font-weight:500}
-.lib-card-link{font-size:11px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px}
+.lib-card-price-row{display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap}
+.lib-card-price{font-size:11px;color:var(--text2);font-weight:500}
+.lib-card-link{font-size:10px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:80px}
 
 /* DETAIL OVERLAY */
 .detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;display:none;align-items:flex-end;backdrop-filter:blur(4px)}
@@ -1578,20 +1578,22 @@ function handleImage(event, type) {
       canvas.width=tw; canvas.height=th;
       const ctx=canvas.getContext('2d');
 
-      // For product images: scale to fit inside canvas keeping aspect ratio, center it
-      // No cropping — product stays whole, centered
-      const scale = Math.min(tw/img.width, th/img.height) * 0.92; // 92% so there's a little breathing room
-      const dw = img.width * scale;
-      const dh = img.height * scale;
-      const dx = (tw - dw) / 2;
-      const dy = (th - dh) / 2;
-
-      // Use PNG for product (preserves transparency), JPEG for cover
-      ctx.clearRect(0,0,tw,th);
-      ctx.drawImage(img, dx, dy, dw, dh);
-      const fmt = type==='cover' ? 'image/jpeg' : 'image/png';
-      const quality = type==='cover' ? 0.85 : 1.0;
-      const b64=canvas.toDataURL(fmt, quality);
+      // Fill canvas completely — crop to target ratio from center
+      // This matches how Notion displays images: full bleed, no black bars
+      const srcRatio = img.width / img.height;
+      const tgtRatio = tw / th;
+      let sx=0, sy=0, sw=img.width, sh=img.height;
+      if(srcRatio > tgtRatio) {
+        // Image is wider — crop sides
+        sw = img.height * tgtRatio;
+        sx = (img.width - sw) / 2;
+      } else {
+        // Image is taller — crop top/bottom
+        sh = img.width / tgtRatio;
+        sy = (img.height - sh) / 2;
+      }
+      ctx.drawImage(img, sx, sy, sw, sh, 0, 0, tw, th);
+      const b64=canvas.toDataURL('image/jpeg', 0.85);
 
       if(type==='cover') coverImageB64=b64;
       else productImageB64=b64;
