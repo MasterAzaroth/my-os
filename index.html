@@ -383,6 +383,45 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
 .expiry-val{font-size:15px;font-weight:500;color:var(--accent)}
 .expiry-label{font-size:10px;color:var(--text3);margin-top:2px}
 
+/* ADD TO KIT */
+.add-to-kit-btn{width:100%;padding:13px;border-radius:12px;border:0.5px solid var(--accent2);background:transparent;color:var(--accent);font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);transition:all 0.2s;text-align:center}
+.add-to-kit-btn:active{background:rgba(200,184,154,0.1)}
+.kit-instance-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:8px}
+.kit-instance-state{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:500;padding:3px 8px;border-radius:10px;margin-bottom:8px}
+.state-active{background:rgba(74,124,89,0.2);color:#4a7c59}
+.state-backup{background:rgba(74,74,138,0.2);color:#4a4a8a}
+.state-passive{background:rgba(100,100,100,0.2);color:#888}
+.kit-instance-info{font-size:12px;color:var(--text2);line-height:1.6}
+.kit-instance-amount{font-size:20px;font-weight:500;color:var(--text);margin-bottom:4px}
+.kit-amount-bar{height:4px;background:var(--border);border-radius:2px;margin:6px 0;overflow:hidden}
+.kit-amount-fill{height:100%;border-radius:2px;background:var(--accent);transition:width 0.4s}
+
+/* DETAIL INLINE RATING + NOTES */
+.detail-rating-inline{display:flex;align-items:center;flex-wrap:wrap;gap:2px}
+.detail-star-inline{font-size:20px;color:var(--border2);cursor:pointer;transition:color 0.1s}
+.detail-star-inline.filled{color:var(--accent)}
+.detail-notes-edit{width:100%;background:var(--bg2);border:0.5px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--text2);font-size:13px;outline:none;font-family:var(--sans);resize:none;min-height:80px;line-height:1.5;transition:border-color 0.2s}
+.detail-notes-edit:focus{border-color:var(--border2)}
+
+/* KIT FLOW OVERLAY */
+.kit-flow-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:400;display:none;align-items:flex-end;backdrop-filter:blur(6px)}
+.kit-flow-overlay.open{display:flex}
+.kit-flow-sheet{background:var(--bg);border-radius:24px 24px 0 0;width:100%;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;padding-bottom:env(safe-area-inset-bottom,20px)}
+.kit-flow-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px}
+.kit-flow-title{font-family:var(--serif);font-size:20px;color:var(--text)}
+.kit-flow-body{flex:1;overflow-y:auto;padding:0 20px 16px}
+.kit-flow-body::-webkit-scrollbar{display:none}
+.kit-flow-footer{padding:12px 20px;border-top:0.5px solid var(--border)}
+.kit-save-btn{width:100%;padding:14px;border-radius:14px;border:none;background:var(--accent);color:var(--bg);font-size:14px;font-weight:500;cursor:pointer;font-family:var(--sans)}
+
+/* AMOUNT SLIDER */
+.amount-display{text-align:center;margin:12px 0 4px}
+.amount-big{font-size:32px;font-weight:500;color:var(--text)}
+.amount-total{font-size:14px;color:var(--text3)}
+.amount-visual{position:relative;height:48px;background:var(--bg2);border:0.5px solid var(--border);border-radius:12px;overflow:hidden;margin:10px 0;cursor:pointer}
+.amount-fill-vis{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--accent2),var(--accent));border-radius:12px;transition:width 0.1s}
+.amount-label{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--text);font-weight:500;pointer-events:none}
+
 /* TOAST */
 .toast{position:fixed;bottom:calc(80px + var(--safe-bot));left:50%;transform:translateX(-50%) translateY(20px);background:var(--bg3);border:0.5px solid var(--border2);border-radius:20px;padding:10px 20px;font-size:13px;color:var(--text);opacity:0;transition:all 0.3s;pointer-events:none;white-space:nowrap;z-index:100}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
@@ -614,6 +653,20 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
     </div>
 
     <button onclick="closeBarcodeScanner()" style="position:absolute;top:calc(20px + env(safe-area-inset-top,0px));right:20px;background:rgba(30,30,30,0.8);border:0.5px solid rgba(255,255,255,0.1);color:#fff;width:36px;height:36px;border-radius:50%;font-size:16px;cursor:pointer;z-index:3;backdrop-filter:blur(4px)">✕</button>
+  </div>
+
+  <!-- ADD TO KIT FLOW -->
+  <div class="kit-flow-overlay" id="kitFlowOverlay">
+    <div class="kit-flow-sheet">
+      <div class="kit-flow-header">
+        <div class="kit-flow-title">Add to My Kit</div>
+        <button onclick="closeKitFlow()" style="background:var(--bg3);border:0.5px solid var(--border2);color:var(--text3);width:30px;height:30px;border-radius:50%;font-size:12px;cursor:pointer;font-family:var(--sans)">✕</button>
+      </div>
+      <div class="kit-flow-body" id="kitFlowBody"></div>
+      <div class="kit-flow-footer">
+        <button class="kit-save-btn" onclick="saveKitItem()">Add to Kit</button>
+      </div>
+    </div>
   </div>
 
   <!-- PLACEHOLDER TAB 5 -->
@@ -1178,7 +1231,7 @@ let totalSteps = 6;
 
 function getSteps() {
   const isFragrance = (formData.category||'').includes('Fragrance');
-  return isFragrance ? 6 : 5;
+  return isFragrance ? 5 : 4;
 }
 
 function openProductForm() {
@@ -1279,10 +1332,6 @@ function collectStep() {
     formData.description = document.getElementById('f_desc')?.value.trim();
   }
   if(formStep === 3) {
-    formData.personal_notes = document.getElementById('f_notes')?.value.trim();
-    formData.rating = formRating || null;
-  }
-  if(formStep === 4) {
     formPrices = formPrices; // already updated live
   }
 }
@@ -1300,10 +1349,9 @@ function renderFormStep() {
   const steps = [
     { label: 'Step 1 of '+total, title: 'The Basics' },
     { label: 'Step 2 of '+total, title: 'Details' },
-    { label: 'Step 3 of '+total, title: 'Images' },
-    { label: 'Step 4 of '+total, title: 'Rating & Notes' },
-    { label: 'Step 5 of '+total, title: 'Pricing' },
-    { label: 'Step 6 of '+total, title: 'Fragrance Profile' },
+    { label: 'Step 3 of '+total, title: 'Image' },
+    { label: 'Step 4 of '+total, title: 'Pricing' },
+    { label: 'Step 5 of '+total, title: 'Fragrance Profile' },
   ];
 
   document.getElementById('formStepLabel').textContent = steps[formStep].label;
@@ -1402,43 +1450,17 @@ function renderFormStep() {
   else if(formStep === 2) {
     body.innerHTML = `
       <div class="form-field">
-        <div class="form-label">Cover Image</div>
+        <div class="form-label">Product Image</div>
         <div class="form-image-zone" id="coverZone">
           <input type="file" accept="image/*" onchange="handleImage(event,'cover')">
           ${coverImageB64
             ? `<img class="form-image-preview" src="${coverImageB64}" style="display:block;width:100%">`
-            : `<div class="form-image-placeholder">🖼</div><div class="form-image-label">Tap to upload cover photo</div>`}
+            : `<div class="form-image-placeholder">🖼</div><div class="form-image-label">Tap to upload product image</div>`}
         </div>
-      </div>
-      <div class="form-field">
-        <div class="form-label">Product Photo</div>
-        <div class="form-image-zone" id="productZone">
-          <input type="file" accept="image/*" onchange="handleImage(event,'product')">
-          ${productImageB64
-            ? `<img class="form-image-preview" src="${productImageB64}" style="display:block;width:100%">`
-            : `<div class="form-image-placeholder">📷</div><div class="form-image-label">Tap to upload product photo</div>`}
-        </div>
-      </div>
-      <div class="form-note">Images are automatically resized and optimized for display.</div>`;
-  }
-
-  else if(formStep === 3) {
-    const stars = Array.from({length:10},(_,i) =>
-      `<span class="form-rating-star${formRating>i?' filled':''}" onclick="setRating(${i+1})">★</span>`
-    ).join('');
-    body.innerHTML = `
-      <div class="form-field">
-        <div class="form-label">Your Rating</div>
-        <div class="form-rating-row">${stars}</div>
-        <div style="text-align:center;font-size:12px;color:var(--text3);margin-top:4px">${formRating ? formRating+'/10' : 'Tap to rate'}</div>
-      </div>
-      <div class="form-field">
-        <div class="form-label">Personal Notes</div>
-        <textarea class="form-textarea" id="f_notes" placeholder="Your thoughts, observations, how it makes you feel...">${formData.personal_notes||''}</textarea>
       </div>`;
   }
 
-  else if(formStep === 4) {
+  else if(formStep === 3) {
     body.innerHTML = `
       <div class="form-field">
         <div class="form-label">Where to Buy</div>
@@ -1447,7 +1469,7 @@ function renderFormStep() {
       </div>`;
   }
 
-  else if(formStep === 5) {
+  else if(formStep === 4) {
     body.innerHTML = `
       <div class="form-field">
         <div class="form-label">Concentration</div>
@@ -1625,7 +1647,7 @@ async function submitProduct() {
   if(formStep===1) {
     formData.ingredients = document.getElementById('f_ingredients')?.value.trim();
   }
-  if(formStep===5) {
+  if(formStep===4) {
     formData.top_notes = document.getElementById('f_top')?.value.trim();
     formData.heart_notes = document.getElementById('f_heart')?.value.trim();
     formData.base_notes = document.getElementById('f_base')?.value.trim();
@@ -1641,14 +1663,11 @@ async function submitProduct() {
     brand: formData.brand,
     category: formData.category,
     subcategory: formData.subcategory||null,
-    status: formData.status||'Not Owned',
-    stock: formData.stock||'Full',
     description: formData.description||null,
     personal_notes: formData.personal_notes||null,
     ingredients: formData.ingredients||null,
     rating: formData.rating||null,
     cover_image_url: coverImageB64||null,
-    image_url: productImageB64||null,
     concentration: formData.concentration||null,
     scent_family: formData.scent_family||null,
     top_notes: formData.top_notes||null,
@@ -1659,9 +1678,6 @@ async function submitProduct() {
     season: formData.season||null,
     occasion: formData.occasion||null,
     gender_impression: formData.gender_impression||null,
-    container_size: formData.container_size||null,
-    container_unit: formData.container_unit||'ml',
-    body_areas: formData.body_areas?.length ? formData.body_areas : null,
     barcode: formData._barcode || null
   };
 
@@ -1920,10 +1936,21 @@ async function openDetail(productId) {
     </div>
 
     <div class="detail-section">
-      <div class="detail-section-title">Routine Steps</div>
-      <div class="detail-routine-steps" id="detailRoutineSteps-${p.id}">
-        <div style="font-size:11px;color:var(--text3)">Loading...</div>
+      <button class="add-to-kit-btn" onclick="openAddToKit('${p.id}')">+ Add to My Kit</button>
+      <div id="kitInstancesFor-${p.id}" style="margin-top:10px"></div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">Rating</div>
+      <div class="detail-rating-inline" id="detailRatingInline-${p.id}">
+        ${Array.from({length:10},(_,i)=>`<span class="detail-star-inline${p.rating&&i<Math.round(p.rating)?' filled':''}" onclick="rateProduct('${p.id}',${i+1})">★</span>`).join('')}
+        <span style="font-size:12px;color:var(--text3);margin-left:6px">${p.rating ? p.rating+'/10' : 'Tap to rate'}</span>
       </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">Personal Notes</div>
+      <textarea class="detail-notes-edit" id="detailNotes-${p.id}" placeholder="Your thoughts, observations..." onblur="saveNotes('${p.id}')">${p.personal_notes||''}</textarea>
     </div>
 
     ${p.description ? `<div class="detail-section"><div class="detail-section-title">Description</div><div class="detail-text">${p.description}</div></div>` : ''}
@@ -1944,8 +1971,7 @@ async function openDetail(productId) {
   `;
 
   document.getElementById('detailOverlay').classList.add('open');
-  // Load routine steps async
-  loadRoutineStepsForProduct(productId);
+  loadKitInstances(productId);
 }
 
 function closeDetail() {
@@ -2587,6 +2613,213 @@ function closeCompare() {
   if(btn) { btn.style.background='var(--bg2)';btn.style.color='var(--text3)';btn.style.borderColor='var(--border2)'; }
   document.getElementById('compareHint')?.remove();
   document.querySelectorAll('.lib-card').forEach(c=>c.classList.remove('compare-selected'));
+}
+
+// ============================================================
+// ADD TO KIT FLOW
+// ============================================================
+const BODY_AREAS_KIT = ['🦱 Hair','🫧 Face','🧔 Facial Hair','👄 Lips','🦷 Oral','🫁 Body','🪒 Body Hair','🤲 Hands','💅 Nails','🦶 Feet'];
+const KIT_STATES = ['Active','Backup','Passive'];
+let kitFlowProductId = null;
+let kitFlowData = { state:'Active', container_size:null, container_unit:'ml', current_amount:null, body_areas:[], opened_date: new Date().toISOString().split('T')[0] };
+let kitFlowSteps = [];
+let kitFlowLinkedSteps = [];
+
+async function openAddToKit(productId) {
+  kitFlowProductId = productId;
+  kitFlowData = { state:'Active', container_size:200, container_unit:'ml', current_amount:200, body_areas:[], opened_date: new Date().toISOString().split('T')[0] };
+  kitFlowLinkedSteps = [];
+
+  // Load routine steps
+  const [am, pm] = await Promise.all([
+    api('routine_tasks','?time_of_day=eq.Morning&order=order.asc'),
+    api('routine_tasks','?time_of_day=eq.Evening&order=order.asc')
+  ]);
+  kitFlowSteps = [...(am||[]), ...(pm||[])];
+
+  renderKitFlow();
+  document.getElementById('kitFlowOverlay').classList.add('open');
+}
+
+function closeKitFlow() {
+  document.getElementById('kitFlowOverlay').classList.remove('open');
+}
+
+function renderKitFlow() {
+  const pct = kitFlowData.container_size > 0 ? Math.round((kitFlowData.current_amount/kitFlowData.container_size)*100) : 100;
+
+  document.getElementById('kitFlowBody').innerHTML = `
+    <div class="form-field">
+      <div class="form-label">Status</div>
+      <div class="form-chips-wrap">
+        ${KIT_STATES.map(s => `<button class="form-chip${kitFlowData.state===s?' selected':''}" onclick="setKitState('${s}')">${s==='Active'?'🟢':s==='Backup'?'📦':'💤'} ${s}</button>`).join('')}
+      </div>
+    </div>
+
+    <div class="form-field">
+      <div class="form-label">Container Size</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input class="form-input" type="number" placeholder="e.g. 200" value="${kitFlowData.container_size||''}" oninput="kitFlowData.container_size=parseFloat(this.value)||0;kitFlowData.current_amount=Math.min(kitFlowData.current_amount||0,kitFlowData.container_size);renderKitFlow()" style="flex:1">
+        <div class="form-chips-wrap">
+          ${['ml','g','oz'].map(u=>`<button class="form-chip${kitFlowData.container_unit===u?' selected':''}" onclick="kitFlowData.container_unit='${u}';renderKitFlow()">${u}</button>`).join('')}
+        </div>
+      </div>
+    </div>
+
+    <div class="form-field">
+      <div class="form-label">How much is left?</div>
+      <div class="amount-display">
+        <span class="amount-big">${kitFlowData.current_amount||0}</span>
+        <span class="amount-total"> / ${kitFlowData.container_size||0} ${kitFlowData.container_unit}</span>
+      </div>
+      <div class="amount-visual" id="amountVisual">
+        <div class="amount-fill-vis" style="width:${pct}%"></div>
+        <div class="amount-label">${pct}% remaining</div>
+      </div>
+      <input type="range" class="form-slider" min="0" max="${kitFlowData.container_size||200}" value="${kitFlowData.current_amount||kitFlowData.container_size||200}"
+        oninput="kitFlowData.current_amount=parseFloat(this.value);document.querySelector('.amount-big').textContent=this.value;const p=Math.round(this.value/(${kitFlowData.container_size||200})*100);document.querySelector('.amount-fill-vis').style.width=p+'%';document.querySelector('.amount-label').textContent=p+'% remaining'">
+    </div>
+
+    <div class="form-field">
+      <div class="form-label">Body Area <span style="font-size:10px;color:var(--text3);text-transform:none;letter-spacing:0">(optional)</span></div>
+      <div class="form-chips-wrap">
+        ${BODY_AREAS_KIT.map(a=>`<button class="form-chip${kitFlowData.body_areas.includes(a)?' selected':''}" onclick="toggleKitBodyArea('${a}',this)">${a}</button>`).join('')}
+      </div>
+    </div>
+
+    <div class="form-field">
+      <div class="form-label">Link to Routine Steps <span style="font-size:10px;color:var(--text3);text-transform:none;letter-spacing:0">(optional)</span></div>
+      <div style="margin-bottom:8px">
+        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:5px">Morning</div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px">
+          ${kitFlowSteps.filter(s=>s.time_of_day==='Morning').map(s=>`<button class="form-chip${kitFlowLinkedSteps.includes(s.id)?' selected':''}" onclick="toggleKitStep('${s.id}',this)">${s.name}</button>`).join('')}
+        </div>
+        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:5px">Evening</div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px">
+          ${kitFlowSteps.filter(s=>s.time_of_day==='Evening').map(s=>`<button class="form-chip${kitFlowLinkedSteps.includes(s.id)?' selected':''}" onclick="toggleKitStep('${s.id}',this)">${s.name}</button>`).join('')}
+        </div>
+      </div>
+    </div>
+
+    <div class="form-field">
+      <div class="form-label">Opened Date</div>
+      <input class="form-input" type="date" value="${kitFlowData.opened_date}" oninput="kitFlowData.opened_date=this.value">
+    </div>`;
+}
+
+function setKitState(state) {
+  kitFlowData.state = state;
+  renderKitFlow();
+}
+
+function toggleKitBodyArea(area, btn) {
+  const idx = kitFlowData.body_areas.indexOf(area);
+  if(idx>-1) { kitFlowData.body_areas.splice(idx,1); btn.classList.remove('selected'); }
+  else { kitFlowData.body_areas.push(area); btn.classList.add('selected'); }
+}
+
+function toggleKitStep(stepId, btn) {
+  const idx = kitFlowLinkedSteps.indexOf(stepId);
+  if(idx>-1) { kitFlowLinkedSteps.splice(idx,1); btn.classList.remove('selected'); }
+  else { kitFlowLinkedSteps.push(stepId); btn.classList.add('selected'); }
+}
+
+async function saveKitItem() {
+  const btn = document.querySelector('.kit-save-btn');
+  btn.disabled=true; btn.textContent='Saving...';
+
+  // Create kit item
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/kit_items`, {
+    method:'POST',
+    headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`,'Content-Type':'application/json','Prefer':'return=representation'},
+    body: JSON.stringify({
+      product_id: kitFlowProductId,
+      state: kitFlowData.state,
+      container_size: kitFlowData.container_size||null,
+      container_unit: kitFlowData.container_unit,
+      current_amount: kitFlowData.current_amount||null,
+      body_areas: kitFlowData.body_areas.length ? kitFlowData.body_areas : null,
+      opened_date: kitFlowData.opened_date,
+      added_date: new Date().toISOString().split('T')[0]
+    })
+  });
+
+  if(!res.ok) { showToast('Error saving'); btn.disabled=false; btn.textContent='Add to Kit'; return; }
+  const [kitItem] = await res.json();
+
+  // Link routine steps
+  if(kitFlowLinkedSteps.length && kitItem) {
+    await apiPost('kit_item_steps', kitFlowLinkedSteps.map(sid=>({
+      kit_item_id: kitItem.id,
+      routine_task_id: sid
+    })));
+  }
+
+  showToast('✓ Added to My Kit');
+  closeKitFlow();
+  btn.disabled=false; btn.textContent='Add to Kit';
+
+  // Refresh kit instances shown in detail
+  loadKitInstances(kitFlowProductId);
+}
+
+async function loadKitInstances(productId) {
+  const items = await api('kit_items', `?product_id=eq.${productId}&order=created_at.desc`);
+  const container = document.getElementById(`kitInstancesFor-${productId}`);
+  if(!container || !items?.length) return;
+
+  container.innerHTML = items.map(item => {
+    const pct = item.container_size > 0 ? Math.round((item.current_amount/item.container_size)*100) : 100;
+    const stateClass = item.state==='Active'?'state-active':item.state==='Backup'?'state-backup':'state-passive';
+    const stateIcon = item.state==='Active'?'🟢':item.state==='Backup'?'📦':'💤';
+    return `<div class="kit-instance-card">
+      <div class="kit-instance-state ${stateClass}">${stateIcon} ${item.state}</div>
+      ${item.container_size ? `
+        <div class="kit-instance-amount">${item.current_amount||0} <span style="font-size:13px;color:var(--text3)">/ ${item.container_size} ${item.container_unit||'ml'}</span></div>
+        <div class="kit-amount-bar"><div class="kit-amount-fill" style="width:${pct}%"></div></div>
+      ` : ''}
+      <div class="kit-instance-info">
+        ${item.opened_date ? `Opened ${item.opened_date}` : ''}
+        ${item.body_areas?.length ? ` · ${item.body_areas.join(', ')}` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ============================================================
+// INLINE RATING + NOTES SAVE
+// ============================================================
+async function rateProduct(productId, rating) {
+  // Update stars visually
+  document.querySelectorAll(`#detailRatingInline-${productId} .detail-star-inline`).forEach((s,i) => {
+    s.classList.toggle('filled', i < rating);
+  });
+  const label = document.querySelector(`#detailRatingInline-${productId} + span`) ||
+    document.querySelector(`#detailRatingInline-${productId}`).nextSibling;
+
+  // Save to DB
+  await fetch(`${SUPABASE_URL}/rest/v1/products?id=eq.${productId}`, {
+    method:'PATCH',
+    headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`,'Content-Type':'application/json'},
+    body: JSON.stringify({rating})
+  });
+
+  // Update local
+  const p = allProducts.find(x=>x.id===productId);
+  if(p) p.rating = rating;
+  showToast(`★ ${rating}/10 saved`);
+}
+
+async function saveNotes(productId) {
+  const notes = document.getElementById(`detailNotes-${productId}`)?.value;
+  await fetch(`${SUPABASE_URL}/rest/v1/products?id=eq.${productId}`, {
+    method:'PATCH',
+    headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`,'Content-Type':'application/json'},
+    body: JSON.stringify({personal_notes: notes})
+  });
+  const p = allProducts.find(x=>x.id===productId);
+  if(p) p.personal_notes = notes;
+  showToast('Notes saved');
 }
 
 initHome();
