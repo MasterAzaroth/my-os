@@ -2883,12 +2883,10 @@ async function loadKitInstances(productId) {
 window._rate = function(productId, rating) { rateProduct(productId, rating); };
 
 async function rateProduct(productId, rating) {
-  // Update stars visually
-  document.querySelectorAll(`#detailRatingInline-${productId} .detail-star-inline`).forEach((s,i) => {
+  // Update stars visually — use all visible hero stars since there's only one detail open at a time
+  document.querySelectorAll('.detail-hero-star').forEach((s,i) => {
     s.classList.toggle('filled', i < rating);
   });
-  const label = document.querySelector(`#detailRatingInline-${productId} + span`) ||
-    document.querySelector(`#detailRatingInline-${productId}`).nextSibling;
 
   // Save to DB
   await fetch(`${SUPABASE_URL}/rest/v1/products?id=eq.${productId}`, {
@@ -2897,7 +2895,6 @@ async function rateProduct(productId, rating) {
     body: JSON.stringify({rating})
   });
 
-  // Update local
   const p = allProducts.find(x=>x.id===productId);
   if(p) p.rating = rating;
   showToast(`★ ${rating}/10 saved`);
