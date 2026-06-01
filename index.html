@@ -1271,6 +1271,8 @@ function collectStep() {
     formData.brand = document.getElementById('f_brand')?.value.trim();
     formData.container_size = parseFloat(document.getElementById('f_container_size')?.value)||null;
     if(!formData.container_unit) formData.container_unit = 'ml';
+    const manualBarcode = document.getElementById('f_barcode_manual')?.value.trim();
+    if(manualBarcode) formData._barcode = manualBarcode;
   }
   if(formStep === 1) {
     formData.subcategory = document.getElementById('f_subcat')?.value.trim();
@@ -1316,10 +1318,15 @@ function renderFormStep() {
   if(formStep === 0) {
     body.innerHTML = `
       <div class="form-field">
-        <div class="form-label" style="display:flex;align-items:center;justify-content:space-between">
-          <span>Product Name <span class="form-required">*</span></span>
-          <button onclick="openBarcodeScannerFromForm()" style="background:var(--bg2);border:0.5px solid var(--border2);color:var(--text3);font-size:11px;padding:4px 10px;border-radius:10px;cursor:pointer;font-family:var(--sans);display:flex;align-items:center;gap:5px">⌻ Scan barcode</button>
+        <div class="form-label">Barcode <span style="font-size:10px;color:var(--text3);text-transform:none;letter-spacing:0">(optional — scan or type)</span></div>
+        <div style="display:flex;gap:8px">
+          <input class="form-input" id="f_barcode_manual" type="number" placeholder="e.g. 4066447579673" value="${formData._barcode||''}" style="flex:1">
+          <button onclick="openBarcodeScannerFromForm()" style="background:var(--bg2);border:0.5px solid var(--border2);color:var(--text2);font-size:18px;width:46px;height:46px;border-radius:10px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center">📷</button>
         </div>
+        <div class="form-note">Saved so future scans of this product are recognized instantly</div>
+      </div>
+      <div class="form-field">
+        <div class="form-label">Product Name <span class="form-required">*</span></div>
         <input class="form-input" id="f_name" placeholder="e.g. Moisturizing Cream" value="${formData.name||''}">
       </div>
       <div class="form-field">
