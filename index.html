@@ -1316,7 +1316,10 @@ function renderFormStep() {
   if(formStep === 0) {
     body.innerHTML = `
       <div class="form-field">
-        <div class="form-label">Product Name <span class="form-required">*</span></div>
+        <div class="form-label" style="display:flex;align-items:center;justify-content:space-between">
+          <span>Product Name <span class="form-required">*</span></span>
+          <button onclick="openBarcodeScannerFromForm()" style="background:var(--bg2);border:0.5px solid var(--border2);color:var(--text3);font-size:11px;padding:4px 10px;border-radius:10px;cursor:pointer;font-family:var(--sans);display:flex;align-items:center;gap:5px">⌻ Scan barcode</button>
+        </div>
         <input class="form-input" id="f_name" placeholder="e.g. Moisturizing Cream" value="${formData.name||''}">
       </div>
       <div class="form-field">
@@ -2224,7 +2227,13 @@ let zxingReader = null;
 let barcodeScanning = false;
 let manualVisible = false;
 
-async function openBarcodeScanner() {
+async function openBarcodeScannerFromForm() {
+  // Close form temporarily, scan, then reopen with prefilled data
+  document.getElementById('formOverlay').classList.remove('open');
+  await openBarcodeScanner(true);
+}
+
+async function openBarcodeScanner(fromForm = false) {
   manualVisible = false;
   const overlay = document.getElementById('barcodeOverlay');
   overlay.style.display = 'flex';
@@ -2272,7 +2281,7 @@ async function openBarcodeScanner() {
         if(navigator.vibrate) navigator.vibrate([30,50,80]);
         await new Promise(r=>setTimeout(r,500));
         closeBarcodeScanner();
-        await lookupBarcode(barcode);
+        await lookupBarcode(barcode, fromForm);
         return;
       }
       // NotFoundException is normal — fires every frame until detected, ignore it
@@ -2334,10 +2343,13 @@ async function submitManualBarcode() {
   if(!val) { showToast('Enter a barcode number'); return; }
   if(!/^[0-9]{6,14}$/.test(val)) { showToast('Barcodes are 6-14 digits'); return; }
   closeBarcodeScanner();
-  await lookupBarcode(val);
+  await lookupBarcode(val, _scanFromForm);
 }
 
-async function lookupBarcode(barcode) {
+let _scanFromForm = false;
+
+async function lookupBarcode(barcode, fromForm = false) {
+  _scanFromForm = fromForm;
   showToast('🔍 Searching...');
 
   // Check local Supabase database first
@@ -2346,9 +2358,21 @@ async function lookupBarcode(barcode) {
     if(local && local.length) {
       const p = local[0];
       showBarcodeSuccess('Your Library', p.name);
-      // Open detail directly — already in library
-      await initLibrary();
-      setTimeout(() => openDetail(p.id), 300);
+      if(fromForm) {
+        // Product exists — ask if they want to open it or create new
+        setTimeout(async () => {
+          if(confirm(`"${p.name}" already exists in your library.\n\nOpen existing entry?`)) {
+            await initLibrary();
+            openDetail(p.id);
+          } else {
+            formData._barcode = barcode;
+            openProductForm();
+          }
+        }, 400);
+      } else {
+        await initLibrary();
+        setTimeout(() => openDetail(p.id), 300);
+      }
       return;
     }
   } catch(e) { console.warn('Local lookup failed:', e); }
@@ -2411,8 +2435,11 @@ async function lookupBarcode(barcode) {
   // Nothing found anywhere
   showToast(`⚠️ Not found in any database`);
   setTimeout(() => {
-    if(confirm(`Barcode ${barcode} not found.\n\nOpen blank form? The barcode will be saved so next time you scan this product it's recognized instantly.`)) {
-      formData = {};
+    const msg = fromForm
+      ? `Barcode ${barcode} not found in databases.\n\nFill in manually? It'll be saved for next time.`
+      : `Barcode ${barcode} not found.\n\nOpen blank form? The barcode will be saved so next time you scan this product it's recognized instantly.`;
+    if(confirm(msg)) {
+      if(!formData._prefilled) formData = {};
       formData._barcode = barcode;
       openProductForm();
     }
