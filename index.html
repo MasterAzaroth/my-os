@@ -2668,7 +2668,7 @@ let kitFlowLinkedSteps = [];
 
 async function openAddToKit(productId) {
   kitFlowProductId = productId;
-  kitFlowData = { state:'Active', container_size:null, container_unit:'ml', current_amount:null, body_areas:[], opened_date: new Date().toISOString().split('T')[0], price_paid:null, purchased_from:null, ml_per_piece:null, g_per_piece:null };
+  kitFlowData = { state:'Active', container_size:null, container_unit:'ml', current_amount:null, body_areas:[], opened_date: new Date().toISOString().split('T')[0], price_paid:null, purchased_from:null, piece_amount:null, piece_unit:'ml' };
   kitFlowLinkedSteps = [];
 
   // Load routine steps + prices for this product
@@ -2746,14 +2746,14 @@ function renderKitFlow() {
           ${['ml','g','pcs'].map(u=>`<button class="form-chip${kitFlowData.container_unit===u?' selected':''}" onclick="kitFlowData.container_unit='${u}';renderKitFlow()">${u}</button>`).join('')}
         </div>
       </div>
-      ${kitFlowData.container_unit==='pcs' ? `<div class="form-row-2" style="margin-top:8px">
-        <div>
-          <div class="form-label" style="font-size:10px">ml per piece (optional)</div>
-          <input class="form-input" type="number" placeholder="e.g. 25" value="${kitFlowData.ml_per_piece||''}" oninput="kitFlowData.ml_per_piece=parseFloat(this.value)" style="padding:9px 12px">
-        </div>
-        <div>
-          <div class="form-label" style="font-size:10px">g per piece (optional)</div>
-          <input class="form-input" type="number" placeholder="e.g. 20" value="${kitFlowData.g_per_piece||''}" oninput="kitFlowData.g_per_piece=parseFloat(this.value)" style="padding:9px 12px">
+      ${kitFlowData.container_unit==='pcs' ? `<div style="margin-top:8px">
+        <div class="form-label" style="font-size:10px;margin-bottom:6px">Amount per piece (optional)</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input class="form-input" type="number" placeholder="e.g. 25" value="${kitFlowData.piece_amount||''}" oninput="kitFlowData.piece_amount=parseFloat(this.value)" style="flex:1;padding:9px 12px">
+          <div class="form-chips-wrap">
+            <button class="form-chip${(kitFlowData.piece_unit||'ml')==='ml'?' selected':''}" onclick="kitFlowData.piece_unit='ml';renderKitFlow()">ml</button>
+            <button class="form-chip${(kitFlowData.piece_unit||'ml')==='g'?' selected':''}" onclick="kitFlowData.piece_unit='g';renderKitFlow()">g</button>
+          </div>
         </div>
       </div>` : ''}
     </div>
@@ -2843,8 +2843,8 @@ async function saveKitItem() {
       added_date: new Date().toISOString().split('T')[0],
       price_paid: kitFlowData.price_paid||null,
       purchased_from: kitFlowData.purchased_from||null,
-      ml_per_piece: kitFlowData.ml_per_piece||null,
-      g_per_piece: kitFlowData.g_per_piece||null
+      ml_per_piece: kitFlowData.piece_unit==='ml' ? kitFlowData.piece_amount||null : null,
+      g_per_piece: kitFlowData.piece_unit==='g' ? kitFlowData.piece_amount||null : null
     })
   });
 
