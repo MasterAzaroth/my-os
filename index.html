@@ -1960,8 +1960,9 @@ async function openDetail(productId) {
     ? `<img src="${p.cover_image_url}" alt="${p.name}">`
     : `<div class="detail-hero-img-placeholder">🧴</div>`;
 
+  const pid = p.id;
   const heroStars = Array.from({length:10},(_,i)=>
-    `<span class="detail-hero-star${p.rating&&i<Math.round(p.rating)?' filled':''}" data-pid="${p.id}" data-rating="${i+1}">★</span>`
+    `<span class="detail-hero-star${p.rating&&i<Math.round(p.rating)?' filled':''}" ontouchend="event.stopPropagation();window._rate('${p.id}',${i+1})" onclick="window._rate('${p.id}',${i+1})">★</span>`
   ).join('');
 
   document.getElementById('detailBody').innerHTML = `
@@ -1973,7 +1974,7 @@ async function openDetail(productId) {
         <div class="detail-hero-brand">${p.brand||''}</div>
         <div class="detail-hero-rating" id="detailRatingInline-${p.id}">
           ${heroStars}
-          <span style="font-size:11px;color:var(--text3);margin-left:4px">${p.rating ? p.rating+'/10' : 'Rate'}</span>
+
         </div>
       </div>
     </div>
@@ -2010,16 +2011,7 @@ async function openDetail(productId) {
   document.getElementById('detailOverlay').classList.add('open');
   loadKitInstances(productId);
 
-  // Attach star rating via event delegation (more reliable on iOS than inline onclick)
-  setTimeout(() => {
-    document.querySelectorAll('.detail-hero-star').forEach(star => {
-      star.addEventListener('click', function() {
-        const pid = this.dataset.pid;
-        const rating = parseInt(this.dataset.rating);
-        rateProduct(pid, rating);
-      });
-    });
-  }, 100);
+
 }
 
 function closeDetail() {
@@ -2888,6 +2880,8 @@ async function loadKitInstances(productId) {
 // ============================================================
 // INLINE RATING + NOTES SAVE
 // ============================================================
+window._rate = function(productId, rating) { rateProduct(productId, rating); };
+
 async function rateProduct(productId, rating) {
   // Update stars visually
   document.querySelectorAll(`#detailRatingInline-${productId} .detail-star-inline`).forEach((s,i) => {
