@@ -235,8 +235,12 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
 .lib-search-icon{font-size:16px;color:var(--text3)}
 .lib-search{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-size:14px;padding:10px 0;font-family:var(--sans)}
 .lib-search::placeholder{color:var(--text3)}
-.lib-lists{display:flex;gap:6px;padding:0 20px 10px;overflow-x:auto;flex-shrink:0}
+.lib-lists{display:flex;align-items:center;gap:6px;padding:0 14px 10px 20px;flex-shrink:0}
 .lib-lists::-webkit-scrollbar{display:none}
+.lib-lists-inner{display:flex;gap:6px;overflow-x:auto;flex:1;-webkit-overflow-scrolling:touch}
+.lib-lists-inner::-webkit-scrollbar{display:none}
+.lib-sort-pill{display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:16px;border:0.5px solid var(--border);background:transparent;cursor:pointer;flex-shrink:0;transition:all 0.2s;font-family:var(--sans)}
+.lib-sort-pill:active{background:var(--bg3)}
 .lib-list-btn{flex-shrink:0;display:flex;align-items:center;gap:5px;padding:5px 12px;border-radius:16px;border:0.5px solid var(--border);background:transparent;color:var(--text3);font-size:11px;cursor:pointer;transition:all 0.2s;font-family:var(--sans);white-space:nowrap}
 .lib-list-btn.active{background:var(--bg3);color:var(--text);border-color:var(--border2)}
 .lib-list-btn .list-icon{font-size:12px}
@@ -607,22 +611,23 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
       </div>
     </div>
 
-    <!-- List tabs -->
-    <div class="lib-lists" id="libLists"></div>
-
-    <!-- Filter row -->
-    <div class="lib-filter-row" id="libFilterRow"></div>
-
-    <!-- Sort + Compare toggle -->
-    <div class="lib-sort-row">
-      <span class="lib-sort-label">Sort</span>
-      <select class="lib-sort-select" id="libSort" onchange="filterLibrary()">
+    <!-- List tabs + sort pill -->
+    <div class="lib-lists">
+      <div class="lib-lists-inner" id="libLists"></div>
+      <button class="lib-sort-pill" id="libSortPill" onclick="toggleLibSortMenu()">
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 3h12M3 7h8M5 11h4" stroke="var(--text3)" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 1v12M7 1L4 4M7 1l3 3M7 13L4 10M7 13l3-3" stroke="var(--text3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <select class="lib-sort-select" id="libSort" onchange="filterLibrary()" style="display:none">
         <option value="name">Name</option>
         <option value="brand">Brand</option>
         <option value="rating">Rating</option>
         <option value="newest">Newest</option>
       </select>
     </div>
+
+    <!-- Filter row -->
+    <div class="lib-filter-row" id="libFilterRow"></div>
 
     <!-- Grid -->
     <div class="ptr-wrap" id="libPtrWrap">
@@ -912,6 +917,18 @@ function initScreen(screen) {
   }
 }
 
+
+// ── LIBRARY SORT PILL ────────────────────────────────────────────────────────
+function toggleLibSortMenu() {
+  const sel = document.getElementById('libSort');
+  if(!sel) return;
+  // On iOS, triggering click on a select opens the native picker
+  sel.focus();
+  sel.click();
+  // Also dispatch a touch event for iOS
+  sel.dispatchEvent(new MouseEvent('mousedown', {bubbles:true}));
+}
+// ─────────────────────────────────────────────────────────────────────────────
 
 // ── TEXT FORMATTER ───────────────────────────────────────────────────────────
 function formatDescription(text) {
@@ -2231,6 +2248,10 @@ function setCatFilter(cat) {
 }
 
 function filterLibrary() {
+  // Update pill highlight
+  const sortVal = document.getElementById('libSort')?.value || 'name';
+  const pill = document.getElementById('libSortPill');
+  if(pill) pill.style.borderColor = sortVal !== 'name' ? 'var(--accent2)' : 'var(--border)';
   const query = document.getElementById('libSearch').value.toLowerCase();
   const sort = document.getElementById('libSort').value;
 
