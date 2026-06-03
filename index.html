@@ -560,7 +560,7 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
     <div class="page-header">
       <div class="page-label">Self Care</div>
       <div class="page-title">My Kit</div>
-      <div class="page-subtitle" id="kitSubtitle">Loading...</div>
+      <div class="page-subtitle" id="kitSubtitle"><span id="kitSubtitleNum" style="transition:opacity 0.3s ease"></span><span id="kitSubtitleText"></span></div>
     </div>
     <div style="display:flex;align-items:center;padding:8px 14px 8px 20px;gap:6px;flex-shrink:0">
       <div id="kitFilter" style="display:flex;gap:6px;overflow-x:auto;flex:1;-webkit-overflow-scrolling:touch"></div>
@@ -1308,7 +1308,8 @@ const KIT_FILTER_STATES = ['All','Active','Backup','Passive'];
 async function initKit() {
   if(!kitItems.length) {
   }
-  document.getElementById('kitSubtitle').textContent = '';
+  const numEl = document.getElementById('kitSubtitleNum');
+  if(numEl) { numEl.style.opacity = '0'; }
   try {
     const [items, prods] = await Promise.all([
       api('kit_items', '?order=created_at.desc'),
@@ -1326,7 +1327,18 @@ async function initKit() {
     if(active) parts.push(active+' active');
     if(backup) parts.push(backup+' backup');
     if(passive) parts.push(passive+' passive');
-    document.getElementById('kitSubtitle').textContent = parts.length ? parts.join(' · ') : 'Empty';
+    const _num = document.getElementById('kitSubtitleNum');
+    const _txt = document.getElementById('kitSubtitleText');
+    if(_num && _txt) {
+      if(parts.length) {
+        // Split e.g. "4 active · 1 backup" — number first, rest after
+        const full = parts.join(' · ');
+        const match = full.match(/^(\d+)(.*)/);
+        if(match) { _num.textContent = match[1]; _txt.textContent = match[2]; }
+        else { _num.textContent = full; _txt.textContent = ''; }
+      } else { _num.textContent = ''; _txt.textContent = 'Empty'; }
+      _num.style.opacity = '1';
+    }
 
     document.getElementById('kitFilter').innerHTML = KIT_FILTER_STATES.map(s =>
       `<button class="filter-btn${kitItemFilter===s?' active':''}" onclick="setKitFilter('${s}')">${s}</button>`
@@ -1336,7 +1348,8 @@ async function initKit() {
   } catch(e) {
     console.error('initKit error:', e.message);
     document.getElementById('kitGrid').innerHTML = '<div class="empty-state"><div class="empty-glyph">∅</div><div class="empty-title">Your kit is empty</div><div class="empty-sub">Open a product in the Library and tap "Add to My Kit"</div></div>';
-    document.getElementById('kitSubtitle').textContent = '';
+    const numEl = document.getElementById('kitSubtitleNum');
+  if(numEl) { numEl.style.opacity = '0'; }
   }
 }
 
@@ -1541,7 +1554,18 @@ async function deleteKitItem() {
     if(active) parts.push(active+' active');
     if(backup) parts.push(backup+' backup');
     if(passive) parts.push(passive+' passive');
-    document.getElementById('kitSubtitle').textContent = parts.length ? parts.join(' · ') : 'Empty';
+    const _num = document.getElementById('kitSubtitleNum');
+    const _txt = document.getElementById('kitSubtitleText');
+    if(_num && _txt) {
+      if(parts.length) {
+        // Split e.g. "4 active · 1 backup" — number first, rest after
+        const full = parts.join(' · ');
+        const match = full.match(/^(\d+)(.*)/);
+        if(match) { _num.textContent = match[1]; _txt.textContent = match[2]; }
+        else { _num.textContent = full; _txt.textContent = ''; }
+      } else { _num.textContent = ''; _txt.textContent = 'Empty'; }
+      _num.style.opacity = '1';
+    }
   } else {
     showToast('Error removing');
   }
