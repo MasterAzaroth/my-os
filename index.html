@@ -2792,7 +2792,7 @@ function renderKitFlow() {
 
     <div class="form-field">
       <div class="form-label">Opened Date</div>
-      <input class="form-input" type="date" value="${kitFlowData.opened_date}" oninput="kitFlowData.opened_date=this.value">
+      <input class="form-input" type="date" value="${kitFlowData.opened_date}" oninput="kitFlowData.opened_date=this.value" style="width:100%;max-width:100%;box-sizing:border-box">
     </div>`;
 
   // Step picker popup lives outside the kit flow body so it doesn't break the template
@@ -2800,8 +2800,8 @@ function renderKitFlow() {
   if(!popup) {
     popup = document.createElement('div');
     popup.id = 'stepPickerPopup';
-    popup.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:600;align-items:flex-end;backdrop-filter:blur(4px);overflow:hidden';
-    popup.innerHTML = `<div style="background:var(--bg);border-radius:20px 20px 0 0;width:100%;height:70vh;max-height:70vh;display:flex;flex-direction:column;overflow:hidden;padding-bottom:env(safe-area-inset-bottom,16px)">
+    popup.style.cssText = 'display:none;position:fixed;top:0;left:0;right:0;bottom:0;width:100%;background:rgba(0,0,0,0.6);z-index:600;align-items:flex-end;backdrop-filter:blur(4px);overflow:hidden;box-sizing:border-box';
+    popup.innerHTML = `<div style="background:var(--bg);border-radius:20px 20px 0 0;width:100%;max-width:100%;height:70vh;max-height:70vh;display:flex;flex-direction:column;overflow:hidden;padding-bottom:env(safe-area-inset-bottom,16px);box-sizing:border-box">
       <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:0.5px solid var(--border)">
         <div style="font-size:14px;font-weight:500;color:var(--text)" id="stepPickerTitle"></div>
         <button onclick="closeStepPicker()" style="background:var(--bg3);border:0.5px solid var(--border2);color:var(--text3);width:28px;height:28px;border-radius:50%;font-size:11px;cursor:pointer;font-family:var(--sans)">✕</button>
@@ -3039,7 +3039,14 @@ function openStepPicker(session) {
   list.style.webkitOverflowScrolling = 'touch';
 
   title.textContent = session === 'Morning' ? '🌅 Morning Steps' : '🌙 Evening Steps';
-  const steps = kitFlowSteps.filter(s => s.time_of_day === session);
+  // Deduplicate by name
+  const seen = new Set();
+  const steps = kitFlowSteps.filter(s => {
+    if(s.time_of_day !== session) return false;
+    if(seen.has(s.name)) return false;
+    seen.add(s.name);
+    return true;
+  });
 
   list.innerHTML = steps.map(s => `
     <button class="form-chip${kitFlowLinkedSteps.includes(s.id)?' selected':''}"
