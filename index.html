@@ -393,8 +393,8 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
 /* PULL TO REFRESH */
 .ptr-wrap{position:relative;flex:1;overflow:visible;display:flex;flex-direction:column;min-height:0}
 .ptr-indicator{position:absolute;top:-44px;left:0;right:0;height:44px;display:flex;align-items:center;justify-content:center;z-index:10}
-.ptr-spinner{width:22px;height:22px;border:1.5px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.65s linear infinite;animation-play-state:running;opacity:0}
-.ptr-spinner.visible{opacity:1;transform:translateY(0px) scale(1);transition:opacity 0.25s ease,transform 0.35s cubic-bezier(0.34,1.56,0.64,1)}
+.ptr-spinner{opacity:0;display:flex;align-items:center;justify-content:center}
+.ptr-spinner-ring{width:22px;height:22px;border:1.5px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.65s linear infinite;flex-shrink:0}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* COMPARE */
@@ -577,7 +577,7 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
       </select>
     </div>
     <div class="ptr-wrap" id="kitPtrWrap">
-      <div class="ptr-indicator"><div class="ptr-spinner" id="kitSpinner"></div></div>
+      <div class="ptr-indicator"><div class="ptr-spinner" id="kitSpinner"><div class="ptr-spinner-ring"></div></div></div>
       <div class="scroll" id="kitScroll">
         <div id="kitGrid">
         <div id="kitGrid"></div>
@@ -627,7 +627,7 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
 
     <!-- Grid -->
     <div class="ptr-wrap" id="libPtrWrap">
-      <div class="ptr-indicator"><div class="ptr-spinner" id="libSpinner"></div></div>
+      <div class="ptr-indicator"><div class="ptr-spinner" id="libSpinner"><div class="ptr-spinner-ring"></div></div></div>
       <div class="scroll" id="libScroll">
         <div class="lib-grid" id="libGrid">
           <div style="grid-column:span 2" class="loading"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div>
@@ -2470,7 +2470,6 @@ function setupPTR(wrapperId, scrollId, spinnerId, refreshFn) {
     spinner.parentElement.style.transform = `translateY(${eased}px)`;
     spinner.style.transition = 'none';
     spinner.style.opacity = String(Math.min(eased / 44, 1));
-    spinner.style.transform = `scale(${0.7 + Math.min(eased / 44, 1) * 0.3})`;
     if(dy > TRIGGER_PX && !triggered) {
       triggered = true;
       if(navigator.vibrate) navigator.vibrate(10);
@@ -2486,16 +2485,16 @@ function setupPTR(wrapperId, scrollId, spinnerId, refreshFn) {
       scroll.style.transform = 'translateY(0)';
       indicator.style.transition = SNAP;
       indicator.style.transform = 'translateY(0)';
-      spinner.style.transition = 'opacity 0.2s ease, transform 0.3s cubic-bezier(0.34,1.56,0.64,1)';
+      spinner.style.transition = 'opacity 0.2s ease';
       spinner.style.opacity = '1';
-      spinner.style.transform = 'scale(1)';
       refreshing = true;
       refreshFn().finally(() => {
         setTimeout(() => {
           spinner.style.transition = 'opacity 0.25s ease';
           spinner.style.opacity = '0';
           setTimeout(() => {
-            spinner.style.cssText = '';
+            spinner.style.opacity = '';
+            spinner.style.transition = '';
             indicator.style.cssText = '';
             refreshing = false;
           }, 260);
@@ -2509,7 +2508,7 @@ function setupPTR(wrapperId, scrollId, spinnerId, refreshFn) {
       indicator.style.transform = 'translateY(0)';
       spinner.style.transition = 'opacity 0.15s ease';
       spinner.style.opacity = '0';
-      setTimeout(() => { spinner.style.cssText = ''; indicator.style.cssText = ''; }, 420);
+      setTimeout(() => { spinner.style.opacity = ''; spinner.style.transition = ''; indicator.style.cssText = ''; }, 420);
     }
     pulling = false;
     triggered = false;
