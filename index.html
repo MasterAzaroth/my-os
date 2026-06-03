@@ -2766,19 +2766,28 @@ function renderKitPurchaseQuestion() {
     </div>`;
 }
 
+function fadeSwapKitBody(renderFn) {
+  const body = document.getElementById('kitFlowBody');
+  body.style.transition = 'opacity 0.18s ease';
+  body.style.opacity = '0';
+  setTimeout(() => {
+    renderFn();
+    body.style.opacity = '1';
+  }, 180);
+}
+
 function selectPurchaseSource(idx) {
   const pr = kitFlowPrices[idx];
-  // Prefill from price source
   kitFlowData.container_size = pr.size_amount || null;
   kitFlowData.container_unit = pr.size_unit || 'ml';
   kitFlowData.current_amount = pr.size_amount || null;
   kitFlowData.price_paid = pr.price || null;
   kitFlowData.purchased_from = pr.source_name || null;
-  renderKitFlow();
+  fadeSwapKitBody(renderKitFlow);
 }
 
 function skipPurchaseSource() {
-  renderKitFlow();
+  fadeSwapKitBody(renderKitFlow);
 }
 
 function closeKitFlow() {
