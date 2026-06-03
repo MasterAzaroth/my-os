@@ -2466,7 +2466,8 @@ function setupPTR(wrapperId, scrollId, spinnerId, refreshFn) {
     // Slide content down — spinner at top:-44px comes into view naturally
     scroll.style.transition = 'none';
     scroll.style.transform = `translateY(${eased}px)`;
-    // Fade spinner in as content slides down
+    spinner.parentElement.style.transition = 'none';
+    spinner.parentElement.style.transform = `translateY(${eased}px)`;
     spinner.style.transition = 'none';
     spinner.style.opacity = String(Math.min(eased / 44, 1));
     spinner.style.transform = `scale(${0.7 + Math.min(eased / 44, 1) * 0.3})`;
