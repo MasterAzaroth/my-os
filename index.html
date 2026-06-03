@@ -51,7 +51,7 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
 .nav-icon{font-size:20px;line-height:1}
 .nav-label{font-size:9px;letter-spacing:0.08em;text-transform:uppercase;font-weight:500}
 
-.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;overflow-x:hidden}
 .scroll::-webkit-scrollbar{display:none}
 
 .page-header{padding:20px 20px 16px;border-bottom:0.5px solid var(--border);flex-shrink:0}
@@ -391,7 +391,7 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
 .form-note{font-size:11px;color:var(--text3);margin-top:4px;line-height:1.5}
 
 /* PULL TO REFRESH */
-.ptr-wrap{position:relative;flex:1;overflow:hidden;display:flex;flex-direction:column}
+.ptr-wrap{position:relative;flex:1;overflow:visible;display:flex;flex-direction:column;min-height:0}
 .ptr-indicator{position:absolute;top:-44px;left:0;right:0;height:44px;display:flex;align-items:center;justify-content:center;z-index:10}
 .ptr-spinner{width:20px;height:20px;border:1.5px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.65s linear infinite;opacity:0;transform:scale(0.7);transition:opacity 0.25s ease,transform 0.25s cubic-bezier(0.34,1.56,0.64,1)}
 .ptr-spinner.visible{opacity:1;transform:scale(1)}
@@ -1337,36 +1337,35 @@ function renderKit() {
   const filtered = kitItemFilter==='All' ? kitItems : kitItems.filter(i=>i.state===kitItemFilter);
   const grid = document.getElementById('kitGrid');
   if(!filtered.length) {
+    grid.className = '';
     grid.innerHTML = `<div class="empty-state"><div class="empty-glyph">∅</div><div class="empty-title">${kitItemFilter==='All'?'Your kit is empty':'No '+kitItemFilter.toLowerCase()+' items'}</div><div class="empty-sub">${kitItemFilter==='All'?'Open a product in the Library and tap "Add to My Kit"':''}</div></div>`;
     return;
   }
+  grid.className = 'kit-grid-wrap';
   grid.innerHTML = filtered.map(item => {
     const p = item._product;
     const pct = item.container_size > 0 && item.current_amount != null
       ? Math.round((item.current_amount / item.container_size) * 100) : null;
-    const stateClass = item.state==='Active'?'kit-state-active':item.state==='Backup'?'kit-state-backup':'kit-state-passive';
     const stateIcon = item.state==='Active'?'🟢':item.state==='Backup'?'📦':'💤';
-    const amountHtml = pct !== null ? `
-      <div class="kit-amount-wrap">
-        <div class="kit-amount-track"><div class="kit-amount-fill" style="width:${pct}%"></div></div>
-        <div class="kit-amount-label">${item.current_amount}${item.container_unit||'ml'} remaining · ${pct}%</div>
-      </div>` : '';
-    return `<div class="kit-item-card" onclick="openDetail('${item.product_id}')">
-      <div class="kit-item-thumb">
-        ${p.cover_image_url||p.image_url ? `<img src="${p.cover_image_url||p.image_url}" alt="${p.name||''}">` : '<div class="kit-item-thumb-placeholder">🧴</div>'}
+    const imgHtml = p.cover_image_url||p.image_url
+      ? `<img src="${p.cover_image_url||p.image_url}" alt="${p.name||''}">`
+      : '<div class="kit-item-img-placeholder">🧴</div>';
+    const barHtml = pct !== null
+      ? `<div class="kit-amount-bar"><div class="kit-amount-bar-fill" style="width:${pct}%"></div></div>` : '';
+    return `<div class="kit-item-card" onclick="openKitItemEdit('${item.id}')">
+      <div class="kit-item-img">
+        ${imgHtml}
+        <div class="kit-item-state-dot">${stateIcon}</div>
+        ${barHtml}
       </div>
-      <div class="kit-item-info">
+      <div class="kit-item-body">
         <div class="kit-item-name">${p.name||'Unknown'}</div>
-        <div class="kit-item-brand">${p.brand||''}</div>
-        <div class="kit-item-meta">
-          <span class="kit-state-badge ${stateClass}">${stateIcon} ${item.state}</span>
-          ${item.opened_date ? `<span style="font-size:10px;color:var(--text3)">opened ${formatRelativeDate(item.opened_date)}</span>` : ''}
-        </div>
-        ${amountHtml}
+        ${pct !== null ? `<div class="kit-item-sub">${pct}%</div>` : ''}
       </div>
     </div>`;
   }).join('');
 }
+
 
 // ── KIT ITEM EDIT ────────────────────────────────────────────────────────────
 let kitEditItem = null;
@@ -2423,7 +2422,7 @@ function setupPTR(wrapperId, scrollId, spinnerId, refreshFn) {
   scroll.addEventListener('touchmove', e => {
     if(!pulling) return;
     const dy = e.touches[0].clientY - startY;
-    if(dy > 55 && !triggered) {
+    if(dy > 40 && !triggered) {
       triggered = true;
       spinner.classList.add('visible');
       // Haptic if available
