@@ -691,7 +691,7 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
         <div id="stepPickerTitle" style="font-family:var(--serif);font-size:20px;color:var(--text)"></div>
         <button onclick="closeStepPicker()" class="form-close">✕</button>
       </div>
-      <div class="kit-flow-body" id="stepPickerList" style="display:flex;flex-wrap:wrap;gap:8px;align-content:flex-start;padding:16px 20px 20px"></div>
+      <div class="kit-flow-body" id="stepPickerList" style="padding:16px 20px 20px"></div>
     </div>
   </div>
 
@@ -3048,11 +3048,12 @@ function openStepPicker(session) {
     return true;
   });
 
-  list.innerHTML = steps.map(s => `
+  list.innerHTML = `<div style="display:flex;flex-wrap:wrap;gap:8px;align-content:flex-start">` +
+    steps.map(s => `
     <button class="form-chip${kitFlowLinkedSteps.includes(s.id)?' selected':''}"
       onclick="toggleKitStep('${s.id}', this)" style="padding:8px 14px;font-size:12px">
       ${s.name}
-    </button>`).join('');
+    </button>`).join('') + `</div>`;
 
   overlay.classList.add('open');
 }
