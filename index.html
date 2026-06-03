@@ -2768,7 +2768,7 @@ function renderKitFlow() {
         value="${kitFlowData.container_size ? (kitFlowData.current_amount!==null?kitFlowData.current_amount:kitFlowData.container_size) : 50}"
         ${!kitFlowData.container_size ? 'disabled' : ''}
         style="${!kitFlowData.container_size ? 'opacity:0.3' : ''}"
-        oninput="kitFlowData.current_amount=parseFloat(this.value);document.querySelector('.amount-big').textContent=this.value;const p=Math.round(this.value/(${kitFlowData.container_size||100})*100);document.querySelector('.amount-fill-vis').style.width=p+'%';document.querySelector('.amount-label').textContent=p+'% remaining'">
+        oninput="kitFlowData.current_amount=parseFloat(this.value);document.querySelector('.amount-big').textContent=this.value;const p=Math.round(parseFloat(this.value)/parseFloat(this.max)*100);document.querySelector('.amount-fill-vis').style.width=p+'%';document.querySelector('.amount-label').textContent=p+'% remaining'">
     </div>
 
     <div class="form-field">
