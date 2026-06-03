@@ -1515,9 +1515,14 @@ function renderFormStep() {
 }
 
 function selectCategory(cat) {
+  // Save any typed values before re-rendering
+  const name = document.getElementById('f_name')?.value.trim();
+  const brand = document.getElementById('f_brand')?.value.trim();
+  const barcode = document.getElementById('f_barcode_manual')?.value.trim();
+  if(name) formData.name = name;
+  if(brand) formData.brand = brand;
+  if(barcode) formData._barcode = barcode;
   formData.category = cat;
-  if(cat !== '🪥 Self Care') formData.body_areas = [];
-  // Re-render step to show/hide body area
   renderFormStep();
 }
 
@@ -1577,23 +1582,7 @@ function renderPriceEntries() {
         <div class="form-label">URL</div>
         <input class="form-input" placeholder="https://..." value="${p.url||''}" oninput="formPrices[${i}].url=this.value" style="padding:9px 12px">
       </div>
-      <div class="form-label" style="margin-bottom:6px">Size of this listing</div>
-      <div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">
-        <input class="form-input" type="number" placeholder="e.g. 200" value="${p.size_amount||''}" oninput="formPrices[${i}].size_amount=parseFloat(this.value);updatePriceSizeUnit(${i})" style="padding:9px 12px;flex:1">
-        <div class="form-chips-wrap">
-          ${['ml','g','pcs'].map(u=>`<button class="form-chip${(p.size_unit||'ml')===u?' selected':''}" onclick="setPriceSizeUnit(${i},'${u}')">${u}</button>`).join('')}
-        </div>
-      </div>
-      ${(p.size_unit==='pcs') ? `<div class="form-row-2">
-        <div>
-          <div class="form-label" style="font-size:10px">ml per piece (optional)</div>
-          <input class="form-input" type="number" placeholder="e.g. 25" value="${p.ml_per_piece||''}" oninput="formPrices[${i}].ml_per_piece=parseFloat(this.value)" style="padding:9px 12px">
-        </div>
-        <div>
-          <div class="form-label" style="font-size:10px">g per piece (optional)</div>
-          <input class="form-input" type="number" placeholder="e.g. 20" value="${p.g_per_piece||''}" oninput="formPrices[${i}].g_per_piece=parseFloat(this.value)" style="padding:9px 12px">
-        </div>
-      </div>` : ''}
+
     </div>`).join('');
 }
 
@@ -1918,18 +1907,25 @@ async function openDetail(productId) {
 
   // Prices
   const priceHtml = productPrices[productId].length
-    ? productPrices[productId].map(pr => `
-        <div class="detail-price-row">
+    ? productPrices[productId].map(pr => {
+        const packAmt = pr.pack_amount||1;
+        const sizePerItem = pr.size_amount||0;
+        const totalSize = packAmt * sizePerItem;
+        const unit = pr.size_unit||'ml';
+        const pricePerUnit = totalSize > 0 && pr.price ? (pr.price/totalSize).toFixed(2) : null;
+        const totalStr = packAmt > 1 ? `${packAmt} × ${sizePerItem}${unit} = ${totalSize}${unit}` : sizePerItem ? `${sizePerItem}${unit}` : '';
+        return `<div class="detail-price-row">
           <div>
             <div class="detail-price-source">${pr.source_name||'Source'}</div>
-            ${pr.size_amount ? `<div style="font-size:11px;color:var(--text3)">${pr.size_amount}${pr.size_unit||'ml'}${pr.size_unit==='pcs'&&pr.ml_per_piece?` · ${pr.ml_per_piece}ml/pc`:''}</div>` : ''}
+            ${totalStr ? `<div style="font-size:11px;color:var(--text3)">${totalStr}</div>` : ''}
             ${pr.url ? `<a class="detail-price-link" href="${pr.url}" target="_blank">View →</a>` : ''}
           </div>
-          <div>
+          <div style="text-align:right">
             <div class="detail-price-val">${pr.currency||'€'}${Number(pr.price).toFixed(2)}</div>
-            ${pr.size_amount && pr.price ? `<div style="font-size:10px;color:var(--text3);text-align:right">€${(pr.price/pr.size_amount).toFixed(2)}/${pr.size_unit||'ml'}</div>` : ''}
+            ${pricePerUnit ? `<div style="font-size:10px;color:var(--text3)">€${pricePerUnit}/${unit}</div>` : ''}
           </div>
-        </div>`).join('')
+        </div>`;
+      }).join('')
     : `<div style="font-size:13px;color:var(--text3);font-style:italic">No prices added yet</div>`;
 
   // Fragrance section
@@ -2760,15 +2756,19 @@ function renderKitFlow() {
     <div class="form-field">
       <div class="form-label">How much is left?</div>
       <div class="amount-display">
-        <span class="amount-big">${kitFlowData.current_amount||0}</span>
-        <span class="amount-total"> / ${kitFlowData.container_size||0} ${kitFlowData.container_unit}</span>
+        <span class="amount-big">${kitFlowData.container_size ? (kitFlowData.current_amount||kitFlowData.container_size) : '—'}</span>
+        <span class="amount-total"> / ${kitFlowData.container_size||'?'} ${kitFlowData.container_unit}</span>
       </div>
-      <div class="amount-visual" id="amountVisual">
-        <div class="amount-fill-vis" style="width:${pct}%"></div>
-        <div class="amount-label">${pct}% remaining</div>
+      <div class="amount-visual" id="amountVisual" style="${!kitFlowData.container_size ? 'opacity:0.3' : ''}">
+        <div class="amount-fill-vis" style="width:${kitFlowData.container_size ? pct : 50}%"></div>
+        <div class="amount-label">${kitFlowData.container_size ? pct+'% remaining' : 'Enter size first'}</div>
       </div>
-      <input type="range" class="form-slider" id="kitAmountSlider" min="0" max="${kitFlowData.container_size||200}" value="${kitFlowData.current_amount!==null?kitFlowData.current_amount:kitFlowData.container_size||200}"
-        oninput="kitFlowData.current_amount=parseFloat(this.value);document.querySelector('.amount-big').textContent=this.value;const p=Math.round(this.value/(${kitFlowData.container_size||200})*100);document.querySelector('.amount-fill-vis').style.width=p+'%';document.querySelector('.amount-label').textContent=p+'% remaining'">
+      <input type="range" class="form-slider" id="kitAmountSlider"
+        min="0" max="${kitFlowData.container_size||100}"
+        value="${kitFlowData.container_size ? (kitFlowData.current_amount!==null?kitFlowData.current_amount:kitFlowData.container_size) : 50}"
+        ${!kitFlowData.container_size ? 'disabled' : ''}
+        style="${!kitFlowData.container_size ? 'opacity:0.3' : ''}"
+        oninput="kitFlowData.current_amount=parseFloat(this.value);document.querySelector('.amount-big').textContent=this.value;const p=Math.round(this.value/(${kitFlowData.container_size||100})*100);document.querySelector('.amount-fill-vis').style.width=p+'%';document.querySelector('.amount-label').textContent=p+'% remaining'">
     </div>
 
     <div class="form-field">
@@ -2979,19 +2979,42 @@ function setKitUnit(unit) {
 }
 
 function updateSliderMax() {
+  // Read current typed value directly from input
+  const input = document.getElementById('kitContainerSize');
+  const size = parseFloat(input?.value) || 0;
+  kitFlowData.container_size = size;
+
   const slider = document.getElementById('kitAmountSlider');
-  const size = kitFlowData.container_size || 200;
+  const big = document.querySelector('.amount-big');
+  const fill = document.querySelector('.amount-fill-vis');
+  const label = document.querySelector('.amount-label');
+  const total = document.querySelector('.amount-total');
+
   if(slider) {
-    slider.max = size;
-    if(!kitFlowData.current_amount || kitFlowData.current_amount > size) {
+    if(size > 0) {
+      slider.disabled = false;
+      slider.style.opacity = '1';
+      slider.max = size;
       slider.value = size;
       kitFlowData.current_amount = size;
-      const big = document.querySelector('.amount-big');
-      const fill = document.querySelector('.amount-fill-vis');
-      const label = document.querySelector('.amount-label');
+      const pct = 100;
       if(big) big.textContent = size;
       if(fill) fill.style.width = '100%';
       if(label) label.textContent = '100% remaining';
+      if(total) total.textContent = ' / ' + size + ' ' + kitFlowData.container_unit;
+      const visual = document.getElementById('amountVisual');
+      if(visual) visual.style.opacity = '1';
+    } else {
+      slider.disabled = true;
+      slider.style.opacity = '0.3';
+      slider.max = 100;
+      slider.value = 50;
+      if(big) big.textContent = '—';
+      if(total) total.textContent = ' / ? ' + kitFlowData.container_unit;
+      if(fill) fill.style.width = '50%';
+      if(label) label.textContent = 'Enter size first';
+      const visual = document.getElementById('amountVisual');
+      if(visual) visual.style.opacity = '0.3';
     }
   }
 }
