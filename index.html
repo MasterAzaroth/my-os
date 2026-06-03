@@ -562,12 +562,11 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
       <div class="page-title">My Kit</div>
       <div class="page-subtitle" id="kitSubtitle">Loading...</div>
     </div>
-    <div class="kit-filter" id="kitFilter"></div>
-    <div class="lib-sort-row" style="padding:0 20px 10px">
-      <span class="lib-sort-label">Sort</span>
-      <select class="lib-sort-select" id="kitSort" onchange="renderKit()">
-        <option value="date_desc">Date added ↓</option>
-        <option value="date_asc">Date added ↑</option>
+    <div style="display:flex;align-items:center;padding:8px 14px 8px 20px;gap:6px;flex-shrink:0">
+      <div id="kitFilter" style="display:flex;gap:6px;overflow-x:auto;flex:1;-webkit-overflow-scrolling:touch"></div>
+      <select class="lib-sort-select" id="kitSort" onchange="renderKit()" style="flex-shrink:0;margin-left:4px">
+        <option value="date_desc">Date ↓</option>
+        <option value="date_asc">Date ↑</option>
         <option value="name_asc">Name ↑</option>
         <option value="name_desc">Name ↓</option>
         <option value="price_asc">Price ↑</option>
