@@ -417,10 +417,10 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
 /* KIT FLOW OVERLAY */
 .kit-flow-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:400;display:none;align-items:flex-end;backdrop-filter:blur(6px)}
 .kit-flow-overlay.open{display:flex}
-.kit-flow-sheet{background:var(--bg);border-radius:24px 24px 0 0;width:100%;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;padding-bottom:env(safe-area-inset-bottom,20px)}
+.kit-flow-sheet{background:var(--bg);border-radius:24px 24px 0 0;width:100%;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;padding-bottom:env(safe-area-inset-bottom,20px);position:relative}
 .kit-flow-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px}
 .kit-flow-title{font-family:var(--serif);font-size:20px;color:var(--text)}
-.kit-flow-body{flex:1;overflow-y:auto;padding:0 20px 16px}
+.kit-flow-body{flex:1;overflow-y:auto;padding:0 20px 16px;-webkit-overflow-scrolling:touch;overflow-x:hidden}
 .kit-flow-body::-webkit-scrollbar{display:none}
 .kit-flow-footer{padding:12px 20px;border-top:0.5px solid var(--border)}
 .kit-save-btn{width:100%;padding:14px;border-radius:14px;border:none;background:var(--accent);color:var(--bg);font-size:14px;font-weight:500;cursor:pointer;font-family:var(--sans)}
@@ -2808,7 +2808,7 @@ function renderKitFlow() {
       </div>
       <div style="overflow-y:scroll;padding:14px 20px;display:flex;flex-wrap:wrap;gap:8px;align-content:flex-start;min-height:200px" id="stepPickerList"></div>
     </div>`;
-    document.body.appendChild(popup);
+    (document.getElementById('kitFlowOverlay') || document.body).appendChild(popup);
   }
 }
 
