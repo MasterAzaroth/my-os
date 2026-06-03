@@ -1288,7 +1288,7 @@ async function initKit() {
   try {
     const [items, prods] = await Promise.all([
       api('kit_items', '?order=created_at.desc'),
-      api('products', '?limit=1')
+      api('products', '?order=name.asc')
     ]);
     kitItems = Array.isArray(items) ? items : [];
     const prodMap = {};
@@ -1311,7 +1311,6 @@ async function initKit() {
     renderKit();
   } catch(e) {
     console.error('initKit error:', e.message);
-    showToast('Kit error: ' + e.message);
     document.getElementById('kitGrid').innerHTML = '<div class="empty-state"><div class="empty-glyph">∅</div><div class="empty-title">Your kit is empty</div><div class="empty-sub">Open a product in the Library and tap "Add to My Kit"</div></div>';
     document.getElementById('kitSubtitle').textContent = '';
   }
@@ -1343,7 +1342,7 @@ function renderKit() {
       </div>` : '';
     return `<div class="kit-item-card" onclick="openDetail('${item.product_id}')">
       <div class="kit-item-thumb">
-        ${p.image_url ? `<img src="${p.image_url}" alt="${p.name||''}">` : '<div class="kit-item-thumb-placeholder">🧴</div>'}
+        ${p.cover_image_url||p.image_url ? `<img src="${p.cover_image_url||p.image_url}" alt="${p.name||''}">` : '<div class="kit-item-thumb-placeholder">🧴</div>'}
       </div>
       <div class="kit-item-info">
         <div class="kit-item-name">${p.name||'Unknown'}</div>
@@ -2292,7 +2291,7 @@ function setupPTR(wrapperId, scrollId, spinnerId, refreshFn) {
 // ============================================================
 async function loadHomeAlerts() {
   const today = new Date();
-  const data = await api('products', '?status=eq.Owned&select=id,name,brand,stock,container_size,container_unit,estimated_days_per_ml,first_use_date,opened_date');
+  const data = await api('products', '?status=eq.Owned&order=name.asc');
   const alerts = [];
 
   (data||[]).forEach(p => {
