@@ -433,6 +433,11 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
 .amount-fill-vis{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--accent2),var(--accent));border-radius:12px;transition:width 0.1s}
 .amount-label{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--text);font-weight:500;pointer-events:none}
 
+/* KIT SESSION BUTTONS */
+.kit-session-btn{flex:1;padding:10px 14px;border-radius:12px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text3);font-size:13px;cursor:pointer;font-family:var(--sans);transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:6px}
+.kit-session-btn.kit-session-active{border-color:var(--accent2);color:var(--accent)}
+.kit-step-count{background:var(--accent);color:var(--bg);font-size:10px;font-weight:600;width:18px;height:18px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center}
+
 /* TOAST */
 .toast{position:fixed;bottom:calc(80px + var(--safe-bot));left:50%;transform:translateX(-50%) translateY(20px);background:var(--bg3);border:0.5px solid var(--border2);border-radius:20px;padding:10px 20px;font-size:13px;color:var(--text);opacity:0;transition:all 0.3s;pointer-events:none;white-space:nowrap;z-index:100}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
@@ -1441,12 +1446,13 @@ function renderFormStep() {
   else if(formStep === 1) {
     const subcats = SUBCATEGORIES[formData.category] || [];
     body.innerHTML = `
-      ${subcats.length ? `<div class="form-field">
+      <div class="form-field">
         <div class="form-label">Subcategory</div>
-        <div class="form-chips-wrap">
-          ${subcats.map(s => `<button class="form-chip${formData.subcategory===s?' selected':''}" onclick="selectChip('subcategory','${s}',this,'subcatChips')" id="subcatChips">${s}</button>`).join('')}
+        <div class="form-chips-wrap" id="subcatChips">
+          ${getAllSubcats(formData.category).map(s => `<button class="form-chip${formData.subcategory===s?' selected':''}" onclick="selectSubcat('${s}')">${s}</button>`).join('')}
+          <button class="form-chip" onclick="addCustomSubcat()" style="border-style:dashed">+ Custom</button>
         </div>
-      </div>` : ''}
+      </div>
       <div class="form-field">
         <div class="form-label">Description</div>
         <textarea class="form-textarea" id="f_desc" placeholder="What is this product? What does it do?">${formData.description||''}</textarea>
@@ -1580,6 +1586,22 @@ function renderPriceEntries() {
         <div>
           <div class="form-label">Price (€)</div>
           <input class="form-input" type="number" placeholder="0.00" value="${p.price||''}" oninput="formPrices[${i}].price=parseFloat(this.value)" style="padding:9px 12px">
+        </div>
+      </div>
+      <div class="form-row-2" style="margin-bottom:8px">
+        <div>
+          <div class="form-label">Amount in pack</div>
+          <input class="form-input" type="number" placeholder="e.g. 2" value="${p.pack_amount||1}" oninput="formPrices[${i}].pack_amount=parseInt(this.value)||1" style="padding:9px 12px">
+          <div class="form-note">How many items in this listing</div>
+        </div>
+        <div>
+          <div class="form-label">Size per item</div>
+          <div style="display:flex;gap:4px">
+            <input class="form-input" type="number" placeholder="200" value="${p.size_amount||''}" oninput="formPrices[${i}].size_amount=parseFloat(this.value)" style="padding:9px 12px;flex:1">
+            <div class="form-chips-wrap" style="flex-shrink:0">
+              ${['ml','g','pcs'].map(u=>`<button class="form-chip${(p.size_unit||'ml')===u?' selected':''}" onclick="setPriceSizeUnit(${i},'${u}')">${u}</button>`).join('')}
+            </div>
+          </div>
         </div>
       </div>
       <div class="form-field" style="margin-bottom:8px">
@@ -1746,7 +1768,7 @@ async function submitProduct() {
 
     // Insert prices
     if(formPrices.length && newProduct) {
-      const priceRows = formPrices.filter(p=>p.price||p.source_name).map(p=>({...p,product_id:newProduct.id,currency:'EUR'}));
+      const priceRows = formPrices.filter(p=>p.price||p.source_name).map(p=>({source_name:p.source_name||null,price:p.price||null,url:p.url||null,size_amount:p.size_amount||null,size_unit:p.size_unit||'ml',pack_amount:p.pack_amount||1,ml_per_piece:p.ml_per_piece||null,g_per_piece:p.g_per_piece||null,product_id:newProduct.id,currency:'EUR'}));
       if(priceRows.length) await apiPost('product_prices',priceRows);
     }
 
@@ -2741,9 +2763,9 @@ function renderKitFlow() {
     <div class="form-field">
       <div class="form-label">Container Size</div>
       <div style="display:flex;gap:8px;align-items:center">
-        <input class="form-input" type="number" placeholder="e.g. 200" value="${kitFlowData.container_size||''}" oninput="kitFlowData.container_size=parseFloat(this.value)||0;kitFlowData.current_amount=Math.min(kitFlowData.current_amount||0,kitFlowData.container_size);renderKitFlow()" style="flex:1">
+        <input class="form-input" type="number" placeholder="e.g. 200" id="kitContainerSize" value="${kitFlowData.container_size||''}" oninput="kitFlowData.container_size=parseFloat(this.value)||0;updateSliderMax()" style="flex:1">
         <div class="form-chips-wrap">
-          ${['ml','g','pcs'].map(u=>`<button class="form-chip${kitFlowData.container_unit===u?' selected':''}" onclick="kitFlowData.container_unit='${u}';renderKitFlow()">${u}</button>`).join('')}
+          ${['ml','g','pcs'].map(u=>`<button class="form-chip${kitFlowData.container_unit===u?' selected':''}" onclick="setKitUnit('${u}')">${u}</button>`).join('')}
         </div>
       </div>
       ${kitFlowData.container_unit==='pcs' ? `<div style="margin-top:8px">
@@ -2776,7 +2798,7 @@ function renderKitFlow() {
         <div class="amount-fill-vis" style="width:${pct}%"></div>
         <div class="amount-label">${pct}% remaining</div>
       </div>
-      <input type="range" class="form-slider" min="0" max="${kitFlowData.container_size||200}" value="${kitFlowData.current_amount||kitFlowData.container_size||200}"
+      <input type="range" class="form-slider" id="kitAmountSlider" min="0" max="${kitFlowData.container_size||200}" value="${kitFlowData.current_amount!==null?kitFlowData.current_amount:kitFlowData.container_size||200}"
         oninput="kitFlowData.current_amount=parseFloat(this.value);document.querySelector('.amount-big').textContent=this.value;const p=Math.round(this.value/(${kitFlowData.container_size||200})*100);document.querySelector('.amount-fill-vis').style.width=p+'%';document.querySelector('.amount-label').textContent=p+'% remaining'">
     </div>
 
@@ -2789,15 +2811,13 @@ function renderKitFlow() {
 
     <div class="form-field">
       <div class="form-label">Link to Routine Steps <span style="font-size:10px;color:var(--text3);text-transform:none;letter-spacing:0">(optional)</span></div>
-      <div style="margin-bottom:8px">
-        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:5px">Morning</div>
-        <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px">
-          ${kitFlowSteps.filter(s=>s.time_of_day==='Morning').map(s=>`<button class="form-chip${kitFlowLinkedSteps.includes(s.id)?' selected':''}" onclick="toggleKitStep('${s.id}',this)">${s.name}</button>`).join('')}
-        </div>
-        <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:5px">Evening</div>
-        <div style="display:flex;flex-wrap:wrap;gap:5px">
-          ${kitFlowSteps.filter(s=>s.time_of_day==='Evening').map(s=>`<button class="form-chip${kitFlowLinkedSteps.includes(s.id)?' selected':''}" onclick="toggleKitStep('${s.id}',this)">${s.name}</button>`).join('')}
-        </div>
+      <div style="display:flex;gap:8px">
+        <button class="kit-session-btn${kitFlowLinkedSteps.some(id=>kitFlowSteps.find(s=>s.id===id&&s.time_of_day==='Morning'))?' kit-session-active':''}" onclick="openStepPicker('Morning')">
+          🌅 Morning ${kitFlowLinkedSteps.filter(id=>kitFlowSteps.find(s=>s.id===id&&s.time_of_day==='Morning')).length > 0 ? `<span class="kit-step-count">${kitFlowLinkedSteps.filter(id=>kitFlowSteps.find(s=>s.id===id&&s.time_of_day==='Morning')).length}</span>` : ''}
+        </button>
+        <button class="kit-session-btn${kitFlowLinkedSteps.some(id=>kitFlowSteps.find(s=>s.id===id&&s.time_of_day==='Evening'))?' kit-session-active':''}" onclick="openStepPicker('Evening')">
+          🌙 Evening ${kitFlowLinkedSteps.filter(id=>kitFlowSteps.find(s=>s.id===id&&s.time_of_day==='Evening')).length > 0 ? `<span class="kit-step-count">${kitFlowLinkedSteps.filter(id=>kitFlowSteps.find(s=>s.id===id&&s.time_of_day==='Evening')).length}</span>` : ''}
+        </button>
       </div>
     </div>
 
@@ -2805,6 +2825,22 @@ function renderKitFlow() {
       <div class="form-label">Opened Date</div>
       <input class="form-input" type="date" value="${kitFlowData.opened_date}" oninput="kitFlowData.opened_date=this.value">
     </div>`;
+
+  // Step picker popup lives outside the kit flow body so it doesn't break the template
+  let popup = document.getElementById('stepPickerPopup');
+  if(!popup) {
+    popup = document.createElement('div');
+    popup.id = 'stepPickerPopup';
+    popup.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:500;align-items:flex-end;backdrop-filter:blur(4px)';
+    popup.innerHTML = `<div style="background:var(--bg);border-radius:20px 20px 0 0;width:100%;max-height:70vh;display:flex;flex-direction:column;padding-bottom:env(safe-area-inset-bottom,16px)">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:0.5px solid var(--border)">
+        <div style="font-size:14px;font-weight:500;color:var(--text)" id="stepPickerTitle"></div>
+        <button onclick="closeStepPicker()" style="background:var(--bg3);border:0.5px solid var(--border2);color:var(--text3);width:28px;height:28px;border-radius:50%;font-size:11px;cursor:pointer;font-family:var(--sans)">✕</button>
+      </div>
+      <div style="overflow-y:auto;padding:14px 20px;display:flex;flex-wrap:wrap;gap:8px" id="stepPickerList"></div>
+    </div>`;
+    document.body.appendChild(popup);
+  }
 }
 
 function setKitState(state) {
@@ -2923,6 +2959,104 @@ async function saveNotes(productId) {
   const p = allProducts.find(x=>x.id===productId);
   if(p) p.personal_notes = notes;
   showToast('Notes saved');
+}
+
+// ============================================================
+// CUSTOM SUBCATEGORIES
+// ============================================================
+let customSubcats = JSON.parse(localStorage.getItem('customSubcats')||'{}');
+
+function getAllSubcats(category) {
+  const defaults = SUBCATEGORIES[category] || [];
+  const custom = customSubcats[category] || [];
+  return [...new Set([...defaults, ...custom])];
+}
+
+function selectSubcat(s) {
+  formData.subcategory = s;
+  document.querySelectorAll('#subcatChips .form-chip').forEach(b => {
+    b.classList.toggle('selected', b.textContent === s);
+  });
+}
+
+function addCustomSubcat() {
+  const val = prompt('Enter custom subcategory name:');
+  if(!val || !val.trim()) return;
+  const cat = formData.category;
+  if(!customSubcats[cat]) customSubcats[cat] = [];
+  if(!customSubcats[cat].includes(val.trim())) {
+    customSubcats[cat].push(val.trim());
+    localStorage.setItem('customSubcats', JSON.stringify(customSubcats));
+  }
+  formData.subcategory = val.trim();
+  // Re-render just the subcategory chips
+  const wrap = document.getElementById('subcatChips');
+  if(wrap) {
+    wrap.innerHTML = getAllSubcats(cat).map(s =>
+      `<button class="form-chip${formData.subcategory===s?' selected':''}" onclick="selectSubcat('${s}')">${s}</button>`
+    ).join('') + `<button class="form-chip" onclick="addCustomSubcat()" style="border-style:dashed">+ Custom</button>`;
+  }
+}
+
+// ============================================================
+// KIT FLOW HELPERS — fix keyboard + slider
+// ============================================================
+function setKitUnit(unit) {
+  kitFlowData.container_unit = unit;
+  // Preserve typed value before re-render
+  const val = document.getElementById('kitContainerSize')?.value;
+  if(val) kitFlowData.container_size = parseFloat(val)||0;
+  renderKitFlow();
+}
+
+function updateSliderMax() {
+  const slider = document.getElementById('kitAmountSlider');
+  const size = kitFlowData.container_size || 200;
+  if(slider) {
+    slider.max = size;
+    if(!kitFlowData.current_amount || kitFlowData.current_amount > size) {
+      slider.value = size;
+      kitFlowData.current_amount = size;
+      const big = document.querySelector('.amount-big');
+      const fill = document.querySelector('.amount-fill-vis');
+      const label = document.querySelector('.amount-label');
+      if(big) big.textContent = size;
+      if(fill) fill.style.width = '100%';
+      if(label) label.textContent = '100% remaining';
+    }
+  }
+}
+
+// ============================================================
+// STEP PICKER
+// ============================================================
+let stepPickerSession = 'Morning';
+
+function openStepPicker(session) {
+  stepPickerSession = session;
+  const popup = document.getElementById('stepPickerPopup');
+  const title = document.getElementById('stepPickerTitle');
+  const list = document.getElementById('stepPickerList');
+  if(!popup || !title || !list) return;
+
+  title.textContent = session === 'Morning' ? '🌅 Morning Steps' : '🌙 Evening Steps';
+  const steps = kitFlowSteps.filter(s => s.time_of_day === session);
+
+  list.innerHTML = steps.map(s => `
+    <button class="form-chip${kitFlowLinkedSteps.includes(s.id)?' selected':''}"
+      onclick="toggleKitStep('${s.id}', this)" style="padding:8px 14px;font-size:12px">
+      ${s.name}
+    </button>`).join('');
+
+  popup.style.display = 'flex';
+}
+
+function closeStepPicker() {
+  document.getElementById('stepPickerPopup').style.display = 'none';
+  // Re-render kit flow to update button counts
+  const size = document.getElementById('kitContainerSize')?.value;
+  if(size) kitFlowData.container_size = parseFloat(size)||0;
+  renderKitFlow();
 }
 
 initHome();
