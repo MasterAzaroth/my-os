@@ -198,6 +198,25 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
 .stock-low{background:var(--yellow)}
 .stock-empty{background:var(--red)}
 
+/* KIT ITEM CARDS */
+.kit-item-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:16px;padding:14px;display:flex;gap:12px;cursor:pointer;transition:all 0.2s;margin-bottom:10px}
+.kit-item-card:active{background:var(--bg3);transform:scale(0.99)}
+.kit-item-thumb{width:64px;height:64px;border-radius:10px;background:var(--bg3);overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.kit-item-thumb img{width:100%;height:100%;object-fit:contain}
+.kit-item-thumb-placeholder{font-size:26px;color:var(--text3)}
+.kit-item-info{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:3px}
+.kit-item-name{font-size:14px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kit-item-brand{font-size:11px;color:var(--text3)}
+.kit-item-meta{display:flex;align-items:center;gap:6px;margin-top:4px}
+.kit-state-badge{font-size:10px;font-weight:500;padding:2px 8px;border-radius:8px}
+.kit-state-active{background:rgba(74,124,89,0.15);color:#4a7c59}
+.kit-state-backup{background:rgba(74,74,138,0.15);color:#6a6aaa}
+.kit-state-passive{background:rgba(80,80,80,0.15);color:var(--text3)}
+.kit-amount-wrap{margin-top:6px}
+.kit-amount-track{height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.kit-amount-fill{height:100%;border-radius:2px;background:var(--accent);transition:width 0.4s}
+.kit-amount-label{font-size:10px;color:var(--text3);margin-top:3px}
+
 /* EMPTY / LOADING */
 .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 40px;text-align:center;flex:1}
 .empty-glyph{font-family:var(--serif);font-size:48px;color:var(--text3);margin-bottom:16px;font-style:italic}
@@ -541,14 +560,14 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
     <div class="page-header">
       <div class="page-label">Self Care</div>
       <div class="page-title">My Kit</div>
-      <div class="page-subtitle" id="kitSubtitle">Loading...</div>
+      <div class="page-subtitle" id="kitSubtitle"></div>
     </div>
     <div class="kit-filter" id="kitFilter"></div>
     <div class="ptr-wrap" id="kitPtrWrap">
       <div class="ptr-indicator"><div class="ptr-spinner" id="kitSpinner"></div></div>
       <div class="scroll" id="kitScroll">
-        <div class="kit-grid" id="kitGrid">
-          <div style="grid-column:span 2" class="loading"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div>
+        <div id="kitGrid" style="padding:12px 16px 24px">
+          <div class="loading"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div>
         </div>
       </div>
     </div>
@@ -855,7 +874,7 @@ function initScreen(screen) {
   if(screen==='kit') {
     initKit().then(() => {
       setupPTR('kitPtrWrap','kitScroll','kitSpinner', async()=>{
-        products=[];
+        kitItems=[];
         await initKit();
       });
     });
@@ -1259,37 +1278,94 @@ async function saveRoutine() {
 }
 
 // KIT
+let kitItems = [];
+let kitItemFilter = 'All';
+const KIT_FILTER_STATES = ['All','Active','Backup','Passive'];
+
 async function initKit() {
-  const data=await api('products','?status=eq.Owned&order=category.asc,name.asc');
-  products=data||[];
-  const cats=['All',...new Set(products.map(p=>p.category).filter(Boolean))];
-  document.getElementById('kitFilter').innerHTML=cats.map(c=>`<button class="filter-btn${c===kitFilter?' active':''}" onclick="setKitFilter('${c}')">${c}</button>`).join('');
-  document.getElementById('kitSubtitle').textContent=`${products.length} products owned`;
-  renderKit();
+  document.getElementById('kitGrid').innerHTML = '<div class="loading"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div>';
+  try {
+    // Fetch kit_items + join product data
+    const [items, prods] = await Promise.all([
+      api('kit_items', '?order=state.asc,added_date.desc'),
+      api('products', '?select=id,name,brand,image_url,category')
+    ]);
+    kitItems = items || [];
+    const prodMap = {};
+    (prods||[]).forEach(p => prodMap[p.id] = p);
+    kitItems.forEach(item => { item._product = prodMap[item.product_id] || {}; });
+
+    // Build subtitle
+    const active = kitItems.filter(i=>i.state==='Active').length;
+    const backup = kitItems.filter(i=>i.state==='Backup').length;
+    const passive = kitItems.filter(i=>i.state==='Passive').length;
+    const parts = [];
+    if(active) parts.push(`${active} active`);
+    if(backup) parts.push(`${backup} backup`);
+    if(passive) parts.push(`${passive} passive`);
+    document.getElementById('kitSubtitle').textContent = parts.length ? parts.join(' · ') : 'Empty';
+
+    // Filter tabs
+    document.getElementById('kitFilter').innerHTML = KIT_FILTER_STATES.map(s =>
+      `<button class="filter-btn${kitItemFilter===s?' active':''}" onclick="setKitFilter('${s}')">${s}</button>`
+    ).join('');
+
+    renderKit();
+  } catch(e) {
+    document.getElementById('kitGrid').innerHTML = '<div class="empty-state"><div class="empty-glyph">∅</div><div class="empty-title">Could not load kit</div><div class="empty-sub">Pull down to retry</div></div>';
+  }
 }
 
-function setKitFilter(cat) {
-  kitFilter=cat;
-  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.toggle('active',b.textContent===cat));
+function setKitFilter(state) {
+  kitItemFilter = state;
+  document.querySelectorAll('#kitFilter .filter-btn').forEach(b => b.classList.toggle('active', b.textContent===state));
   renderKit();
 }
 
 function renderKit() {
-  const filtered=kitFilter==='All'?products:products.filter(p=>p.category===kitFilter);
-  if(!filtered.length){
-    document.getElementById('kitGrid').innerHTML=`<div style="grid-column:span 2"><div class="empty-state"><div class="empty-glyph">∅</div><div class="empty-title">Your kit is empty</div><div class="empty-sub">Head to the Library and add products to My Kit to see them here</div></div></div>`;
+  const filtered = kitItemFilter==='All' ? kitItems : kitItems.filter(i=>i.state===kitItemFilter);
+  const grid = document.getElementById('kitGrid');
+  if(!filtered.length) {
+    grid.innerHTML = `<div class="empty-state"><div class="empty-glyph">∅</div><div class="empty-title">${kitItemFilter==='All'?'Your kit is empty':'No '+kitItemFilter.toLowerCase()+' items'}</div><div class="empty-sub">${kitItemFilter==='All'?'Open a product in the Library and tap "Add to My Kit"':''}</div></div>`;
     return;
   }
-  document.getElementById('kitGrid').innerHTML=filtered.map(p=>`
-    <div class="product-card">
-      <div class="product-img">${p.image_url?`<img src="${p.image_url}" alt="${p.name}">`:`<div class="product-img-placeholder">🧴</div>`}</div>
-      <div class="product-info">
-        <div class="product-name">${p.name}</div>
-        <div class="product-brand">${p.brand||''}</div>
-        ${p.price?`<div class="product-price">€${Number(p.price).toFixed(2)}</div>`:''}
-        <div style="margin-top:4px"><span class="stock-dot stock-${(p.stock||'Full').toLowerCase()}"></span><span style="font-size:10px;color:var(--text3)">${p.stock||'Full'}</span></div>
+  grid.innerHTML = filtered.map(item => {
+    const p = item._product;
+    const pct = item.container_size > 0 && item.current_amount != null
+      ? Math.round((item.current_amount / item.container_size) * 100)
+      : null;
+    const stateClass = item.state==='Active'?'kit-state-active':item.state==='Backup'?'kit-state-backup':'kit-state-passive';
+    const stateIcon = item.state==='Active'?'🟢':item.state==='Backup'?'📦':'💤';
+    const amountHtml = pct !== null ? `
+      <div class="kit-amount-wrap">
+        <div class="kit-amount-track"><div class="kit-amount-fill" style="width:${pct}%"></div></div>
+        <div class="kit-amount-label">${item.current_amount}${item.container_unit||'ml'} remaining · ${pct}%</div>
+      </div>` : '';
+    return `<div class="kit-item-card" onclick="openDetail('${item.product_id}')">
+      <div class="kit-item-thumb">
+        ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}">` : `<div class="kit-item-thumb-placeholder">🧴</div>`}
       </div>
-    </div>`).join('');
+      <div class="kit-item-info">
+        <div class="kit-item-name">${p.name||'Unknown'}</div>
+        <div class="kit-item-brand">${p.brand||''}</div>
+        <div class="kit-item-meta">
+          <span class="kit-state-badge ${stateClass}">${stateIcon} ${item.state}</span>
+          ${item.opened_date ? `<span style="font-size:10px;color:var(--text3)">opened ${formatRelativeDate(item.opened_date)}</span>` : ''}
+        </div>
+        ${amountHtml}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function formatRelativeDate(dateStr) {
+  const d = new Date(dateStr);
+  const diff = Math.floor((new Date() - d) / 86400000);
+  if(diff === 0) return 'today';
+  if(diff === 1) return 'yesterday';
+  if(diff < 30) return diff+'d ago';
+  if(diff < 365) return Math.floor(diff/30)+'mo ago';
+  return Math.floor(diff/365)+'y ago';
 }
 
 // SAVE STATE
