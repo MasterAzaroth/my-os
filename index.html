@@ -1337,8 +1337,6 @@ function collectStep() {
   if(formStep === 0) {
     formData.name = document.getElementById('f_name')?.value.trim();
     formData.brand = document.getElementById('f_brand')?.value.trim();
-    formData.container_size = parseFloat(document.getElementById('f_container_size')?.value)||null;
-    if(!formData.container_unit) formData.container_unit = 'ml';
     const manualBarcode = document.getElementById('f_barcode_manual')?.value.trim();
     if(manualBarcode) formData._barcode = manualBarcode;
   }
@@ -1402,12 +1400,7 @@ function renderFormStep() {
           ${CATEGORIES.map(c => `<button class="form-chip${formData.category===c?' selected':''}" onclick="selectCategory('${c}')">${c}</button>`).join('')}
         </div>
       </div>
-      ${formData.category==='🪥 Self Care' ? `<div class="form-field" id="bodyAreaField">
-        <div class="form-label">Body Area <span style="font-size:10px;color:var(--text3);text-transform:none;letter-spacing:0">(select all that apply)</span></div>
-        <div class="form-chips-wrap">
-          ${BODY_AREAS.map(a => `<button class="form-chip${(formData.body_areas||[]).includes(a)?' selected':''}" onclick="toggleMultiChip('body_areas','${a}',this)">${a}</button>`).join('')}
-        </div>
-      </div>` : ''}
+
       ${formData._barcode ? `<div class="form-field">
         <div class="form-label">Barcode</div>
         <div style="display:flex;align-items:center;gap:8px">
@@ -1415,32 +1408,8 @@ function renderFormStep() {
           <span style="font-size:11px;color:var(--text3)">saved for future scans</span>
         </div>
       </div>` : ''}
-      <div class="form-field" id="statusStockRow">
-        <div class="form-row-2">
-          <div>
-            <div class="form-label">Status</div>
-            <div class="form-chips-wrap">
-              ${STATUSES.map(s => `<button class="form-chip${formData.status===s?' selected':''}" onclick="selectChip('status','${s}',this,'statusChips')">${s}</button>`).join('')}
-            </div>
-          </div>
-          <div>
-            <div class="form-label">Stock</div>
-            <div class="form-chips-wrap" id="stockChips">
-              ${STOCKS.map(s => `<button class="form-chip${formData.stock===s?' selected':''}" onclick="selectChip('stock','${s}',this,'stockChips')">${s}</button>`).join('')}
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="form-field">
-        <div class="form-label">Container Size</div>
-        <div class="form-row-2">
-          <input class="form-input" id="f_container_size" type="number" placeholder="e.g. 50" value="${formData.container_size||''}">
-          <div class="form-chips-wrap" style="align-items:center">
-            ${['ml','g','oz'].map(u => `<button class="form-chip${(formData.container_unit||'ml')===u?' selected':''}" onclick="selectChip('container_unit','${u}',this,'unitChips')">${u}</button>`).join('')}
-          </div>
-        </div>
-        <div class="form-note">Used to calculate how long a product lasts</div>
-      </div>`;
+
+`;
   }
 
   else if(formStep === 1) {
