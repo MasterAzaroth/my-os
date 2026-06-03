@@ -391,10 +391,10 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
 .form-note{font-size:11px;color:var(--text3);margin-top:4px;line-height:1.5}
 
 /* PULL TO REFRESH */
-.ptr-wrap{position:relative;flex:1;overflow:hidden;display:flex;flex-direction:column}
+.ptr-wrap{position:relative;flex:1;overflow:visible;display:flex;flex-direction:column;min-height:0}
 .ptr-indicator{position:absolute;top:-44px;left:0;right:0;height:44px;display:flex;align-items:center;justify-content:center;z-index:10}
-.ptr-spinner{width:20px;height:20px;border:1.5px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.65s linear infinite;opacity:0;transform:scale(0.7);transition:opacity 0.25s ease,transform 0.25s cubic-bezier(0.34,1.56,0.64,1)}
-.ptr-spinner.visible{opacity:1;transform:scale(1)}
+.ptr-spinner{width:22px;height:22px;border:1.5px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.65s linear infinite;opacity:0;transform:translateY(-8px) scale(0.8);transition:opacity 0.2s ease,transform 0.2s ease}
+.ptr-spinner.visible{opacity:1;transform:translateY(0) scale(1)}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* COMPARE */
@@ -1307,7 +1307,10 @@ let kitItemFilter = 'All';
 const KIT_FILTER_STATES = ['All','Active','Backup','Passive'];
 
 async function initKit() {
-  document.getElementById('kitGrid').innerHTML = '<div class="loading"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div>';
+  // Only show loading dots on first ever load, not on pull-to-refresh
+  if(!kitItems.length) {
+    document.getElementById('kitGrid').innerHTML = '<div class="loading"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div>';
+  }
   document.getElementById('kitSubtitle').textContent = '';
   try {
     const [items, prods] = await Promise.all([
@@ -2435,13 +2438,14 @@ document.getElementById('detailOverlay').addEventListener('click', function(e) {
 const ptrAttached = new Set();
 
 function setupPTR(wrapperId, scrollId, spinnerId, refreshFn) {
-  if(ptrAttached.has(scrollId)) return; // only attach once
+  if(ptrAttached.has(scrollId)) return;
   ptrAttached.add(scrollId);
 
   const scroll = document.getElementById(scrollId);
   const spinner = document.getElementById(spinnerId);
   if(!scroll || !spinner) return;
 
+  const indicator = spinner.parentElement; // .ptr-indicator
   let startY = 0, pulling = false, triggered = false, refreshing = false;
 
   scroll.addEventListener('touchstart', e => {
@@ -2449,32 +2453,53 @@ function setupPTR(wrapperId, scrollId, spinnerId, refreshFn) {
       startY = e.touches[0].clientY;
       pulling = true;
       triggered = false;
+      // Disable transition while dragging for instant follow
+      spinner.style.transition = 'none';
     }
   }, {passive:true});
 
   scroll.addEventListener('touchmove', e => {
     if(!pulling) return;
-    const dy = e.touches[0].clientY - startY;
+    const dy = Math.max(0, e.touches[0].clientY - startY);
+    if(dy > 10) {
+      // Fade and translate spinner in as user pulls — rubber band feel (sqrt curve)
+      const progress = Math.min(dy / 80, 1);
+      const translateY = Math.min(dy * 0.45, 36); // follows finger, max 36px down
+      spinner.style.opacity = progress;
+      spinner.style.transform = `translateY(${translateY}px) scale(${0.7 + progress * 0.3})`;
+    }
     if(dy > 55 && !triggered) {
       triggered = true;
-      spinner.classList.add('visible');
-      // Haptic if available
       if(navigator.vibrate) navigator.vibrate(10);
     }
   }, {passive:true});
 
-  scroll.addEventListener('touchend', async () => {
+  scroll.addEventListener('touchend', () => {
     if(triggered && !refreshing) {
+      // Re-enable transition and lock spinner in place
+      spinner.style.transition = 'opacity 0.2s ease, transform 0.3s cubic-bezier(0.34,1.56,0.64,1)';
+      spinner.style.opacity = '1';
+      spinner.style.transform = 'translateY(20px) scale(1)';
       refreshing = true;
-      refreshFn().then(() => {
+      refreshFn().finally(() => {
         setTimeout(() => {
-          spinner.classList.remove('visible');
-          refreshing = false;
-        }, 300);
-      }).catch(() => {
-        spinner.classList.remove('visible');
-        refreshing = false;
+          spinner.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+          spinner.style.opacity = '0';
+          spinner.style.transform = 'translateY(-8px) scale(0.8)';
+          setTimeout(() => {
+            spinner.style.transition = '';
+            spinner.style.opacity = '';
+            spinner.style.transform = '';
+            refreshing = false;
+          }, 200);
+        }, 400);
       });
+    } else if(!triggered) {
+      // Snapped back without trigger — fade out
+      spinner.style.transition = 'opacity 0.15s ease, transform 0.15s ease';
+      spinner.style.opacity = '0';
+      spinner.style.transform = 'translateY(-8px) scale(0.8)';
+      setTimeout(() => { spinner.style.transition = ''; spinner.style.opacity = ''; spinner.style.transform = ''; }, 150);
     }
     pulling = false;
     triggered = false;
