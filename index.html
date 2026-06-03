@@ -3048,10 +3048,16 @@ function openStepPicker(session) {
     </button>`).join('');
 
   popup.style.display = 'flex';
+  // Prevent kit flow body from scrolling while picker is open
+  const kitBody = document.getElementById('kitFlowBody');
+  if(kitBody) kitBody.style.overflow = 'hidden';
 }
 
 function closeStepPicker() {
   document.getElementById('stepPickerPopup').style.display = 'none';
+  // Re-enable kit flow body scroll
+  const kitBody = document.getElementById('kitFlowBody');
+  if(kitBody) kitBody.style.overflow = '';
   // Re-render kit flow to update button counts
   const size = document.getElementById('kitContainerSize')?.value;
   if(size) kitFlowData.container_size = parseFloat(size)||0;
