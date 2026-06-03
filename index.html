@@ -932,17 +932,28 @@ function setSession(s) {
   document.getElementById('amBtn').classList.toggle('active',s==='Morning');
   document.getElementById('pmBtn').classList.toggle('active',s==='Evening');
   stepState={};stepProducts={};
-  const content = document.getElementById('stepList');
+  const stepList = document.getElementById('stepList');
   const pastView = document.getElementById('pastView');
   const doneOverlay = document.getElementById('doneOverlay');
-  const targets = [content, pastView, doneOverlay].filter(Boolean);
-  targets.forEach(el => { el.style.transition='opacity 0.5s ease'; el.style.opacity='0'; });
-  setTimeout(() => {
-    if(isToday) { deactivateSave(); loadSteps(); }
-    else if(isPast) { loadPastLog(); }
-    else { loadFuturePreview(); }
-    targets.forEach(el => { el.style.opacity='1'; });
-  }, 500);
+  const targets = [stepList, pastView, doneOverlay].filter(Boolean);
+  // Fade out
+  targets.forEach(el => { el.style.transition='opacity 0.4s ease'; el.style.opacity='0'; });
+  setTimeout(async () => {
+    // Load content while invisible
+    if(isToday) { deactivateSave(); await loadSteps(); }
+    else if(isPast) { await loadPastLog(); }
+    else { await loadFuturePreview(); }
+    // Fade in after render
+    const newTargets = [
+      document.getElementById('stepList'),
+      document.getElementById('pastView'),
+      document.getElementById('doneOverlay')
+    ].filter(Boolean);
+    newTargets.forEach(el => { el.style.transition='opacity 0.4s ease'; el.style.opacity='0'; });
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      newTargets.forEach(el => { el.style.opacity='1'; });
+    }));
+  }, 400);
 }
 
 async function loadSteps() {
