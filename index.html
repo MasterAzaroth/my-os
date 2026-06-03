@@ -684,6 +684,17 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
     </div>
   </div>
 
+  <!-- STEP PICKER OVERLAY — identical structure to kit-flow-overlay -->
+  <div class="kit-flow-overlay" id="stepPickerOverlay">
+    <div class="kit-flow-sheet">
+      <div class="kit-flow-header">
+        <div id="stepPickerTitle" style="font-family:var(--serif);font-size:20px;color:var(--text)"></div>
+        <button onclick="closeStepPicker()" class="form-close">✕</button>
+      </div>
+      <div class="kit-flow-body" id="stepPickerList" style="display:flex;flex-wrap:wrap;gap:8px;align-content:flex-start;padding:14px 20px"></div>
+    </div>
+  </div>
+
   <!-- PLACEHOLDER TAB 5 -->
   <div class="screen" id="screen-explore">
     <div class="empty-state" style="flex:1;display:flex">
@@ -3047,17 +3058,11 @@ function openStepPicker(session) {
       ${s.name}
     </button>`).join('');
 
-  popup.style.display = 'flex';
-  // Prevent kit flow body from scrolling while picker is open
-  const kitBody = document.getElementById('kitFlowBody');
-  if(kitBody) kitBody.style.overflow = 'hidden';
+  popup.classList.add('open');
 }
 
 function closeStepPicker() {
-  document.getElementById('stepPickerPopup').style.display = 'none';
-  // Re-enable kit flow body scroll
-  const kitBody = document.getElementById('kitFlowBody');
-  if(kitBody) kitBody.style.overflow = '';
+  document.getElementById('stepPickerOverlay').classList.remove('open');
   // Re-render kit flow to update button counts
   const size = document.getElementById('kitContainerSize')?.value;
   if(size) kitFlowData.container_size = parseFloat(size)||0;
