@@ -2463,15 +2463,13 @@ function setupPTR(wrapperId, scrollId, spinnerId, refreshFn) {
     const clamped = Math.min(dy, MAX_DRAG);
     const eased = clamped * (1 - clamped / (MAX_DRAG * 2.5));
     const progress = Math.min(dy / TRIGGER_PX, 1);
-    // Slide content AND indicator down together
-    const indicator = spinner.parentElement;
+    // Slide content down — spinner at top:-44px comes into view naturally
     scroll.style.transition = 'none';
     scroll.style.transform = `translateY(${eased}px)`;
-    indicator.style.transition = 'none';
-    indicator.style.transform = `translateY(${eased}px)`;
+    // Fade spinner in as content slides down
     spinner.style.transition = 'none';
-    spinner.style.opacity = String(Math.min(progress * 1.4, 1));
-    spinner.style.transform = `scale(${0.7 + progress * 0.3})`;
+    spinner.style.opacity = String(Math.min(eased / 44, 1));
+    spinner.style.transform = `scale(${0.7 + Math.min(eased / 44, 1) * 0.3})`;
     if(dy > TRIGGER_PX && !triggered) {
       triggered = true;
       if(navigator.vibrate) navigator.vibrate(10);
