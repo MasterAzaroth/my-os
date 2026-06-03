@@ -1370,36 +1370,35 @@ function renderKit() {
 
   const grid = document.getElementById('kitGrid');
   if(!filtered.length) {
+    grid.className = '';
     grid.innerHTML = `<div class="empty-state"><div class="empty-glyph">∅</div><div class="empty-title">${kitItemFilter==='All'?'Your kit is empty':'No '+kitItemFilter.toLowerCase()+' items'}</div><div class="empty-sub">${kitItemFilter==='All'?'Open a product in the Library and tap "Add to My Kit"':''}</div></div>`;
     return;
   }
+  grid.className = 'kit-grid-wrap';
   grid.innerHTML = filtered.map(item => {
     const p = item._product;
     const pct = item.container_size > 0 && item.current_amount != null
       ? Math.round((item.current_amount / item.container_size) * 100) : null;
-    const stateClass = item.state==='Active'?'kit-state-active':item.state==='Backup'?'kit-state-backup':'kit-state-passive';
     const stateIcon = item.state==='Active'?'🟢':item.state==='Backup'?'📦':'💤';
-    const amountHtml = pct !== null ? `
-      <div class="kit-amount-wrap">
-        <div class="kit-amount-track"><div class="kit-amount-fill" style="width:${pct}%"></div></div>
-        <div class="kit-amount-label">${item.current_amount}${item.container_unit||'ml'} remaining · ${pct}%</div>
-      </div>` : '';
-    return `<div class="kit-item-card" onclick="openDetail('${item.product_id}')">
-      <div class="kit-item-thumb">
-        ${p.cover_image_url||p.image_url ? `<img src="${p.cover_image_url||p.image_url}" alt="${p.name||''}">` : '<div class="kit-item-thumb-placeholder">🧴</div>'}
+    const imgHtml = p.cover_image_url||p.image_url
+      ? `<img src="${p.cover_image_url||p.image_url}" alt="${p.name||''}">`
+      : '<div class="kit-item-img-placeholder">🧴</div>';
+    const barHtml = pct !== null
+      ? `<div class="kit-amount-bar"><div class="kit-amount-bar-fill" style="width:${pct}%"></div></div>` : '';
+    return `<div class="kit-item-card" onclick="openKitItemEdit('${item.id}')">
+      <div class="kit-item-img">
+        ${imgHtml}
+        <div class="kit-item-state-dot">${stateIcon}</div>
+        ${barHtml}
       </div>
-      <div class="kit-item-info">
+      <div class="kit-item-body">
         <div class="kit-item-name">${p.name||'Unknown'}</div>
-        <div class="kit-item-brand">${p.brand||''}</div>
-        <div class="kit-item-meta">
-          <span class="kit-state-badge ${stateClass}">${stateIcon} ${item.state}</span>
-          ${item.opened_date ? `<span style="font-size:10px;color:var(--text3)">opened ${formatRelativeDate(item.opened_date)}</span>` : ''}
-        </div>
-        ${amountHtml}
+        ${pct !== null ? `<div class="kit-item-sub">${pct}%</div>` : ''}
       </div>
     </div>`;
   }).join('');
 }
+
 
 // ── KIT ITEM EDIT ────────────────────────────────────────────────────────────
 let kitEditItem = null;
