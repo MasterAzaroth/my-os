@@ -37,7 +37,7 @@
 html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--text);overflow:hidden}
 
 .app{height:100vh;height:100dvh;display:flex;flex-direction:column}
-.screen{display:none;flex:1;flex-direction:column;overflow:hidden;padding-top:var(--safe-top);opacity:0;transition:opacity 0.25s ease}
+.screen{display:none;flex:1;flex-direction:column;overflow:hidden;padding-top:var(--safe-top);opacity:0;transition:opacity 0.5s ease}
 .screen.active{display:flex}
 .screen.visible{opacity:1}
 
@@ -823,7 +823,7 @@ function navigate(screen) {
       document.getElementById(`nav-${screen}`)?.classList.add('active');
       requestAnimationFrame(() => requestAnimationFrame(() => next.classList.add('visible')));
       initScreen(screen);
-    }, 250);
+    }, 500);
   } else {
     document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
     next.classList.add('active');
