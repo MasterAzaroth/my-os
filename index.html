@@ -1287,7 +1287,7 @@ async function initKit() {
   document.getElementById('kitSubtitle').textContent = '';
   try {
     const [items, prods] = await Promise.all([
-      api('kit_items', '?order=state.asc,added_date.desc'),
+      api('kit_items', '?order=created_at.desc'),
       api('products', '?select=id,name,brand,image_url,category')
     ]);
     kitItems = Array.isArray(items) ? items : [];
@@ -1311,6 +1311,7 @@ async function initKit() {
     renderKit();
   } catch(e) {
     console.error('initKit error:', e.message);
+    showToast('Kit error: ' + e.message);
     document.getElementById('kitGrid').innerHTML = '<div class="empty-state"><div class="empty-glyph">∅</div><div class="empty-title">Your kit is empty</div><div class="empty-sub">Open a product in the Library and tap "Add to My Kit"</div></div>';
     document.getElementById('kitSubtitle').textContent = '';
   }
