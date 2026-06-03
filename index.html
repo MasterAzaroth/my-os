@@ -2792,7 +2792,7 @@ function renderKitFlow() {
 
     <div class="form-field">
       <div class="form-label">Opened Date</div>
-      <input class="form-input" type="date" value="${kitFlowData.opened_date}" oninput="kitFlowData.opened_date=this.value" style="width:100%;max-width:100%;box-sizing:border-box">
+      <input class="form-input" type="date" value="${kitFlowData.opened_date}" onchange="kitFlowData.opened_date=this.value" style="width:100%;box-sizing:border-box;-webkit-appearance:none;color:var(--text2)">
     </div>`;
 
   // Step picker popup lives outside the kit flow body so it doesn't break the template
@@ -3030,13 +3030,6 @@ function openStepPicker(session) {
   const title = document.getElementById('stepPickerTitle');
   const list = document.getElementById('stepPickerList');
   if(!popup || !title || !list) return;
-
-  // Force scrollable regardless of content
-  list.style.overflowY = 'scroll';
-  list.style.minHeight = '220px';
-  list.style.maxHeight = '50vh';
-  list.style.alignContent = 'flex-start';
-  list.style.webkitOverflowScrolling = 'touch';
 
   title.textContent = session === 'Morning' ? '🌅 Morning Steps' : '🌙 Evening Steps';
   // Deduplicate by name
