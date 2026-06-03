@@ -181,7 +181,7 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
 /* KIT */
 .kit-filter{display:flex;gap:6px;padding:12px 20px;overflow-x:auto;flex-shrink:0}
 .kit-filter::-webkit-scrollbar{display:none}
-.filter-btn{flex-shrink:0;padding:5px 12px;border-radius:16px;border:0.5px solid var(--border);background:transparent;color:var(--text3);font-size:11px;cursor:pointer;transition:all 0.2s;font-family:var(--sans)}
+.filter-btn{flex-shrink:0;padding:0 12px;height:28px;border-radius:16px;border:0.5px solid var(--border);background:transparent;color:var(--text3);font-size:11px;cursor:pointer;transition:all 0.2s;font-family:var(--sans)}
 .filter-btn.active{background:var(--bg3);color:var(--text);border-color:var(--border2)}
 .kit-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:8px 14px 20px}
 .product-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;transition:all 0.2s}
@@ -239,9 +239,9 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
 .lib-lists::-webkit-scrollbar{display:none}
 .lib-lists-inner{display:flex;gap:6px;overflow-x:auto;flex:1;-webkit-overflow-scrolling:touch}
 .lib-lists-inner::-webkit-scrollbar{display:none}
-.lib-sort-pill{flex-shrink:0;display:flex;align-items:center;gap:5px;padding:5px 12px;border-radius:16px;border:0.5px solid var(--accent);background:var(--accent);cursor:pointer;transition:all 0.2s;font-family:var(--sans);margin-left:8px}
+.lib-sort-pill{flex-shrink:0;display:flex;align-items:center;justify-content:center;gap:5px;padding:0 12px;height:28px;border-radius:16px;border:0.5px solid var(--accent);background:var(--accent);cursor:pointer;transition:all 0.2s;font-family:var(--sans);margin-left:8px}
 .lib-sort-pill:active{opacity:0.8}
-.lib-list-btn{flex-shrink:0;display:flex;align-items:center;gap:5px;padding:5px 12px;border-radius:16px;border:0.5px solid var(--border);background:transparent;color:var(--text3);font-size:11px;cursor:pointer;transition:all 0.2s;font-family:var(--sans);white-space:nowrap}
+.lib-list-btn{flex-shrink:0;display:flex;align-items:center;gap:5px;padding:0 12px;height:28px;border-radius:16px;border:0.5px solid var(--border);background:transparent;color:var(--text3);font-size:11px;cursor:pointer;transition:all 0.2s;font-family:var(--sans);white-space:nowrap}
 .lib-list-btn.active{background:var(--bg3);color:var(--text);border-color:var(--border2)}
 .lib-list-btn .list-icon{font-size:12px}
 .lib-filter-row{display:flex;gap:6px;padding:0 20px 8px;overflow-x:auto;flex-shrink:0}
@@ -567,8 +567,12 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
       <div class="page-subtitle" id="kitSubtitle"><span id="kitSubtitleNum" style="transition:opacity 0.3s ease"></span><span id="kitSubtitleText"></span></div>
     </div>
     <div style="display:flex;align-items:center;padding:8px 14px 8px 20px;gap:6px;flex-shrink:0">
-      <div id="kitFilter" style="display:flex;gap:6px;overflow-x:auto;flex:1;-webkit-overflow-scrolling:touch"></div>
-      <select class="lib-sort-select" id="kitSort" onchange="renderKit()" style="flex-shrink:0;margin-left:4px">
+      <div id="kitFilter" style="display:flex;gap:6px;overflow-x:auto;flex:1;-webkit-overflow-scrolling:touch;scrollbar-width:none"></div>
+      <button class="lib-sort-pill" id="kitSortPill" onclick="openKitSortMenu()" style="margin-left:8px">
+        <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M1 3h12M3 7h8M5 11h4" stroke="var(--bg)" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M7 1L4 4M7 1l3 3M7 13L4 10M7 13l3-3" stroke="var(--bg)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <select class="lib-sort-select" id="kitSort" onchange="renderKit()" style="position:absolute;opacity:0;pointer-events:none;width:1px;height:1px">
         <option value="date_desc">Date ↓</option>
         <option value="date_asc">Date ↑</option>
         <option value="name_asc">Name ↑</option>
@@ -917,6 +921,28 @@ function initScreen(screen) {
   }
 }
 
+
+// ── KIT SORT ─────────────────────────────────────────────────────────────────
+function openKitSortMenu() {
+  const sel = document.getElementById('kitSort');
+  if(!sel) return;
+  sel.style.pointerEvents = 'all';
+  sel.style.position = 'fixed';
+  sel.style.opacity = '0';
+  sel.style.top = '0';
+  sel.style.left = '0';
+  sel.style.width = '100vw';
+  sel.style.height = '100vh';
+  sel.focus();
+  sel.click();
+  setTimeout(() => {
+    sel.style.pointerEvents = 'none';
+    sel.style.position = 'absolute';
+    sel.style.width = '1px';
+    sel.style.height = '1px';
+  }, 300);
+}
+// ─────────────────────────────────────────────────────────────────────────────
 
 // ── LIBRARY SORT ─────────────────────────────────────────────────────────────
 function openLibSortMenu() {
