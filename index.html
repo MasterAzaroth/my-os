@@ -37,9 +37,9 @@
 html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--text);overflow:hidden}
 
 .app{height:100vh;height:100dvh;display:flex;flex-direction:column}
-.screen{display:none;flex:1;flex-direction:column;overflow:hidden;padding-top:var(--safe-top);opacity:0;transform:translateY(12px) scale(0.99)}
-.screen.active{display:flex;animation:screenIn 0.3s cubic-bezier(0.16,1,0.3,1) forwards}
-@keyframes screenIn{to{opacity:1;transform:translateY(0) scale(1)}}
+.screen{display:none;flex:1;flex-direction:column;overflow:hidden;padding-top:var(--safe-top);opacity:0;transition:opacity 0.25s ease}
+.screen.active{display:flex}
+.screen.visible{opacity:1}
 
 /* NAV */
 .navbar{display:flex;justify-content:space-around;align-items:center;padding:10px 0 calc(10px + var(--safe-bot));border-top:0.5px solid var(--border);background:var(--bg);flex-shrink:0}
@@ -808,10 +808,32 @@ async function apiPost(table, data) {
 }
 
 function navigate(screen) {
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById(`screen-${screen}`).classList.add('active');
-  document.getElementById(`nav-${screen}`)?.classList.add('active');
+  const current = document.querySelector('.screen.active');
+  const next = document.getElementById(`screen-${screen}`);
+  if(current === next) return;
+
+  // Fade out current
+  if(current) {
+    current.classList.remove('visible');
+    setTimeout(() => {
+      current.classList.remove('active');
+      // Show next
+      document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+      next.classList.add('active');
+      document.getElementById(`nav-${screen}`)?.classList.add('active');
+      requestAnimationFrame(() => requestAnimationFrame(() => next.classList.add('visible')));
+      initScreen(screen);
+    }, 250);
+  } else {
+    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+    next.classList.add('active');
+    document.getElementById(`nav-${screen}`)?.classList.add('active');
+    requestAnimationFrame(() => requestAnimationFrame(() => next.classList.add('visible')));
+    initScreen(screen);
+  }
+}
+
+function initScreen(screen) {
   if(screen==='selfcare') initSelfCare();
   if(screen==='kit') {
     initKit().then(() => {
@@ -3070,6 +3092,10 @@ function closeStepPicker() {
 }
 
 initHome();
+// Show home screen on load
+requestAnimationFrame(() => requestAnimationFrame(() => {
+  document.getElementById('screen-home').classList.add('visible');
+}));
 </script>
 </body>
 </html>
