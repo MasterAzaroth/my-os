@@ -3031,6 +3031,13 @@ function openStepPicker(session) {
   const list = document.getElementById('stepPickerList');
   if(!popup || !title || !list) return;
 
+  // Force scrollable regardless of content
+  list.style.overflowY = 'scroll';
+  list.style.minHeight = '220px';
+  list.style.maxHeight = '50vh';
+  list.style.alignContent = 'flex-start';
+  list.style.webkitOverflowScrolling = 'touch';
+
   title.textContent = session === 'Morning' ? '🌅 Morning Steps' : '🌙 Evening Steps';
   const steps = kitFlowSteps.filter(s => s.time_of_day === session);
 
