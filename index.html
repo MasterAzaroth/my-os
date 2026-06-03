@@ -2806,7 +2806,7 @@ function renderKitFlow() {
         <div style="font-size:14px;font-weight:500;color:var(--text)" id="stepPickerTitle"></div>
         <button onclick="closeStepPicker()" style="background:var(--bg3);border:0.5px solid var(--border2);color:var(--text3);width:28px;height:28px;border-radius:50%;font-size:11px;cursor:pointer;font-family:var(--sans)">✕</button>
       </div>
-      <div style="overflow-y:auto;padding:14px 20px;display:flex;flex-wrap:wrap;gap:8px" id="stepPickerList"></div>
+      <div style="overflow-y:scroll;padding:14px 20px;display:flex;flex-wrap:wrap;gap:8px;align-content:flex-start;min-height:200px" id="stepPickerList"></div>
     </div>`;
     document.body.appendChild(popup);
   }
