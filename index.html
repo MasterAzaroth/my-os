@@ -560,7 +560,7 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
     <div class="page-header">
       <div class="page-label">Self Care</div>
       <div class="page-title">My Kit</div>
-      <div class="page-subtitle" id="kitSubtitle"></div>
+      <div class="page-subtitle" id="kitSubtitle">Loading...</div>
     </div>
     <div class="kit-filter" id="kitFilter"></div>
     <div class="ptr-wrap" id="kitPtrWrap">
@@ -831,6 +831,7 @@ async function api(table, params='') {
   const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}${params}`, {
     headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`}
   });
+  if(!res.ok) throw new Error(`API error ${res.status} on ${table}`);
   return res.json();
 }
 
@@ -872,11 +873,10 @@ function navigate(screen) {
 function initScreen(screen) {
   if(screen==='selfcare') initSelfCare();
   if(screen==='kit') {
-    initKit().then(() => {
-      setupPTR('kitPtrWrap','kitScroll','kitSpinner', async()=>{
-        kitItems=[];
-        await initKit();
-      });
+    initKit();
+    setupPTR('kitPtrWrap','kitScroll','kitSpinner', async()=>{
+      kitItems=[];
+      await initKit();
     });
   }
   if(screen==='library') {
@@ -1284,35 +1284,35 @@ const KIT_FILTER_STATES = ['All','Active','Backup','Passive'];
 
 async function initKit() {
   document.getElementById('kitGrid').innerHTML = '<div class="loading"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div>';
+  document.getElementById('kitSubtitle').textContent = '';
   try {
-    // Fetch kit_items + join product data
     const [items, prods] = await Promise.all([
       api('kit_items', '?order=state.asc,added_date.desc'),
       api('products', '?select=id,name,brand,image_url,category')
     ]);
-    kitItems = items || [];
+    kitItems = Array.isArray(items) ? items : [];
     const prodMap = {};
-    (prods||[]).forEach(p => prodMap[p.id] = p);
+    (Array.isArray(prods)?prods:[]).forEach(p => prodMap[p.id] = p);
     kitItems.forEach(item => { item._product = prodMap[item.product_id] || {}; });
 
-    // Build subtitle
     const active = kitItems.filter(i=>i.state==='Active').length;
     const backup = kitItems.filter(i=>i.state==='Backup').length;
     const passive = kitItems.filter(i=>i.state==='Passive').length;
     const parts = [];
-    if(active) parts.push(`${active} active`);
-    if(backup) parts.push(`${backup} backup`);
-    if(passive) parts.push(`${passive} passive`);
+    if(active) parts.push(active+' active');
+    if(backup) parts.push(backup+' backup');
+    if(passive) parts.push(passive+' passive');
     document.getElementById('kitSubtitle').textContent = parts.length ? parts.join(' · ') : 'Empty';
 
-    // Filter tabs
     document.getElementById('kitFilter').innerHTML = KIT_FILTER_STATES.map(s =>
       `<button class="filter-btn${kitItemFilter===s?' active':''}" onclick="setKitFilter('${s}')">${s}</button>`
     ).join('');
 
     renderKit();
   } catch(e) {
-    document.getElementById('kitGrid').innerHTML = '<div class="empty-state"><div class="empty-glyph">∅</div><div class="empty-title">Could not load kit</div><div class="empty-sub">Pull down to retry</div></div>';
+    console.error('initKit error:', e.message);
+    document.getElementById('kitGrid').innerHTML = '<div class="empty-state"><div class="empty-glyph">∅</div><div class="empty-title">Your kit is empty</div><div class="empty-sub">Open a product in the Library and tap "Add to My Kit"</div></div>';
+    document.getElementById('kitSubtitle').textContent = '';
   }
 }
 
@@ -1332,8 +1332,7 @@ function renderKit() {
   grid.innerHTML = filtered.map(item => {
     const p = item._product;
     const pct = item.container_size > 0 && item.current_amount != null
-      ? Math.round((item.current_amount / item.container_size) * 100)
-      : null;
+      ? Math.round((item.current_amount / item.container_size) * 100) : null;
     const stateClass = item.state==='Active'?'kit-state-active':item.state==='Backup'?'kit-state-backup':'kit-state-passive';
     const stateIcon = item.state==='Active'?'🟢':item.state==='Backup'?'📦':'💤';
     const amountHtml = pct !== null ? `
@@ -1343,7 +1342,7 @@ function renderKit() {
       </div>` : '';
     return `<div class="kit-item-card" onclick="openDetail('${item.product_id}')">
       <div class="kit-item-thumb">
-        ${p.image_url ? `<img src="${p.image_url}" alt="${p.name}">` : `<div class="kit-item-thumb-placeholder">🧴</div>`}
+        ${p.image_url ? `<img src="${p.image_url}" alt="${p.name||''}">` : '<div class="kit-item-thumb-placeholder">🧴</div>'}
       </div>
       <div class="kit-item-info">
         <div class="kit-item-name">${p.name||'Unknown'}</div>
@@ -2272,11 +2271,15 @@ function setupPTR(wrapperId, scrollId, spinnerId, refreshFn) {
   scroll.addEventListener('touchend', async () => {
     if(triggered && !refreshing) {
       refreshing = true;
-      await refreshFn();
-      setTimeout(() => {
+      refreshFn().then(() => {
+        setTimeout(() => {
+          spinner.classList.remove('visible');
+          refreshing = false;
+        }, 300);
+      }).catch(() => {
         spinner.classList.remove('visible');
         refreshing = false;
-      }, 300);
+      });
     }
     pulling = false;
     triggered = false;
