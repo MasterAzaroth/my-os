@@ -1288,7 +1288,7 @@ async function initKit() {
   try {
     const [items, prods] = await Promise.all([
       api('kit_items', '?order=created_at.desc'),
-      api('products', '?select=id,name,brand,image_url,category')
+      api('products', '?limit=1')
     ]);
     kitItems = Array.isArray(items) ? items : [];
     const prodMap = {};
