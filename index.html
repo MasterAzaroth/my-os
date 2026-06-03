@@ -927,18 +927,22 @@ async function initSelfCare() {
 }
 
 function setSession(s) {
+  if(currentSession === s) return;
   currentSession = s;
   document.getElementById('amBtn').classList.toggle('active',s==='Morning');
   document.getElementById('pmBtn').classList.toggle('active',s==='Evening');
   stepState={};stepProducts={};
-  if(isToday) {
-    deactivateSave();
-    loadSteps();
-  } else if(isPast) {
-    loadPastLog();
-  } else {
-    loadFuturePreview();
-  }
+  const content = document.getElementById('stepList');
+  const pastView = document.getElementById('pastView');
+  const doneOverlay = document.getElementById('doneOverlay');
+  const targets = [content, pastView, doneOverlay].filter(Boolean);
+  targets.forEach(el => { el.style.transition='opacity 0.5s ease'; el.style.opacity='0'; });
+  setTimeout(() => {
+    if(isToday) { deactivateSave(); loadSteps(); }
+    else if(isPast) { loadPastLog(); }
+    else { loadFuturePreview(); }
+    targets.forEach(el => { el.style.opacity='1'; });
+  }, 500);
 }
 
 async function loadSteps() {
