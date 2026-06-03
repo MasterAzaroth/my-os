@@ -3033,10 +3033,10 @@ let stepPickerSession = 'Morning';
 
 function openStepPicker(session) {
   stepPickerSession = session;
-  const popup = document.getElementById('stepPickerPopup');
+  const overlay = document.getElementById('stepPickerOverlay');
   const title = document.getElementById('stepPickerTitle');
   const list = document.getElementById('stepPickerList');
-  if(!popup || !title || !list) return;
+  if(!overlay || !title || !list) return;
 
   title.textContent = session === 'Morning' ? '🌅 Morning Steps' : '🌙 Evening Steps';
   // Deduplicate by name
@@ -3054,11 +3054,14 @@ function openStepPicker(session) {
       ${s.name}
     </button>`).join('');
 
-  popup.classList.add('open');
+  overlay.classList.add('open');
 }
 
 function closeStepPicker() {
   document.getElementById('stepPickerOverlay').classList.remove('open');
+  // Clean up orphan popup div if it exists (legacy)
+  const orphan = document.getElementById('stepPickerPopup');
+  if(orphan) orphan.remove();
   // Re-render kit flow to update button counts
   const size = document.getElementById('kitContainerSize')?.value;
   if(size) kitFlowData.container_size = parseFloat(size)||0;
