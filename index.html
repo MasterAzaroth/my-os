@@ -37,9 +37,8 @@
 html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--text);overflow:hidden}
 
 .app{height:100vh;height:100dvh;display:flex;flex-direction:column}
-.screen{display:none;flex:1;flex-direction:column;overflow:hidden;padding-top:var(--safe-top);opacity:0;transition:opacity 0.5s ease}
+.screen{display:none;flex:1;flex-direction:column;overflow:hidden;padding-top:var(--safe-top)}
 .screen.active{display:flex}
-.screen.visible{opacity:1}
 
 /* NAV */
 .navbar{display:flex;justify-content:space-around;align-items:center;padding:10px 0 calc(10px + var(--safe-bot));border-top:0.5px solid var(--border);background:var(--bg);flex-shrink:0}
@@ -247,9 +246,11 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
 .lib-card-link{font-size:9px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70px}
 
 /* DETAIL OVERLAY */
-.detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;display:none;align-items:flex-end;backdrop-filter:blur(4px)}
+.detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,0);z-index:200;display:none;align-items:flex-end;backdrop-filter:blur(0px);transition:background 0.35s ease,backdrop-filter 0.35s ease}
 .detail-overlay.open{display:flex}
-.detail-sheet{background:var(--bg);border-radius:20px 20px 0 0;width:100%;max-height:92vh;overflow-y:auto;position:relative;padding-bottom:env(safe-area-inset-bottom,20px)}
+.detail-overlay.visible{background:rgba(0,0,0,0.7);backdrop-filter:blur(4px)}
+.detail-sheet{background:var(--bg);border-radius:20px 20px 0 0;width:100%;max-height:92vh;overflow-y:auto;position:relative;padding-bottom:env(safe-area-inset-bottom,20px);transform:translateY(100%);transition:transform 0.4s cubic-bezier(0.32,0.72,0,1)}
+.detail-overlay.visible .detail-sheet{transform:translateY(0)}
 .detail-sheet::-webkit-scrollbar{display:none}
 .detail-hero{display:flex;gap:14px;padding:56px 16px 20px;border-bottom:0.5px solid var(--border)}
 .detail-hero-img{width:155px;height:155px;flex-shrink:0;border-radius:12px;background:transparent;overflow:hidden;display:flex;align-items:center;justify-content:center}
@@ -317,9 +318,11 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
 .add-product-btn:active{transform:scale(0.93)}
 
 /* FORM OVERLAY */
-.form-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:300;display:none;align-items:flex-end;backdrop-filter:blur(6px)}
+.form-overlay{position:fixed;inset:0;background:rgba(0,0,0,0);z-index:300;display:none;align-items:flex-end;backdrop-filter:blur(0px);transition:background 0.35s ease,backdrop-filter 0.35s ease}
 .form-overlay.open{display:flex}
-.form-sheet{background:var(--bg);border-radius:24px 24px 0 0;width:100%;max-height:94vh;display:flex;flex-direction:column;overflow:hidden;padding-bottom:env(safe-area-inset-bottom,20px)}
+.form-overlay.visible{background:rgba(0,0,0,0.75);backdrop-filter:blur(6px)}
+.form-sheet{background:var(--bg);border-radius:24px 24px 0 0;width:100%;max-height:94vh;display:flex;flex-direction:column;overflow:hidden;padding-bottom:env(safe-area-inset-bottom,20px);transform:translateY(100%);transition:transform 0.4s cubic-bezier(0.32,0.72,0,1)}
+.form-overlay.visible .form-sheet{transform:translateY(0)}
 .form-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 0}
 .form-back{background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer;padding:4px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-family:var(--sans)}
 .form-close{background:var(--bg3);border:0.5px solid var(--border2);color:var(--text3);width:30px;height:30px;border-radius:50%;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:var(--sans)}
@@ -415,9 +418,11 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
 .detail-notes-edit:focus{border-color:var(--border2)}
 
 /* KIT FLOW OVERLAY */
-.kit-flow-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:400;display:none;align-items:flex-end;backdrop-filter:blur(6px)}
+.kit-flow-overlay{position:fixed;inset:0;background:rgba(0,0,0,0);z-index:400;display:none;align-items:flex-end;backdrop-filter:blur(0px);transition:background 0.35s ease,backdrop-filter 0.35s ease}
 .kit-flow-overlay.open{display:flex}
-.kit-flow-sheet{background:var(--bg);border-radius:24px 24px 0 0;width:100%;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;padding-bottom:env(safe-area-inset-bottom,20px);position:relative}
+.kit-flow-overlay.visible{background:rgba(0,0,0,0.75);backdrop-filter:blur(6px)}
+.kit-flow-sheet{background:var(--bg);border-radius:24px 24px 0 0;width:100%;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;padding-bottom:env(safe-area-inset-bottom,20px);position:relative;transform:translateY(100%);transition:transform 0.4s cubic-bezier(0.32,0.72,0,1)}
+.kit-flow-overlay.visible .kit-flow-sheet{transform:translateY(0)}
 .kit-flow-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:0.5px solid var(--border);flex-shrink:0}
 .kit-flow-title{font-family:var(--serif);font-size:20px;color:var(--text)}
 .kit-flow-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;overflow-x:hidden;min-height:0;padding:0 20px 20px}
@@ -456,12 +461,12 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
       </div>
       <div id="homeAlerts"></div>
       <div class="home-grid">
-        <div class="home-card wide" onclick="navigate('selfcare')">
+        <div class="home-card wide" onclick="navigate('selfcare',event)">
           <div class="home-card-icon">🪞</div>
           <div class="home-card-title">Self Care</div>
           <div class="home-card-sub">AM · PM routine</div>
         </div>
-        <div class="home-card" onclick="navigate('kit')">
+        <div class="home-card" onclick="navigate('kit',event)">
           <div class="home-card-icon">🧴</div>
           <div class="home-card-title">My Kit</div>
           <div class="home-card-sub">Products</div>
@@ -706,23 +711,23 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
 
   <!-- NAV: Self Care | Library | Home | Kit | Explore -->
   <nav class="navbar">
-    <button class="nav-btn" id="nav-selfcare" onclick="navigate('selfcare')">
+    <button class="nav-btn" id="nav-selfcare" onclick="navigate('selfcare',event)">
       <span class="nav-icon">🪞</span>
       <span class="nav-label">Self Care</span>
     </button>
-    <button class="nav-btn" id="nav-library" onclick="navigate('library')">
+    <button class="nav-btn" id="nav-library" onclick="navigate('library',event)">
       <span class="nav-icon">◈</span>
       <span class="nav-label">Library</span>
     </button>
-    <button class="nav-btn active" id="nav-home" onclick="navigate('home')">
+    <button class="nav-btn active" id="nav-home" onclick="navigate('home',event)">
       <span class="nav-icon">⌂</span>
       <span class="nav-label">Home</span>
     </button>
-    <button class="nav-btn" id="nav-kit" onclick="navigate('kit')">
+    <button class="nav-btn" id="nav-kit" onclick="navigate('kit',event)">
       <span class="nav-icon">🧴</span>
       <span class="nav-label">Kit</span>
     </button>
-    <button class="nav-btn" id="nav-explore" onclick="navigate('explore')">
+    <button class="nav-btn" id="nav-explore" onclick="navigate('explore',event)">
       <span class="nav-icon">✦</span>
       <span class="nav-label">Explore</span>
     </button>
@@ -807,30 +812,66 @@ async function apiPost(table, data) {
   return res.ok;
 }
 
-function navigate(screen) {
+function navigate(screen, event) {
   const current = document.querySelector('.screen.active');
   const next = document.getElementById(`screen-${screen}`);
   if(current === next) return;
 
-  // Fade out current
-  if(current) {
-    current.classList.remove('visible');
-    setTimeout(() => {
-      current.classList.remove('active');
-      // Show next
-      document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-      next.classList.add('active');
-      document.getElementById(`nav-${screen}`)?.classList.add('active');
-      requestAnimationFrame(() => requestAnimationFrame(() => next.classList.add('visible')));
-      initScreen(screen);
-    }, 500);
-  } else {
+  // Get click origin — default to bottom-center (nav bar area) if no event
+  let ox = window.innerWidth / 2;
+  let oy = window.innerHeight - 60;
+  if(event) {
+    const t = event.touches ? event.touches[0] : event;
+    ox = t.clientX;
+    oy = t.clientY;
+  }
+
+  // Calc radius needed to cover full screen from origin
+  const maxDist = Math.sqrt(
+    Math.max(ox, window.innerWidth - ox) ** 2 +
+    Math.max(oy, window.innerHeight - oy) ** 2
+  );
+
+  // Build ripple overlay on top of current screen
+  const ripple = document.createElement('div');
+  ripple.style.cssText = `
+    position:fixed;
+    left:${ox}px;
+    top:${oy}px;
+    width:0;height:0;
+    border-radius:50%;
+    background:var(--bg);
+    transform:translate(-50%,-50%);
+    z-index:9999;
+    pointer-events:none;
+    transition:width 0.55s cubic-bezier(0.4,0,0.2,1),height 0.55s cubic-bezier(0.4,0,0.2,1);
+  `;
+  document.body.appendChild(ripple);
+
+  // Trigger expand
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    const d = maxDist * 2 + 20;
+    ripple.style.width = d + 'px';
+    ripple.style.height = d + 'px';
+  }));
+
+  // Midpoint: swap screens
+  setTimeout(() => {
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
     document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
     next.classList.add('active');
     document.getElementById(`nav-${screen}`)?.classList.add('active');
-    requestAnimationFrame(() => requestAnimationFrame(() => next.classList.add('visible')));
     initScreen(screen);
-  }
+  }, 280);
+
+  // End: shrink ripple away to reveal new screen
+  setTimeout(() => {
+    ripple.style.transition = 'width 0.4s cubic-bezier(0.4,0,0.2,1),height 0.4s cubic-bezier(0.4,0,0.2,1),opacity 0.3s ease';
+    ripple.style.width = '0';
+    ripple.style.height = '0';
+    ripple.style.opacity = '0';
+    setTimeout(() => ripple.remove(), 420);
+  }, 320);
 }
 
 function initScreen(screen) {
@@ -1293,7 +1334,7 @@ function openProductForm() {
   coverImageB64 = null;
   productImageB64 = null;
   renderFormStep();
-  document.getElementById('formOverlay').classList.add('open');
+  openOverlay('formOverlay');
 
   // If we have an image URL from barcode, try to load it
   if(formData._imageUrl) {
@@ -1332,7 +1373,7 @@ async function fetchRemoteImage(url) {
 }
 
 function closeProductForm() {
-  document.getElementById('formOverlay').classList.remove('open');
+  closeOverlay('formOverlay');
 }
 
 function formNext() {
@@ -2029,15 +2070,14 @@ async function openDetail(productId) {
     </div>
   `;
 
-  document.getElementById('detailOverlay').classList.add('open');
+  openOverlay('detailOverlay');
   loadKitInstances(productId);
 
 
 }
 
 function closeDetail() {
-  document.getElementById('detailOverlay').classList.remove('open');
-  currentDetailProduct = null;
+  closeOverlay('detailOverlay', () => { currentDetailProduct = null; });
 }
 
 async function toggleListMembership(productId, listId, btn) {
@@ -2136,7 +2176,7 @@ async function loadHomeAlerts() {
 
   alertsEl.innerHTML = `<div class="home-alerts">` +
     alerts.slice(0,4).map(a => `
-      <div class="alert-card" onclick="navigate('library')">
+      <div class="alert-card" onclick="navigate('library',event)">
         <span class="alert-icon">${a.icon}</span>
         <div class="alert-text">
           <div class="alert-title">${a.title}</div>
@@ -2294,7 +2334,7 @@ function editProduct() {
   formStep = 0;
   closeDetail();
   renderFormStep();
-  document.getElementById('formOverlay').classList.add('open');
+  openOverlay('formOverlay');
   // Change submit button label
   document.getElementById('formNextBtn').textContent = formStep === getSteps()-1 ? 'Save Changes' : 'Continue';
 }
@@ -2663,11 +2703,11 @@ async function openCompare() {
       `).join('')}
     </div>`;
 
-  document.getElementById('compareOverlay').classList.add('open');
+  openOverlay('compareOverlay');
 }
 
 function closeCompare() {
-  document.getElementById('compareOverlay').classList.remove('open');
+  closeOverlay('compareOverlay');
   compareMode = false;
   compareSelected = [];
   const btn = document.getElementById('compareToggle');
@@ -2706,7 +2746,7 @@ async function openAddToKit(productId) {
   } else {
     renderKitFlow();
   }
-  document.getElementById('kitFlowOverlay').classList.add('open');
+  openOverlay('kitFlowOverlay');
 }
 
 let kitFlowPrices = [];
@@ -2744,7 +2784,7 @@ function skipPurchaseSource() {
 }
 
 function closeKitFlow() {
-  document.getElementById('kitFlowOverlay').classList.remove('open');
+  closeOverlay('kitFlowOverlay');
 }
 
 function renderKitFlow() {
@@ -3077,11 +3117,11 @@ function openStepPicker(session) {
       ${s.name}
     </button>`).join('') + `</div>`;
 
-  overlay.classList.add('open');
+  openOverlay('stepPickerOverlay');
 }
 
 function closeStepPicker() {
-  document.getElementById('stepPickerOverlay').classList.remove('open');
+  closeOverlay('stepPickerOverlay');
   // Clean up orphan popup div if it exists (legacy)
   const orphan = document.getElementById('stepPickerPopup');
   if(orphan) orphan.remove();
@@ -3091,11 +3131,24 @@ function closeStepPicker() {
   renderKitFlow();
 }
 
+// ── OVERLAY ANIMATION HELPERS ──────────────────────────────────────────────
+function openOverlay(id) {
+  const el = document.getElementById(id);
+  el.classList.add('open');
+  requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('visible')));
+}
+
+function closeOverlay(id, callback) {
+  const el = document.getElementById(id);
+  el.classList.remove('visible');
+  setTimeout(() => {
+    el.classList.remove('open');
+    if(callback) callback();
+  }, 400);
+}
+
 initHome();
-// Show home screen on load
-requestAnimationFrame(() => requestAnimationFrame(() => {
-  document.getElementById('screen-home').classList.add('visible');
-}));
+// home screen shown on load via .active class
 </script>
 </body>
 </html>
