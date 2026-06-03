@@ -392,7 +392,7 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
 
 /* PULL TO REFRESH */
 .ptr-wrap{position:relative;flex:1;overflow:visible;display:flex;flex-direction:column;min-height:0}
-.ptr-indicator{position:absolute;top:-44px;left:0;right:0;height:44px;display:flex;align-items:center;justify-content:center;z-index:10}
+.ptr-indicator{position:absolute;top:-44px;left:0;right:0;height:44px;display:flex;align-items:center;justify-content:center;z-index:10;pointer-events:none}
 .ptr-spinner{opacity:0;display:flex;align-items:center;justify-content:center}
 .ptr-spinner-ring{width:22px;height:22px;border:1.5px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.65s linear infinite;flex-shrink:0}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -2481,19 +2481,24 @@ function setupPTR(wrapperId, scrollId, spinnerId, refreshFn) {
     if(triggered && !refreshing) {
       // Snap both content and indicator back together, keep spinner visible
       scroll.style.transition = SNAP;
-      scroll.style.transform = 'translateY(0)';
+      scroll.style.transform = 'translateY(44px)';
       indicator.style.transition = SNAP;
-      indicator.style.transform = 'translateY(0)';
+      indicator.style.transform = 'translateY(44px)';
       spinner.style.transition = 'opacity 0.2s ease';
       spinner.style.opacity = '1';
       refreshing = true;
       refreshFn().finally(() => {
         setTimeout(() => {
+          scroll.style.transition = SNAP;
+          scroll.style.transform = 'translateY(0)';
+          indicator.style.transition = SNAP;
+          indicator.style.transform = 'translateY(0)';
           spinner.style.transition = 'opacity 0.25s ease';
           spinner.style.opacity = '0';
           setTimeout(() => {
             spinner.style.opacity = '';
             spinner.style.transition = '';
+            scroll.style.cssText = '';
             indicator.style.cssText = '';
             refreshing = false;
           }, 260);
