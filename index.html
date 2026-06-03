@@ -871,6 +871,35 @@ function initScreen(screen) {
 }
 
 
+// ── TEXT FORMATTER ───────────────────────────────────────────────────────────
+function formatDescription(text) {
+  if(!text) return '';
+  const lines = text.split('\n');
+  let html = '';
+  let inList = false;
+  for(const raw of lines) {
+    const line = raw; // preserve spacing
+    if(line.match(/^-\s+/)) {
+      if(!inList) { html += '<ul style="margin:4px 0 4px 16px;padding:0;list-style:disc">'; inList = true; }
+      html += `<li style="margin-bottom:3px">${escHtml(line.replace(/^-\s+/,''))}</li>`;
+    } else {
+      if(inList) { html += '</ul>'; inList = false; }
+      if(line.trim() === '') {
+        html += '<br>';
+      } else {
+        html += `<span>${escHtml(line)}</span><br>`;
+      }
+    }
+  }
+  if(inList) html += '</ul>';
+  // Remove trailing <br>
+  return html.replace(/(<br>)+$/, '');
+}
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 // ── OVERLAY OPEN / CLOSE (animated) ────────────────────────────────────────
 function openOverlay(id) {
   const el = document.getElementById(id);
@@ -2076,7 +2105,7 @@ async function openDetail(productId) {
         <div id="kitInstancesFor-${p.id}" style="margin-top:10px"></div>
       </div>
 
-      ${p.description ? `<div class="detail-section"><div class="detail-section-title">Description</div><div class="detail-text">${p.description}</div></div>` : ''}
+      ${p.description ? `<div class="detail-section"><div class="detail-section-title">Description</div><div class="detail-text">${formatDescription(p.description)}</div></div>` : ''}
 
       <div class="detail-section">
         <div class="detail-section-title">Personal Notes</div>
