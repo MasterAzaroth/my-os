@@ -989,9 +989,7 @@ function updateDateNav() {
 
 let currentSession = (now.getHours() >= 3 && now.getHours() < 15) ? 'Morning' : 'Evening';
 let steps = [];
-let stepState = {};
-let stepProducts = {}; // id -> selected product id
-let hasChanges = false;
+let stepProducts = {};
 let ownedProducts = [];
 let kitFilter = 'All';
 let products = [];
