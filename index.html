@@ -651,6 +651,212 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
       <div class="done-sub" id="doneSubtext"></div>
     </div>
   </div>
+
+  <div class="screen" id="screen-kit">
+    <div class="page-header">
+      <div class="page-label">Self Care</div>
+      <div class="page-title">My Kit</div>
+      <div class="page-subtitle" id="kitSubtitle"><span id="kitSubtitleNum" style="transition:opacity 0.3s ease"></span><span id="kitSubtitleText"></span></div>
+    </div>
+    <div style="display:flex;align-items:center;padding:8px 14px 8px 20px;gap:6px;flex-shrink:0">
+      <div id="kitFilter" style="display:flex;gap:6px;overflow-x:auto;flex:1;-webkit-overflow-scrolling:touch;scrollbar-width:none"></div>
+      <button class="lib-sort-pill" id="kitSortPill" onclick="openKitSortMenu()" style="margin-left:8px">
+        <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M1 3h12M3 7h8M5 11h4" stroke="var(--bg)" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M7 1L4 4M7 1l3 3M7 13L4 10M7 13l3-3" stroke="var(--bg)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <select class="lib-sort-select" id="kitSort" onchange="renderKit()" style="position:absolute;opacity:0;pointer-events:none;width:1px;height:1px">
+        <option value="date_desc">Date ↓</option>
+        <option value="date_asc">Date ↑</option>
+        <option value="name_asc">Name ↑</option>
+        <option value="name_desc">Name ↓</option>
+        <option value="price_asc">Price ↑</option>
+        <option value="price_desc">Price ↓</option>
+        <option value="amount_desc">Amount ↓</option>
+        <option value="amount_asc">Amount ↑</option>
+      </select>
+    </div>
+    <div class="ptr-wrap" id="kitPtrWrap">
+      <div class="ptr-indicator"><div class="ptr-spinner" id="kitSpinner"><div class="ptr-spinner-ring"></div></div></div>
+      <div class="scroll" id="kitScroll">
+        <div id="kitGrid">
+        <div id="kitGrid"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIBRARY -->
+
+  <div class="screen" id="screen-library">
+    <div class="page-header" style="padding-bottom:12px;display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div class="page-label">Leo OS</div>
+        <div class="page-title">Library</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="scan-btn" onclick="toggleCompareMode()" id="compareToggle" title="Compare products" style="font-size:12px;font-family:var(--sans);width:auto;padding:0 10px;border-radius:20px">Compare</button>
+        <button class="scan-btn" onclick="openBarcodeScanner()" title="Scan barcode">⌻</button>
+        <button class="add-product-btn" onclick="openProductForm()">+</button>
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div class="lib-search-wrap">
+      <div class="lib-search-inner">
+        <span class="lib-search-icon">⌕</span>
+        <input class="lib-search" id="libSearch" placeholder="Search products..." oninput="filterLibrary()">
+      </div>
+    </div>
+
+    <!-- List tabs + sort pill -->
+    <div class="lib-lists">
+      <div class="lib-lists-inner" id="libLists"></div>
+      <button class="lib-sort-pill" id="libSortPill" onclick="openLibSortMenu()">
+        <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M1 3h12M3 7h8M5 11h4" stroke="var(--bg)" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M7 1L4 4M7 1l3 3M7 13L4 10M7 13l3-3" stroke="var(--bg)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <select class="lib-sort-select" id="libSort" onchange="filterLibrary()" style="position:absolute;opacity:0;pointer-events:none;width:1px;height:1px">
+        <option value="name">Name</option>
+        <option value="brand">Brand</option>
+        <option value="rating">Rating</option>
+        <option value="newest">Newest</option>
+      </select>
+    </div>
+
+    <!-- Filter row -->
+    <div class="lib-filter-row" id="libFilterRow"></div>
+
+    <!-- Grid -->
+    <div class="ptr-wrap" id="libPtrWrap">
+      <div class="ptr-indicator"><div class="ptr-spinner" id="libSpinner"><div class="ptr-spinner-ring"></div></div></div>
+      <div class="scroll" id="libScroll">
+        <div class="lib-grid" id="libGrid">
+          <div style="grid-column:span 2" class="loading"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRODUCT DETAIL OVERLAY -->
+  <div class="detail-overlay" id="detailOverlay">
+    <div class="detail-sheet" id="detailSheet">
+      <div class="detail-actions">
+        <button class="detail-action-btn" onclick="editProduct()">Edit</button>
+        <button class="detail-action-btn detail-delete-btn" onclick="deleteProduct()">Delete</button>
+      </div>
+      <button class="detail-close" onclick="closeDetail()">✕</button>
+      <div class="detail-body" id="detailBody"></div>
+    </div>
+  </div>
+
+  <!-- ADD PRODUCT FORM OVERLAY -->
+  <div class="form-overlay" id="formOverlay">
+    <div class="form-sheet" id="formSheet">
+      <div class="form-header">
+        <button class="form-back" id="formBack" onclick="formPrev()">←</button>
+        <div class="form-step-indicator" id="formStepIndicator"></div>
+        <button class="form-close" onclick="closeProductForm()">✕</button>
+      </div>
+      <div class="form-title-row">
+        <div class="form-step-label" id="formStepLabel"></div>
+        <div class="form-step-title" id="formStepTitle"></div>
+      </div>
+      <div class="form-body" id="formBody"></div>
+      <div class="form-footer">
+        <button class="form-next-btn" id="formNextBtn" onclick="formNext()">Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPARE OVERLAY -->
+  <div class="form-overlay" id="compareOverlay">
+    <div class="form-sheet" style="max-height:96vh">
+      <div class="form-header">
+        <div style="font-size:13px;color:var(--text2);font-weight:500">Compare Products</div>
+        <button class="form-close" onclick="closeCompare()">✕</button>
+      </div>
+      <div style="flex:1;overflow-y:auto;padding:16px 20px" id="compareBody"></div>
+    </div>
+  </div>
+
+  <!-- BARCODE SCANNER -->
+  <div id="barcodeOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,0);z-index:500;display:none;align-items:flex-end;backdrop-filter:blur(0px);transition:background 0.35s ease,backdrop-filter 0.35s ease"><div id="barcodeSheet" style="background:#000;border-radius:24px 24px 0 0;width:100%;height:92vh;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;transform:translateY(100%);transition:transform 0.45s cubic-bezier(0.16,1,0.3,1);overflow:hidden">
+    <video id="barcodeVideo" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0" playsinline muted></video>
+    
+    <!-- Viewfinder -->
+    <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;width:100%;padding:0 30px">
+      <div style="width:100%;max-width:300px;height:130px;position:relative;margin-bottom:20px">
+        <div style="position:absolute;inset:0;border:2px solid var(--accent);border-radius:12px;opacity:0.9"></div>
+        <div style="position:absolute;top:-1px;left:-1px;width:24px;height:24px;border-top:3px solid var(--accent);border-left:3px solid var(--accent);border-radius:10px 0 0 0"></div>
+        <div style="position:absolute;top:-1px;right:-1px;width:24px;height:24px;border-top:3px solid var(--accent);border-right:3px solid var(--accent);border-radius:0 10px 0 0"></div>
+        <div style="position:absolute;bottom:-1px;left:-1px;width:24px;height:24px;border-bottom:3px solid var(--accent);border-left:3px solid var(--accent);border-radius:0 0 0 10px"></div>
+        <div style="position:absolute;bottom:-1px;right:-1px;width:24px;height:24px;border-bottom:3px solid var(--accent);border-right:3px solid var(--accent);border-radius:0 0 10px 0"></div>
+        <div id="scanLine" style="position:absolute;top:0;left:4px;right:4px;height:2px;background:var(--accent);border-radius:2px;opacity:0.8;animation:scanAnim 2s ease-in-out infinite"></div>
+      </div>
+      <div id="barcodeStatus" style="font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:24px;text-align:center">Point camera at barcode</div>
+      
+      <!-- Manual entry toggle -->
+      <div id="manualWrap" style="width:100%;max-width:300px;display:none;flex-direction:column;gap:8px">
+        <div style="display:flex;gap:8px">
+          <input id="manualBarcodeInput" style="flex:1;background:rgba(255,255,255,0.1);border:0.5px solid rgba(255,255,255,0.2);border-radius:10px;padding:10px 14px;color:#fff;font-size:14px;outline:none;font-family:var(--sans)" placeholder="Enter barcode number..." type="number">
+          <button onclick="submitManualBarcode()" style="background:var(--accent);border:none;color:var(--bg);padding:10px 16px;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);white-space:nowrap">Look up</button>
+        </div>
+      </div>
+
+      <button onclick="toggleManualEntry()" id="manualToggleBtn" style="font-size:12px;color:rgba(255,255,255,0.4);background:transparent;border:none;padding:8px;cursor:pointer;font-family:var(--sans)">Enter barcode manually</button>
+    </div>
+
+    <button onclick="closeBarcodeScanner()" style="position:absolute;top:calc(20px + env(safe-area-inset-top,0px));right:20px;background:rgba(30,30,30,0.8);border:0.5px solid rgba(255,255,255,0.1);color:#fff;width:36px;height:36px;border-radius:50%;font-size:16px;cursor:pointer;z-index:3;backdrop-filter:blur(4px)">✕</button>
+  </div></div>
+
+  <!-- ADD TO KIT FLOW -->
+  <div class="kit-flow-overlay" id="kitFlowOverlay">
+    <div class="kit-flow-sheet">
+      <div class="kit-flow-header">
+        <div class="kit-flow-title">Add to My Kit</div>
+        <button onclick="closeKitFlow()" style="background:var(--bg3);border:0.5px solid var(--border2);color:var(--text3);width:30px;height:30px;border-radius:50%;font-size:12px;cursor:pointer;font-family:var(--sans)">✕</button>
+      </div>
+      <div class="kit-flow-body" id="kitFlowBody"></div>
+      <div class="kit-flow-footer">
+        <button class="kit-save-btn" onclick="saveKitItem()">Add to Kit</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP PICKER OVERLAY — identical structure to kit-flow-overlay -->
+  <div class="kit-flow-overlay" id="stepPickerOverlay" style="z-index:500">
+    <div class="kit-flow-sheet">
+      <div class="kit-flow-header">
+        <div id="stepPickerTitle" style="font-family:var(--serif);font-size:20px;color:var(--text)"></div>
+        <button onclick="closeStepPicker()" class="form-close">✕</button>
+      </div>
+      <div class="kit-flow-body" id="stepPickerList" style="padding:16px 20px 20px"></div>
+    </div>
+  </div>
+
+  <!-- PURCHASE SOURCE OVERLAY -->
+  <div class="kit-flow-overlay" id="purchaseOverlay" style="z-index:600">
+    <div class="kit-flow-sheet">
+      <div class="kit-flow-header">
+        <div style="font-family:var(--serif);font-size:20px;color:var(--text)">Where did you buy it?</div>
+        <button onclick="closePurchaseOverlay()" style="background:var(--bg3);border:0.5px solid var(--border2);color:var(--text3);width:30px;height:30px;border-radius:50%;font-size:12px;cursor:pointer;font-family:var(--sans)">✕</button>
+      </div>
+      <div class="kit-flow-body" id="purchaseBody" style="padding:16px 20px 20px"></div>
+    </div>
+  </div>
+
+  <!-- KIT ITEM EDIT OVERLAY -->
+  <div class="kit-flow-overlay" id="kitEditOverlay" style="z-index:600">
+    <div class="kit-flow-sheet">
+      <div class="kit-flow-header">
+        <div id="kitEditTitle" style="font-family:var(--serif);font-size:20px;color:var(--text)"></div>
+        <button onclick="closeKitEdit()" style="background:var(--bg3);border:0.5px solid var(--border2);color:var(--text3);width:30px;height:30px;border-radius:50%;font-size:12px;cursor:pointer;font-family:var(--sans)">✕</button>
+      </div>
+      <div class="kit-flow-body" id="kitEditBody"></div>
+    </div>
+  </div>
+
+  <!-- PLANNER TAB -->
   <!-- KIT ITEM EDIT OVERLAY -->
   <div class="kit-flow-overlay" id="kitEditOverlay" style="z-index:600">
     <div class="kit-flow-sheet">
