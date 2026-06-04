@@ -218,43 +218,67 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
 .kit-state-passive{background:rgba(80,80,80,0.15);color:var(--text3)}
 
 /* ── PLANNER ─────────────────────────────────────────────────────────────── */
+.planner-tabs{display:flex;gap:4px;padding:10px 16px 0;flex-shrink:0}
+.planner-tab{flex:1;padding:8px 4px;border-radius:12px;border:none;background:transparent;color:var(--text3);font-size:11px;font-family:var(--sans);cursor:pointer;transition:all 0.2s;font-weight:500;text-align:center}
+.planner-tab.active{background:var(--bg3);color:var(--text);border:0.5px solid var(--border2)}
+.planner-pane{display:none;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px 24px}
+.planner-pane.active{display:block}
 .planner-add-btn{background:var(--accent);border:none;color:var(--bg);width:32px;height:32px;border-radius:50%;font-size:20px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:4px;font-family:var(--sans)}
-.planner-section{margin-bottom:10px;border-radius:16px;background:var(--bg2);border:0.5px solid var(--border);overflow:hidden}
-.planner-section-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer;user-select:none}
-.planner-section-left{display:flex;align-items:center;gap:10px}
-.planner-section-icon{font-size:16px}
-.planner-section-title{font-size:14px;font-weight:500;color:var(--text)}
-.planner-section-count{font-size:11px;color:var(--text3);background:var(--bg3);padding:2px 7px;border-radius:8px}
-.planner-section-chevron{font-size:12px;color:var(--text3);transition:transform 0.25s ease}
-.planner-section-chevron.open{transform:rotate(180deg)}
-.planner-section-body{border-top:0.5px solid var(--border)}
-.planner-section-add{display:flex;align-items:center;justify-content:center;padding:10px;border-bottom:0.5px solid var(--border);cursor:pointer;color:var(--text3);font-size:12px;gap:6px;transition:background 0.2s}
-.planner-section-add:active{background:var(--bg3)}
-.planner-card{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:0.5px solid var(--border);cursor:pointer;transition:background 0.2s}
-.planner-card:last-child{border-bottom:none}
-.planner-card:active{background:var(--bg3)}
-.planner-card-icon{font-size:22px;width:36px;height:36px;border-radius:10px;background:var(--bg3);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.planner-card-info{flex:1;min-width:0}
-.planner-card-name{font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.planner-card-sub{font-size:11px;color:var(--text3);margin-top:2px}
-.planner-card-badge{font-size:10px;padding:2px 7px;border-radius:8px;flex-shrink:0}
-.planner-card-meta{display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap}
-.planner-tag{font-size:10px;padding:2px 7px;border-radius:8px;background:var(--bg3);color:var(--text3)}
-.planner-progress-dots{display:flex;gap:4px;margin-top:4px}
-.planner-dot{width:8px;height:8px;border-radius:50%;background:var(--border2)}
-.planner-dot.done{background:var(--accent)}
+/* Routine cards */
+.routine-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:16px;padding:16px;margin-bottom:10px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:14px}
+.routine-card:active{background:var(--bg3);transform:scale(0.99)}
+.routine-card-icon{width:44px;height:44px;border-radius:12px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.routine-card-info{flex:1;min-width:0}
+.routine-card-name{font-size:14px;font-weight:500;color:var(--text)}
+.routine-card-meta{font-size:11px;color:var(--text3);margin-top:3px}
+.routine-card-tags{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap}
+/* Goal cards */
+.goal-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:16px;padding:16px;margin-bottom:10px;cursor:pointer;transition:all 0.2s}
+.goal-card:active{background:var(--bg3)}
+.goal-card-name{font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px}
+.goal-card-freq{font-size:11px;color:var(--text3);margin-bottom:10px}
+.goal-dots{display:flex;gap:5px;flex-wrap:wrap}
+.goal-dot{width:10px;height:10px;border-radius:50%;background:var(--border2);transition:background 0.2s}
+.goal-dot.done{background:var(--accent)}
+/* Experiment cards */
+.exp-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:16px;padding:16px;margin-bottom:10px;cursor:pointer;transition:all 0.2s;display:flex;gap:12px;align-items:flex-start}
+.exp-card:active{background:var(--bg3)}
+.exp-card-img{width:48px;height:48px;border-radius:10px;background:var(--bg3);flex-shrink:0;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:20px}
+.exp-card-img img{width:100%;height:100%;object-fit:contain}
+.exp-card-info{flex:1;min-width:0}
+.exp-card-name{font-size:13px;font-weight:500;color:var(--text)}
+.exp-card-sub{font-size:11px;color:var(--text3);margin-top:2px}
+.exp-progress{margin-top:8px;height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.exp-progress-fill{height:100%;background:var(--accent);border-radius:2px}
+/* Scheduler */
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.cal-month-label{font-size:15px;font-weight:500;color:var(--text);font-family:var(--serif)}
+.cal-nav-btn{background:var(--bg3);border:0.5px solid var(--border);color:var(--text2);width:28px;height:28px;border-radius:50%;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal-day-label{font-size:9px;color:var(--text3);text-align:center;padding-bottom:6px;text-transform:uppercase;letter-spacing:0.06em}
+.cal-day{aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:4px 2px;cursor:pointer;transition:background 0.15s;position:relative}
+.cal-day:active{background:var(--bg3)}
+.cal-day.today .cal-day-num{background:var(--accent);color:var(--bg);border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center}
+.cal-day.other-month .cal-day-num{color:var(--text3)}
+.cal-day-num{font-size:11px;color:var(--text2);line-height:1;margin-bottom:2px}
+.cal-dots{display:flex;gap:2px;flex-wrap:wrap;justify-content:center;margin-top:1px}
+.cal-dot{width:4px;height:4px;border-radius:50%}
+/* Slide-in sub-page */
+.planner-subpage{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg);z-index:300;display:flex;flex-direction:column;transform:translateX(100%);transition:transform 0.35s cubic-bezier(0.16,1,0.3,1)}
+.planner-subpage.open{transform:translateX(0)}
+.planner-subpage-header{display:flex;align-items:center;gap:12px;padding:calc(var(--safe-top) + 16px) 16px 12px;border-bottom:0.5px solid var(--border);flex-shrink:0}
+.planner-back-btn{background:var(--bg3);border:0.5px solid var(--border2);color:var(--text2);padding:6px 12px;border-radius:12px;font-size:12px;cursor:pointer;font-family:var(--sans);display:flex;align-items:center;gap:4px}
+.planner-subpage-title{font-family:var(--serif);font-size:20px;color:var(--text);flex:1}
+.planner-subpage-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px}
+/* Shared */
 .planner-type-btn{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--bg2);border:0.5px solid var(--border);border-radius:14px;cursor:pointer;text-align:left;width:100%;transition:all 0.2s;font-family:var(--sans)}
 .planner-type-btn:active{background:var(--bg3)}
 .planner-type-icon{font-size:24px;flex-shrink:0}
 .planner-type-title{font-size:13px;font-weight:500;color:var(--text)}
 .planner-type-sub{font-size:11px;color:var(--text3);margin-top:2px}
-.experiment-status-active{background:rgba(74,124,89,0.15);color:#4a7c59}
-.experiment-status-concluded{background:rgba(74,74,138,0.15);color:#6a6aaa}
-.experiment-status-abandoned{background:rgba(80,80,80,0.15);color:var(--text3)}
 .checkin-card{background:var(--bg3);border-radius:12px;padding:12px;margin-bottom:8px}
-.checkin-date{font-size:10px;color:var(--text3);margin-bottom:6px}
+.checkin-date{font-size:10px;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em}
 .checkin-notes{font-size:12px;color:var(--text2);line-height:1.5}
-.skin-tag{display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:2px 8px;border-radius:8px;background:var(--bg2);color:var(--text3);margin:2px}
 
 /* EMPTY / LOADING */
 .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 40px;text-align:center;flex:1}
@@ -809,21 +833,51 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
         <div class="page-label">Self Care</div>
         <div class="page-title">Planner</div>
       </div>
-      <button class="planner-add-btn" onclick="openPlannerAdd()">+</button>
+      <button class="planner-add-btn" id="plannerAddBtn" onclick="openPlannerAdd()">+</button>
     </div>
-    <div class="scroll" id="plannerScroll" style="padding:0 16px 24px">
-      <div id="plannerSections"></div>
+    <!-- Inner tab bar -->
+    <div class="planner-tabs">
+      <button class="planner-tab active" id="ptab-operator"   onclick="switchPlannerTab('operator')">Operator</button>
+      <button class="planner-tab"        id="ptab-scheduler"  onclick="switchPlannerTab('scheduler')">Scheduler</button>
+      <button class="planner-tab"        id="ptab-goals"      onclick="switchPlannerTab('goals')">Goals</button>
+      <button class="planner-tab"        id="ptab-lab"        onclick="switchPlannerTab('lab')">Lab</button>
+    </div>
+    <!-- Operator pane -->
+    <div class="planner-pane active" id="pane-operator">
+      <div id="operatorContent"></div>
+    </div>
+    <!-- Scheduler pane -->
+    <div class="planner-pane" id="pane-scheduler">
+      <div id="schedulerContent"></div>
+    </div>
+    <!-- Goals pane -->
+    <div class="planner-pane" id="pane-goals">
+      <div id="goalsContent"></div>
+    </div>
+    <!-- Lab pane -->
+    <div class="planner-pane" id="pane-lab">
+      <div id="labContent"></div>
     </div>
   </div>
 
-  <!-- PLANNER ITEM CREATE OVERLAY -->
+  <!-- PLANNER SUB-PAGE (slide in from right) -->
+  <div class="planner-subpage" id="plannerSubpage">
+    <div class="planner-subpage-header">
+      <button class="planner-back-btn" onclick="closePlannerSubpage()">‹ Back</button>
+      <div class="planner-subpage-title" id="plannerSubpageTitle"></div>
+      <div id="plannerSubpageActions"></div>
+    </div>
+    <div class="planner-subpage-body" id="plannerSubpageBody"></div>
+  </div>
+
+  <!-- PLANNER ADD TYPE PICKER -->
   <div class="kit-flow-overlay" id="plannerAddOverlay" style="z-index:600">
     <div class="kit-flow-sheet">
       <div class="kit-flow-header">
-        <div style="font-family:var(--serif);font-size:20px;color:var(--text)">Add to Planner</div>
+        <div style="font-family:var(--serif);font-size:20px;color:var(--text)" id="plannerAddTitle">Add to Planner</div>
         <button onclick="closeOverlay('plannerAddOverlay')" style="background:var(--bg3);border:0.5px solid var(--border2);color:var(--text3);width:30px;height:30px;border-radius:50%;font-size:12px;cursor:pointer">✕</button>
       </div>
-      <div class="kit-flow-body" style="padding:16px 20px 20px;display:flex;flex-direction:column;gap:10px">
+      <div class="kit-flow-body" style="padding:16px 20px 20px;display:flex;flex-direction:column;gap:10px" id="plannerAddBody">
         <button class="planner-type-btn" onclick="openPlannerForm('routine')">
           <span class="planner-type-icon">📋</span>
           <div><div class="planner-type-title">Routine</div><div class="planner-type-sub">A reusable list of steps</div></div>
@@ -852,17 +906,6 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
         <button onclick="closePlannerForm()" style="background:var(--bg3);border:0.5px solid var(--border2);color:var(--text3);width:30px;height:30px;border-radius:50%;font-size:12px;cursor:pointer">✕</button>
       </div>
       <div class="kit-flow-body" id="plannerFormBody" style="padding:16px 20px 20px"></div>
-    </div>
-  </div>
-
-  <!-- PLANNER DETAIL OVERLAY -->
-  <div class="kit-flow-overlay" id="plannerDetailOverlay" style="z-index:600">
-    <div class="kit-flow-sheet" style="max-height:96vh">
-      <div class="kit-flow-header">
-        <div id="plannerDetailTitle" style="font-family:var(--serif);font-size:20px;color:var(--text)"></div>
-        <button onclick="closeOverlay('plannerDetailOverlay')" style="background:var(--bg3);border:0.5px solid var(--border2);color:var(--text3);width:30px;height:30px;border-radius:50%;font-size:12px;cursor:pointer">✕</button>
-      </div>
-      <div class="kit-flow-body" id="plannerDetailBody" style="padding:16px 20px 20px"></div>
     </div>
   </div>
 
@@ -3677,167 +3720,343 @@ requestAnimationFrame(() => requestAnimationFrame(() => {
 }));
 
 
-// ── PLANNER ───────────────────────────────────────────────────────────────────
+// ── PLANNER ──────────────────────────────────────────────────────────────────
 
 let plannerData = { routines:[], scheduled:[], goals:[], experiments:[] };
-let plannerSectionOrder = JSON.parse(localStorage.getItem('plannerSectionOrder')||'["routines","scheduled","goals","experiments"]');
-let plannerSectionOpen = JSON.parse(localStorage.getItem('plannerSectionOpen')||'{"routines":true,"scheduled":true,"goals":true,"experiments":true}');
-let plannerFormType = null;
-let plannerEditId = null;
+let plannerActiveTab = 'operator';
 let plannerProducts = [];
+let plannerFormType = null;
+let calMonth = new Date().getMonth();
+let calYear  = new Date().getFullYear();
 
 async function initPlanner() {
   await loadPlannerData();
-  renderPlanner();
+  switchPlannerTab(plannerActiveTab, true);
 }
 
 async function loadPlannerData() {
   try {
     const [routines, scheduled, goals, experiments, prods] = await Promise.all([
-      api('routines', '?order=created_at.desc'),
-      api('scheduled_treatments', '?done=eq.false&order=scheduled_date.asc'),
-      api('goals', '?active=eq.true&order=created_at.desc'),
-      api('experiments', '?status=eq.active&order=created_at.desc'),
-      api('products', '?select=id,name,brand,cover_image_url,image_url&order=name.asc')
+      api('routines','?order=created_at.desc'),
+      api('scheduled_treatments','?done=eq.false&order=scheduled_date.asc'),
+      api('goals','?active=eq.true&order=created_at.desc'),
+      api('experiments','?status=eq.active&order=created_at.desc'),
+      api('products','?order=name.asc')
     ]);
-    plannerData.routines = routines||[];
-    plannerData.scheduled = scheduled||[];
-    plannerData.goals = goals||[];
-    plannerData.experiments = experiments||[];
-    plannerProducts = prods||[];
+    plannerData.routines    = Array.isArray(routines)    ? routines    : [];
+    plannerData.scheduled   = Array.isArray(scheduled)   ? scheduled   : [];
+    plannerData.goals       = Array.isArray(goals)       ? goals       : [];
+    plannerData.experiments = Array.isArray(experiments) ? experiments : [];
+    plannerProducts         = Array.isArray(prods)       ? prods       : [];
   } catch(e) { console.error('loadPlannerData:', e); }
 }
 
-function renderPlanner() {
-  const sections = {
-    routines:   { icon:'📋', title:'Routines',   items: plannerData.routines },
-    scheduled:  { icon:'📅', title:'Scheduled',  items: plannerData.scheduled },
-    goals:      { icon:'🎯', title:'Goals',       items: plannerData.goals },
-    experiments:{ icon:'🧪', title:'Experiments', items: plannerData.experiments }
-  };
-  document.getElementById('plannerSections').innerHTML = plannerSectionOrder.map(key => {
-    const s = sections[key];
-    const open = plannerSectionOpen[key];
-    const cards = s.items.map(item => renderPlannerCard(key, item)).join('');
-    return `<div class="planner-section" id="psec-${key}">
-      <div class="planner-section-header" onclick="togglePlannerSection('${key}')">
-        <div class="planner-section-left">
-          <span class="planner-section-icon">${s.icon}</span>
-          <span class="planner-section-title">${s.title}</span>
-          <span class="planner-section-count">${s.items.length}</span>
-        </div>
-        <span class="planner-section-chevron${open?' open':''}">▾</span>
+function switchPlannerTab(tab, force=false) {
+  if(plannerActiveTab === tab && !force) return;
+  plannerActiveTab = tab;
+  document.querySelectorAll('.planner-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.planner-pane').forEach(p => p.classList.remove('active'));
+  document.getElementById('ptab-'+tab)?.classList.add('active');
+  document.getElementById('pane-'+tab)?.classList.add('active');
+  // Update + button context
+  const addBtn = document.getElementById('plannerAddBtn');
+  if(addBtn) addBtn.style.display = tab==='scheduler' ? 'none' : 'flex';
+  if(tab==='operator')  renderOperator();
+  if(tab==='scheduler') renderScheduler();
+  if(tab==='goals')     renderGoals();
+  if(tab==='lab')       renderLab();
+}
+
+// ── OPERATOR ─────────────────────────────────────────────────────────────────
+function renderOperator() {
+  const el = document.getElementById('operatorContent');
+  if(!plannerData.routines.length) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-glyph">📋</div><div class="empty-title">No routines yet</div><div class="empty-sub">Tap + to create your first routine</div></div>`;
+    return;
+  }
+  el.innerHTML = plannerData.routines.map(r => `
+    <div class="routine-card" onclick="openRoutineDetail('${r.id}')">
+      <div class="routine-card-icon">${r.emoji||'📋'}</div>
+      <div class="routine-card-info">
+        <div class="routine-card-name">${r.name}</div>
+        <div class="routine-card-meta">Tap to view steps &amp; schedule</div>
       </div>
-      ${open ? `<div class="planner-section-body">
-        <div class="planner-section-add" onclick="openPlannerForm('${key.replace(/s$/,'')}')">
-          <span>+</span><span>Add ${s.title.replace(/s$/,'')}</span>
-        </div>
-        ${cards || `<div style="padding:20px;text-align:center;font-size:12px;color:var(--text3)">Nothing here yet</div>`}
-      </div>` : ''}
+      <span style="color:var(--text3);font-size:16px">›</span>
+    </div>`).join('');
+}
+
+async function openRoutineDetail(id) {
+  const r = plannerData.routines.find(x=>x.id===id);
+  if(!r) return;
+  let steps = [];
+  try { steps = await api('routine_steps',`?routine_id=eq.${id}&order=order_index.asc`); } catch(e){}
+  const stepList = steps.length
+    ? steps.map((s,i) => `
+        <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:0.5px solid var(--border)">
+          <span style="font-size:11px;color:var(--text3);width:18px;flex-shrink:0">${i+1}</span>
+          <span style="font-size:13px;color:var(--text);flex:1">${s.step_name}</span>
+          <button onclick="deleteRoutineStep('${s.id}','${id}')" style="background:none;border:none;color:var(--text3);font-size:16px;cursor:pointer;padding:0 4px">×</button>
+        </div>`).join('')
+    : `<div style="padding:20px 0;text-align:center;font-size:12px;color:var(--text3)">No steps yet — add one below</div>`;
+
+  openPlannerSubpage(r.emoji+' '+r.name, `
+    <div style="margin-bottom:20px">
+      <div class="form-label" style="margin-bottom:10px">Steps</div>
+      <div id="routineStepList">${stepList}</div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <input class="form-input" id="rsp_name" placeholder="New step name..." style="flex:1">
+        <button onclick="addRoutineStep('${id}')" style="padding:10px 16px;border-radius:12px;border:none;background:var(--accent);color:var(--bg);font-size:13px;cursor:pointer;font-family:var(--sans);flex-shrink:0">Add</button>
+      </div>
+    </div>
+    <button onclick="deletePlannerItem('routines','${id}')" style="width:100%;padding:12px;border-radius:14px;border:0.5px solid var(--border2);background:transparent;color:var(--red,#c45);font-size:13px;cursor:pointer;font-family:var(--sans)">Delete Routine</button>
+  `);
+}
+
+async function addRoutineStep(routineId) {
+  const name = document.getElementById('rsp_name')?.value.trim();
+  if(!name) return;
+  let steps = [];
+  try { steps = await api('routine_steps',`?routine_id=eq.${routineId}&order=order_index.asc`); } catch(e){}
+  await fetch(`${SUPABASE_URL}/rest/v1/routine_steps`, {
+    method:'POST',
+    headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
+    body: JSON.stringify({ routine_id:routineId, step_name:name, order_index:steps.length })
+  });
+  showToast('Step added');
+  openRoutineDetail(routineId);
+}
+
+async function deleteRoutineStep(stepId, routineId) {
+  await fetch(`${SUPABASE_URL}/rest/v1/routine_steps?id=eq.${stepId}`, {
+    method:'DELETE', headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`}
+  });
+  openRoutineDetail(routineId);
+}
+
+// ── SCHEDULER ────────────────────────────────────────────────────────────────
+function renderScheduler() {
+  const el = document.getElementById('schedulerContent');
+  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const DAYS   = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+  const today  = new Date();
+
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+  const daysInPrev  = new Date(calYear, calMonth, 0).getDate();
+
+  // Build dot data per day from scheduled_treatments
+  const dotMap = {};
+  plannerData.scheduled.forEach(s => {
+    const d = new Date(s.scheduled_date+'T00:00:00');
+    if(d.getMonth()===calMonth && d.getFullYear()===calYear) {
+      const k = d.getDate();
+      if(!dotMap[k]) dotMap[k] = [];
+      dotMap[k].push('#c8b89a');
+    }
+  });
+
+  let cells = '';
+  // Prev month padding
+  for(let i=firstDay-1;i>=0;i--) {
+    cells += `<div class="cal-day other-month"><div class="cal-day-num">${daysInPrev-i}</div></div>`;
+  }
+  // Current month
+  for(let d=1;d<=daysInMonth;d++) {
+    const isToday = d===today.getDate() && calMonth===today.getMonth() && calYear===today.getFullYear();
+    const dots = (dotMap[d]||[]).slice(0,4).map(c=>`<div class="cal-dot" style="background:${c}"></div>`).join('');
+    cells += `<div class="cal-day${isToday?' today':''}" onclick="openCalDay(${d})">
+      <div class="cal-day-num">${d}</div>
+      <div class="cal-dots">${dots}</div>
+    </div>`;
+  }
+  // Next month padding
+  const total = firstDay + daysInMonth;
+  const remaining = (7 - (total%7))%7;
+  for(let i=1;i<=remaining;i++) {
+    cells += `<div class="cal-day other-month"><div class="cal-day-num">${i}</div></div>`;
+  }
+
+  el.innerHTML = `
+    <div class="cal-header">
+      <button class="cal-nav-btn" onclick="shiftCalMonth(-1)">‹</button>
+      <div class="cal-month-label">${MONTHS[calMonth]} ${calYear}</div>
+      <button class="cal-nav-btn" onclick="shiftCalMonth(1)">›</button>
+    </div>
+    <div class="cal-grid">
+      ${DAYS.map(d=>`<div class="cal-day-label">${d}</div>`).join('')}
+      ${cells}
+    </div>
+    <div style="margin-top:20px">
+      <div class="form-label" style="margin-bottom:10px">Upcoming Treatments</div>
+      ${plannerData.scheduled.length
+        ? plannerData.scheduled.slice(0,10).map(s => {
+            const d = new Date(s.scheduled_date+'T00:00:00').toLocaleDateString('en',{weekday:'short',month:'short',day:'numeric'});
+            return `<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:0.5px solid var(--border)">
+              <span style="font-size:11px;color:var(--accent);width:80px;flex-shrink:0">${d}</span>
+              <span style="font-size:13px;color:var(--text);flex:1">${s.name}</span>
+              <button onclick="markScheduledDone('${s.id}')" style="background:none;border:none;color:var(--text3);font-size:16px;cursor:pointer">✓</button>
+            </div>`;
+          }).join('')
+        : `<div style="padding:20px 0;text-align:center;font-size:12px;color:var(--text3)">No upcoming treatments</div>`}
+    </div>`;
+}
+
+function shiftCalMonth(dir) {
+  calMonth += dir;
+  if(calMonth > 11) { calMonth=0; calYear++; }
+  if(calMonth < 0)  { calMonth=11; calYear--; }
+  renderScheduler();
+}
+
+function openCalDay(day) {
+  const date = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+  const items = plannerData.scheduled.filter(s=>s.scheduled_date===date);
+  const d = new Date(date+'T00:00:00').toLocaleDateString('en',{weekday:'long',month:'long',day:'numeric'});
+  if(!items.length) { showToast('Nothing scheduled this day'); return; }
+  const list = items.map(s=>`
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:0.5px solid var(--border)">
+      <span style="font-size:13px;color:var(--text);flex:1">${s.name}</span>
+      ${s.note?`<span style="font-size:11px;color:var(--text3)">${s.note}</span>`:''}
+      <button onclick="markScheduledDone('${s.id}')" style="background:none;border:none;color:var(--accent);font-size:13px;cursor:pointer;font-family:var(--sans)">Done</button>
+    </div>`).join('');
+  openPlannerSubpage(d, list);
+}
+
+// ── GOALS ────────────────────────────────────────────────────────────────────
+function renderGoals() {
+  const el = document.getElementById('goalsContent');
+  if(!plannerData.goals.length) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-glyph">🎯</div><div class="empty-title">No goals yet</div><div class="empty-sub">Tap + to set your first goal</div></div>`;
+    return;
+  }
+  el.innerHTML = plannerData.goals.map(g => {
+    const total = g.frequency_count * (g.frequency_type==='daily'?7:1);
+    const dots  = Array.from({length:Math.min(total,14)},(_,i)=>`<div class="goal-dot${i<2?' done':''}"></div>`).join('');
+    const deadline = g.deadline ? `<span style="font-size:10px;color:var(--text3)">until ${new Date(g.deadline+'T00:00:00').toLocaleDateString('en',{month:'short',day:'numeric'})}</span>` : '';
+    return `<div class="goal-card" onclick="openGoalDetail('${g.id}')">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <div class="goal-card-name">${g.name}</div>
+        ${deadline}
+      </div>
+      <div class="goal-card-freq">${g.frequency_count}× per ${g.frequency_type}</div>
+      <div class="goal-dots">${dots}</div>
     </div>`;
   }).join('');
 }
 
-function renderPlannerCard(type, item) {
-  if(type==='routines') {
-    return `<div class="planner-card" onclick="openPlannerDetail('routine','${item.id}')">
-      <div class="planner-card-icon">${item.emoji||'📋'}</div>
-      <div class="planner-card-info">
-        <div class="planner-card-name">${item.name}</div>
-        <div class="planner-card-sub">Tap to view &amp; schedule</div>
-      </div>
-      <span style="color:var(--text3);font-size:12px">›</span>
-    </div>`;
-  }
-  if(type==='scheduled') {
-    const d = new Date(item.scheduled_date+'T00:00:00');
-    const label = d.toLocaleDateString('en',{weekday:'short',month:'short',day:'numeric'});
-    return `<div class="planner-card" onclick="openPlannerDetail('scheduled','${item.id}')">
-      <div class="planner-card-icon">📅</div>
-      <div class="planner-card-info">
-        <div class="planner-card-name">${item.name}</div>
-        <div class="planner-card-sub">${label}${item.note?` · ${item.note}`:''}</div>
-      </div>
-      <span style="color:var(--text3);font-size:12px">›</span>
-    </div>`;
-  }
-  if(type==='goals') {
-    const freq = `${item.frequency_count}× ${item.frequency_type}`;
-    const deadline = item.deadline ? ` · until ${new Date(item.deadline+'T00:00:00').toLocaleDateString('en',{month:'short',day:'numeric'})}` : '';
-    return `<div class="planner-card" onclick="openPlannerDetail('goal','${item.id}')">
-      <div class="planner-card-icon">🎯</div>
-      <div class="planner-card-info">
-        <div class="planner-card-name">${item.name}</div>
-        <div class="planner-card-sub">${freq}${deadline}</div>
-      </div>
-      <span style="color:var(--text3);font-size:12px">›</span>
-    </div>`;
-  }
-  if(type==='experiments') {
-    const days = Math.floor((new Date()-new Date(item.start_date+'T00:00:00'))/86400000);
-    const dur = item.end_date ? `day ${days} of ${Math.floor((new Date(item.end_date+'T00:00:00')-new Date(item.start_date+'T00:00:00'))/86400000)}` : `day ${days}`;
-    return `<div class="planner-card" onclick="openPlannerDetail('experiment','${item.id}')">
-      <div class="planner-card-icon">🧪</div>
-      <div class="planner-card-info">
-        <div class="planner-card-name">${item.name}</div>
-        <div class="planner-card-sub">${dur} · ${item.checkin_frequency}</div>
-      </div>
-      <span class="planner-card-badge experiment-status-active">active</span>
-    </div>`;
-  }
-  return '';
+function openGoalDetail(id) {
+  const g = plannerData.goals.find(x=>x.id===id);
+  if(!g) return;
+  const freq = `${g.frequency_count}× per ${g.frequency_type}`;
+  const deadline = g.deadline ? new Date(g.deadline+'T00:00:00').toLocaleDateString('en',{month:'long',day:'numeric',year:'numeric'}) : 'None';
+  openPlannerSubpage('🎯 '+g.name, `
+    <div class="form-field"><div class="form-label">Frequency</div><div style="font-size:14px;color:var(--text);margin-top:4px">${freq}</div></div>
+    <div class="form-field"><div class="form-label">Deadline</div><div style="font-size:13px;color:var(--text2);margin-top:4px">${deadline}</div></div>
+    <button onclick="deletePlannerItem('goals','${id}')" style="width:100%;padding:12px;border-radius:14px;border:0.5px solid var(--border2);background:transparent;color:var(--red,#c45);font-size:13px;cursor:pointer;font-family:var(--sans);margin-top:16px">Remove Goal</button>
+  `);
 }
 
-function togglePlannerSection(key) {
-  plannerSectionOpen[key] = !plannerSectionOpen[key];
-  localStorage.setItem('plannerSectionOpen', JSON.stringify(plannerSectionOpen));
-  renderPlanner();
+// ── LAB ──────────────────────────────────────────────────────────────────────
+function renderLab() {
+  const el = document.getElementById('labContent');
+  if(!plannerData.experiments.length) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-glyph">🧪</div><div class="empty-title">No experiments running</div><div class="empty-sub">Tap + to start testing a product</div></div>`;
+    return;
+  }
+  const prodMap = {};
+  plannerProducts.forEach(p => prodMap[p.id]=p);
+  el.innerHTML = plannerData.experiments.map(exp => {
+    const p   = prodMap[exp.product_id]||{};
+    const img = p.cover_image_url||p.image_url;
+    const days = Math.floor((new Date()-new Date(exp.start_date+'T00:00:00'))/86400000);
+    const total = exp.end_date ? Math.floor((new Date(exp.end_date+'T00:00:00')-new Date(exp.start_date+'T00:00:00'))/86400000) : null;
+    const pct  = total ? Math.min(Math.round((days/total)*100),100) : null;
+    return `<div class="exp-card" onclick="openExpDetail('${exp.id}')">
+      <div class="exp-card-img">${img?`<img src="${img}" alt="">`:'🧪'}</div>
+      <div class="exp-card-info">
+        <div class="exp-card-name">${exp.name}</div>
+        <div class="exp-card-sub">${p.name||''} · Day ${days}${total?` of ${total}`:''}</div>
+        ${pct!==null?`<div class="exp-progress"><div class="exp-progress-fill" style="width:${pct}%"></div></div>`:''}
+        <div class="exp-card-sub" style="margin-top:4px">${exp.checkin_frequency} check-ins</div>
+      </div>
+      <span style="color:var(--text3);font-size:16px">›</span>
+    </div>`;
+  }).join('');
 }
 
-// ── PLANNER ADD TYPE PICKER ───────────────────────────────────────────────────
-function openPlannerAdd() { openOverlay('plannerAddOverlay'); }
+async function openExpDetail(id) {
+  const exp = plannerData.experiments.find(x=>x.id===id);
+  if(!exp) return;
+  let checkins = [];
+  try { checkins = await api('experiment_checkins',`?experiment_id=eq.${id}&order=date.desc`); } catch(e){}
+  const checkinHtml = checkins.length
+    ? checkins.map(c=>`<div class="checkin-card">
+        <div class="checkin-date">${new Date(c.date+'T00:00:00').toLocaleDateString('en',{weekday:'short',month:'short',day:'numeric'})}</div>
+        ${c.notes?`<div class="checkin-notes">${c.notes}</div>`:''}
+      </div>`).join('')
+    : `<div style="padding:12px 0;text-align:center;font-size:12px;color:var(--text3)">No check-ins yet</div>`;
+  openPlannerSubpage('🧪 '+exp.name, `
+    ${exp.notes?`<div class="form-field"><div class="form-label">Context</div><div style="font-size:13px;color:var(--text2);line-height:1.5;margin-top:4px">${exp.notes}</div></div>`:''}
+    <div class="form-field">
+      <div class="form-label">Check-ins</div>
+      <div id="expCheckinList" style="margin-top:8px">${checkinHtml}</div>
+      <textarea class="form-textarea" id="exp_checkin_notes" placeholder="How is your skin reacting? Any changes?" style="margin-top:12px"></textarea>
+      <button onclick="addCheckin('${id}')" style="width:100%;padding:12px;border-radius:12px;border:none;background:var(--accent);color:var(--bg);font-size:13px;cursor:pointer;font-family:var(--sans);margin-top:8px">+ Log Check-in</button>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button onclick="concludeExperiment('${id}','keep')"  style="flex:1;padding:10px;border-radius:12px;border:0.5px solid var(--border);background:transparent;color:var(--text2);font-size:12px;cursor:pointer;font-family:var(--sans)">✓ Keep</button>
+      <button onclick="concludeExperiment('${id}','maybe')" style="flex:1;padding:10px;border-radius:12px;border:0.5px solid var(--border);background:transparent;color:var(--text2);font-size:12px;cursor:pointer;font-family:var(--sans)">? Maybe</button>
+      <button onclick="concludeExperiment('${id}','ditch')" style="flex:1;padding:10px;border-radius:12px;border:0.5px solid var(--border);background:transparent;color:var(--red,#c45);font-size:12px;cursor:pointer;font-family:var(--sans)">✕ Ditch</button>
+    </div>
+    <button onclick="deletePlannerItem('experiments','${id}')" style="width:100%;padding:12px;border-radius:14px;border:0.5px solid var(--border2);background:transparent;color:var(--red,#c45);font-size:13px;cursor:pointer;font-family:var(--sans);margin-top:8px">Abandon</button>
+  `);
+}
 
-// ── PLANNER FORM ──────────────────────────────────────────────────────────────
-function openPlannerForm(type, editId=null) {
+// ── SLIDE-IN SUBPAGE ──────────────────────────────────────────────────────────
+function openPlannerSubpage(title, bodyHtml) {
+  document.getElementById('plannerSubpageTitle').textContent = title;
+  document.getElementById('plannerSubpageBody').innerHTML = bodyHtml;
+  const sp = document.getElementById('plannerSubpage');
+  sp.style.display = 'flex';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>sp.classList.add('open')));
+}
+function closePlannerSubpage() {
+  const sp = document.getElementById('plannerSubpage');
+  sp.classList.remove('open');
+  setTimeout(()=>{ sp.style.display='none'; }, 380);
+}
+
+// ── ADD PICKER ────────────────────────────────────────────────────────────────
+function openPlannerAdd() {
+  const typeMap = { operator:'routine', scheduler:'scheduled', goals:'goal', lab:'experiment' };
+  openOverlay('plannerAddOverlay');
+}
+
+// ── FORMS ────────────────────────────────────────────────────────────────────
+function openPlannerForm(type) {
   plannerFormType = type;
-  plannerEditId = editId;
   closeOverlay('plannerAddOverlay');
   const titles = { routine:'New Routine', scheduled:'Schedule Treatment', goal:'New Goal', experiment:'New Experiment' };
-  document.getElementById('plannerFormTitle').textContent = editId ? 'Edit' : titles[type]||'New';
-  setTimeout(() => {
-    renderPlannerForm(type, editId);
-    openOverlay('plannerFormOverlay');
-  }, 300);
-}
-
-function closePlannerForm() { closeOverlay('plannerFormOverlay'); }
-
-function renderPlannerForm(type, editId) {
+  document.getElementById('plannerFormTitle').textContent = titles[type]||'New';
+  const prodOptions = plannerProducts.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
   const body = document.getElementById('plannerFormBody');
+  const saveBtn = (label,fn) => `<button onclick="${fn}" style="width:100%;padding:14px;border-radius:14px;border:none;background:var(--accent);color:var(--bg);font-size:14px;font-weight:500;cursor:pointer;font-family:var(--sans);margin-top:8px">${label}</button>`;
+  const today = new Date().toISOString().split('T')[0];
   if(type==='routine') {
     body.innerHTML = `
-      <div class="form-field"><div class="form-label">Name</div>
-        <input class="form-input" id="pf_name" placeholder="e.g. Sunday Reset"></div>
-      <div class="form-field"><div class="form-label">Emoji</div>
-        <input class="form-input" id="pf_emoji" placeholder="✨" maxlength="4" style="width:80px"></div>
-      <button onclick="savePlannerItem('routine')" style="width:100%;padding:14px;border-radius:14px;border:none;background:var(--accent);color:var(--bg);font-size:14px;font-weight:500;cursor:pointer;font-family:var(--sans);margin-top:8px">Save Routine</button>`;
+      <div class="form-field"><div class="form-label">Name</div><input class="form-input" id="pf_name" placeholder="e.g. Sunday Reset"></div>
+      <div class="form-field"><div class="form-label">Emoji</div><input class="form-input" id="pf_emoji" placeholder="✨" maxlength="4" style="width:80px"></div>
+      ${saveBtn('Save Routine',"savePlannerItem('routine')")}`;
   } else if(type==='scheduled') {
-    const prodOptions = plannerProducts.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
     body.innerHTML = `
-      <div class="form-field"><div class="form-label">Step / Treatment name</div>
-        <input class="form-input" id="pf_name" placeholder="e.g. Clay mask"></div>
-      <div class="form-field"><div class="form-label">Product (optional)</div>
-        <select class="form-input" id="pf_product" style="color:var(--text2)">
-          <option value="">— none —</option>${prodOptions}</select></div>
-      <div class="form-field"><div class="form-label">Date</div>
-        <input class="form-input" type="date" id="pf_date" value="${new Date().toISOString().split('T')[0]}" style="color:var(--text2)"></div>
-      <div class="form-field"><div class="form-label">Note (optional)</div>
-        <input class="form-input" id="pf_note" placeholder="Any reminder..."></div>
-      <button onclick="savePlannerItem('scheduled')" style="width:100%;padding:14px;border-radius:14px;border:none;background:var(--accent);color:var(--bg);font-size:14px;font-weight:500;cursor:pointer;font-family:var(--sans);margin-top:8px">Schedule It</button>`;
+      <div class="form-field"><div class="form-label">Treatment name</div><input class="form-input" id="pf_name" placeholder="e.g. Clay mask"></div>
+      <div class="form-field"><div class="form-label">Product (optional)</div><select class="form-input" id="pf_product" style="color:var(--text2)"><option value="">— none —</option>${prodOptions}</select></div>
+      <div class="form-field"><div class="form-label">Date</div><input class="form-input" type="date" id="pf_date" value="${today}" style="color:var(--text2)"></div>
+      <div class="form-field"><div class="form-label">Note (optional)</div><input class="form-input" id="pf_note" placeholder="Any reminder..."></div>
+      ${saveBtn('Schedule It',"savePlannerItem('scheduled')")}`;
   } else if(type==='goal') {
     body.innerHTML = `
-      <div class="form-field"><div class="form-label">Goal name</div>
-        <input class="form-input" id="pf_name" placeholder="e.g. Use retinol 3× a week"></div>
+      <div class="form-field"><div class="form-label">Goal</div><input class="form-input" id="pf_name" placeholder="e.g. Use retinol 3× a week"></div>
       <div class="form-field"><div class="form-label">Frequency</div>
         <div style="display:flex;gap:8px;align-items:center">
           <input class="form-input" type="number" id="pf_freq_count" value="1" min="1" style="width:70px">
@@ -3848,189 +4067,70 @@ function renderPlannerForm(type, editId) {
             <option value="monthly">month</option>
           </select>
         </div></div>
-      <div class="form-field"><div class="form-label">Deadline (optional)</div>
-        <input class="form-input" type="date" id="pf_deadline" style="color:var(--text2)"></div>
-      <button onclick="savePlannerItem('goal')" style="width:100%;padding:14px;border-radius:14px;border:none;background:var(--accent);color:var(--bg);font-size:14px;font-weight:500;cursor:pointer;font-family:var(--sans);margin-top:8px">Set Goal</button>`;
+      <div class="form-field"><div class="form-label">Deadline (optional)</div><input class="form-input" type="date" id="pf_deadline" style="color:var(--text2)"></div>
+      ${saveBtn('Set Goal',"savePlannerItem('goal')")}`;
   } else if(type==='experiment') {
-    const prodOptions = plannerProducts.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
     body.innerHTML = `
-      <div class="form-field"><div class="form-label">Experiment name</div>
-        <input class="form-input" id="pf_name" placeholder="e.g. Retinol 0.5% trial"></div>
-      <div class="form-field"><div class="form-label">Product</div>
-        <select class="form-input" id="pf_product" style="color:var(--text2)">
-          <option value="">— none —</option>${prodOptions}</select></div>
-      <div class="form-field"><div class="form-label">Start date</div>
-        <input class="form-input" type="date" id="pf_start" value="${new Date().toISOString().split('T')[0]}" style="color:var(--text2)"></div>
-      <div class="form-field"><div class="form-label">End date (optional)</div>
-        <input class="form-input" type="date" id="pf_end" style="color:var(--text2)"></div>
+      <div class="form-field"><div class="form-label">Name</div><input class="form-input" id="pf_name" placeholder="e.g. Retinol 0.5% trial"></div>
+      <div class="form-field"><div class="form-label">Product</div><select class="form-input" id="pf_product" style="color:var(--text2)"><option value="">— none —</option>${prodOptions}</select></div>
+      <div class="form-field"><div class="form-label">Start date</div><input class="form-input" type="date" id="pf_start" value="${today}" style="color:var(--text2)"></div>
+      <div class="form-field"><div class="form-label">End date (optional)</div><input class="form-input" type="date" id="pf_end" style="color:var(--text2)"></div>
       <div class="form-field"><div class="form-label">Check-in frequency</div>
         <select class="form-input" id="pf_checkin" style="color:var(--text2)">
-          <option value="freeform">Freeform — log when I feel like it</option>
+          <option value="freeform">Freeform</option>
           <option value="daily">Daily</option>
           <option value="weekly">Weekly</option>
         </select></div>
-      <div class="form-field"><div class="form-label">Notes / context</div>
-        <textarea class="form-textarea" id="pf_notes" placeholder="What are you testing? What's the hypothesis?"></textarea></div>
-      <button onclick="savePlannerItem('experiment')" style="width:100%;padding:14px;border-radius:14px;border:none;background:var(--accent);color:var(--bg);font-size:14px;font-weight:500;cursor:pointer;font-family:var(--sans);margin-top:8px">Start Experiment</button>`;
+      <div class="form-field"><div class="form-label">Notes / context</div><textarea class="form-textarea" id="pf_notes" placeholder="What are you testing? What's the hypothesis?"></textarea></div>
+      ${saveBtn('Start Experiment',"savePlannerItem('experiment')")}`;
   }
+  setTimeout(()=>openOverlay('plannerFormOverlay'), 350);
 }
+
+function closePlannerForm() { closeOverlay('plannerFormOverlay'); }
 
 async function savePlannerItem(type) {
   const name = document.getElementById('pf_name')?.value.trim();
   if(!name) { showToast('Please enter a name'); return; }
-
   let table, data;
   if(type==='routine') {
-    table = 'routines';
-    data = { name, emoji: document.getElementById('pf_emoji')?.value.trim()||'✨' };
+    table='routines'; data={name,emoji:document.getElementById('pf_emoji')?.value.trim()||'✨'};
   } else if(type==='scheduled') {
-    table = 'scheduled_treatments';
-    data = { name, product_id: document.getElementById('pf_product')?.value||null, scheduled_date: document.getElementById('pf_date')?.value, note: document.getElementById('pf_note')?.value.trim()||null };
+    table='scheduled_treatments'; data={name,product_id:document.getElementById('pf_product')?.value||null,scheduled_date:document.getElementById('pf_date')?.value,note:document.getElementById('pf_note')?.value.trim()||null};
   } else if(type==='goal') {
-    table = 'goals';
-    data = { name, frequency_type: document.getElementById('pf_freq_type')?.value, frequency_count: parseInt(document.getElementById('pf_freq_count')?.value)||1, deadline: document.getElementById('pf_deadline')?.value||null };
+    table='goals'; data={name,frequency_type:document.getElementById('pf_freq_type')?.value,frequency_count:parseInt(document.getElementById('pf_freq_count')?.value)||1,deadline:document.getElementById('pf_deadline')?.value||null};
   } else if(type==='experiment') {
-    table = 'experiments';
-    data = { name, product_id: document.getElementById('pf_product')?.value||null, start_date: document.getElementById('pf_start')?.value, end_date: document.getElementById('pf_end')?.value||null, checkin_frequency: document.getElementById('pf_checkin')?.value, notes: document.getElementById('pf_notes')?.value.trim()||null };
+    table='experiments'; data={name,product_id:document.getElementById('pf_product')?.value||null,start_date:document.getElementById('pf_start')?.value,end_date:document.getElementById('pf_end')?.value||null,checkin_frequency:document.getElementById('pf_checkin')?.value,notes:document.getElementById('pf_notes')?.value.trim()||null};
   }
-
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
-    method:'POST',
-    headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
-    body: JSON.stringify(data)
-  });
-
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`,{method:'POST',headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(data)});
   if(res.ok) {
     showToast('✓ Saved');
     closePlannerForm();
     await loadPlannerData();
-    renderPlanner();
-  } else {
-    showToast('Error saving');
-  }
+    switchPlannerTab(plannerActiveTab, true);
+  } else { showToast('Error saving'); }
 }
 
-// ── PLANNER DETAIL ────────────────────────────────────────────────────────────
-async function openPlannerDetail(type, id) {
-  let item, title, bodyHtml;
-
-  if(type==='routine') {
-    item = plannerData.routines.find(r=>r.id===id);
-    if(!item) return;
-    title = item.emoji+' '+item.name;
-    let steps = [];
-    try { steps = await api('routine_steps',`?routine_id=eq.${id}&order=order_index.asc`); } catch(e){}
-    const stepsHtml = steps.length
-      ? steps.map((s,i)=>`<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border)">
-          <span style="font-size:11px;color:var(--text3);width:16px">${i+1}</span>
-          <span style="font-size:13px;color:var(--text);flex:1">${s.step_name}</span>
-        </div>`).join('')
-      : `<div style="padding:20px;text-align:center;font-size:12px;color:var(--text3)">No steps yet</div>`;
-    bodyHtml = `
-      <div class="form-field"><div class="form-label">Steps</div>${stepsHtml}</div>
-      <div style="display:flex;gap:8px;align-items:center;margin-top:4px">
-        <input class="form-input" id="pd_stepname" placeholder="Add a step..." style="flex:1">
-        <button onclick="addRoutineStep('${id}')" style="padding:10px 14px;border-radius:12px;border:none;background:var(--accent);color:var(--bg);font-size:13px;cursor:pointer;font-family:var(--sans);flex-shrink:0">Add</button>
-      </div>
-      <button onclick="deletePlannerItem('routines','${id}')" style="width:100%;padding:12px;border-radius:14px;border:0.5px solid var(--border2);background:transparent;color:var(--red);font-size:13px;cursor:pointer;font-family:var(--sans);margin-top:16px">Delete Routine</button>`;
-  } else if(type==='scheduled') {
-    item = plannerData.scheduled.find(s=>s.id===id);
-    if(!item) return;
-    title = '📅 '+item.name;
-    const d = new Date(item.scheduled_date+'T00:00:00').toLocaleDateString('en',{weekday:'long',month:'long',day:'numeric'});
-    bodyHtml = `
-      <div class="form-field"><div class="form-label">Date</div><div style="font-size:14px;color:var(--text)">${d}</div></div>
-      ${item.note?`<div class="form-field"><div class="form-label">Note</div><div style="font-size:13px;color:var(--text2)">${item.note}</div></div>`:''}
-      <button onclick="markScheduledDone('${id}')" style="width:100%;padding:14px;border-radius:14px;border:none;background:var(--accent);color:var(--bg);font-size:14px;font-weight:500;cursor:pointer;font-family:var(--sans);margin-top:4px">✓ Mark as done</button>
-      <button onclick="deletePlannerItem('scheduled_treatments','${id}')" style="width:100%;padding:12px;border-radius:14px;border:0.5px solid var(--border2);background:transparent;color:var(--red);font-size:13px;cursor:pointer;font-family:var(--sans);margin-top:8px">Remove</button>`;
-  } else if(type==='goal') {
-    item = plannerData.goals.find(g=>g.id===id);
-    if(!item) return;
-    title = '🎯 '+item.name;
-    const freq = `${item.frequency_count}× per ${item.frequency_type}`;
-    bodyHtml = `
-      <div class="form-field"><div class="form-label">Frequency</div><div style="font-size:14px;color:var(--text)">${freq}</div></div>
-      ${item.deadline?`<div class="form-field"><div class="form-label">Deadline</div><div style="font-size:13px;color:var(--text2)">${new Date(item.deadline+'T00:00:00').toLocaleDateString('en',{month:'long',day:'numeric',year:'numeric'})}</div></div>`:''}
-      <button onclick="deletePlannerItem('goals','${id}')" style="width:100%;padding:12px;border-radius:14px;border:0.5px solid var(--border2);background:transparent;color:var(--red);font-size:13px;cursor:pointer;font-family:var(--sans);margin-top:16px">Remove Goal</button>`;
-  } else if(type==='experiment') {
-    item = plannerData.experiments.find(e=>e.id===id);
-    if(!item) return;
-    title = '🧪 '+item.name;
-    let checkins = [];
-    try { checkins = await api('experiment_checkins',`?experiment_id=eq.${id}&order=date.desc`); } catch(e){}
-    const checkinHtml = checkins.length
-      ? checkins.map(c=>`<div class="checkin-card">
-          <div class="checkin-date">${new Date(c.date+'T00:00:00').toLocaleDateString('en',{weekday:'short',month:'short',day:'numeric'})}</div>
-          ${c.notes?`<div class="checkin-notes">${c.notes}</div>`:''}
-        </div>`).join('')
-      : `<div style="padding:12px;text-align:center;font-size:12px;color:var(--text3)">No check-ins yet</div>`;
-    bodyHtml = `
-      ${item.notes?`<div class="form-field"><div class="form-label">Context</div><div style="font-size:13px;color:var(--text2);line-height:1.5">${item.notes}</div></div>`:''}
-      <div class="form-field"><div class="form-label">Check-ins</div>${checkinHtml}</div>
-      <div class="form-field">
-        <textarea class="form-textarea" id="pd_checkin_notes" placeholder="How is your skin reacting? Any changes?"></textarea>
-        <button onclick="addCheckin('${id}')" style="width:100%;padding:12px;border-radius:12px;border:none;background:var(--accent);color:var(--bg);font-size:13px;cursor:pointer;font-family:var(--sans);margin-top:8px">+ Log Check-in</button>
-      </div>
-      <div style="display:flex;gap:8px;margin-top:4px">
-        <button onclick="concludeExperiment('${id}','keep')" style="flex:1;padding:10px;border-radius:12px;border:0.5px solid var(--border);background:transparent;color:var(--text2);font-size:12px;cursor:pointer;font-family:var(--sans)">✓ Keep</button>
-        <button onclick="concludeExperiment('${id}','maybe')" style="flex:1;padding:10px;border-radius:12px;border:0.5px solid var(--border);background:transparent;color:var(--text2);font-size:12px;cursor:pointer;font-family:var(--sans)">? Maybe</button>
-        <button onclick="concludeExperiment('${id}','ditch')" style="flex:1;padding:10px;border-radius:12px;border:0.5px solid var(--border);background:transparent;color:var(--red);font-size:12px;cursor:pointer;font-family:var(--sans)">✕ Ditch</button>
-      </div>
-      <button onclick="deletePlannerItem('experiments','${id}')" style="width:100%;padding:12px;border-radius:14px;border:0.5px solid var(--border2);background:transparent;color:var(--red);font-size:13px;cursor:pointer;font-family:var(--sans);margin-top:8px">Abandon Experiment</button>`;
-  }
-
-  document.getElementById('plannerDetailTitle').innerHTML = title;
-  document.getElementById('plannerDetailBody').innerHTML = bodyHtml;
-  openOverlay('plannerDetailOverlay');
-}
-
-async function addRoutineStep(routineId) {
-  const name = document.getElementById('pd_stepname')?.value.trim();
-  if(!name) return;
-  const steps = await api('routine_steps',`?routine_id=eq.${routineId}&order=order_index.asc`);
-  const nextOrder = steps?.length || 0;
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/routine_steps`, {
-    method:'POST',
-    headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
-    body: JSON.stringify({ routine_id:routineId, step_name:name, order_index:nextOrder })
-  });
-  if(res.ok) { showToast('Step added'); openPlannerDetail('routine', routineId); }
-}
-
+// ── SHARED ACTIONS ────────────────────────────────────────────────────────────
 async function addCheckin(experimentId) {
-  const notes = document.getElementById('pd_checkin_notes')?.value.trim();
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/experiment_checkins`, {
-    method:'POST',
-    headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
-    body: JSON.stringify({ experiment_id:experimentId, date:new Date().toISOString().split('T')[0], notes:notes||null })
-  });
-  if(res.ok) { showToast('✓ Check-in logged'); openPlannerDetail('experiment', experimentId); }
+  const notes = document.getElementById('exp_checkin_notes')?.value.trim();
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/experiment_checkins`,{method:'POST',headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({experiment_id:experimentId,date:new Date().toISOString().split('T')[0],notes:notes||null})});
+  if(res.ok) { showToast('✓ Logged'); openExpDetail(experimentId); }
 }
 
 async function concludeExperiment(id, verdict) {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/experiments?id=eq.${id}`, {
-    method:'PATCH',
-    headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
-    body: JSON.stringify({ status:'concluded', verdict, end_date:new Date().toISOString().split('T')[0] })
-  });
-  if(res.ok) { showToast('Experiment concluded'); closeOverlay('plannerDetailOverlay'); await loadPlannerData(); renderPlanner(); }
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/experiments?id=eq.${id}`,{method:'PATCH',headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({status:'concluded',verdict,end_date:new Date().toISOString().split('T')[0]})});
+  if(res.ok) { showToast('Experiment concluded'); closePlannerSubpage(); await loadPlannerData(); renderLab(); }
 }
 
 async function markScheduledDone(id) {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/scheduled_treatments?id=eq.${id}`, {
-    method:'PATCH',
-    headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},
-    body: JSON.stringify({ done:true })
-  });
-  if(res.ok) { showToast('✓ Done'); closeOverlay('plannerDetailOverlay'); await loadPlannerData(); renderPlanner(); }
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/scheduled_treatments?id=eq.${id}`,{method:'PATCH',headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({done:true})});
+  if(res.ok) { showToast('✓ Done'); closePlannerSubpage(); await loadPlannerData(); renderScheduler(); }
 }
 
 async function deletePlannerItem(table, id) {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
-    method:'DELETE',
-    headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`}
-  });
-  if(res.ok) { showToast('Removed'); closeOverlay('plannerDetailOverlay'); await loadPlannerData(); renderPlanner(); }
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`,{method:'DELETE',headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`}});
+  if(res.ok) { showToast('Removed'); closePlannerSubpage(); await loadPlannerData(); switchPlannerTab(plannerActiveTab,true); }
 }
 
 // ── END PLANNER ───────────────────────────────────────────────────────────────
