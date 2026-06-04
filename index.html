@@ -804,41 +804,26 @@ function getDateStr(d) { return d.toISOString().split('T')[0]; }
 function getDayShort(d) { return DAYS[d.getDay()]; }
 function getDayFull(d) { return DAY_FULL[d.getDay()]; }
 
-function shiftDay(delta) {
-  viewDate.setDate(viewDate.getDate() + delta);
-  isToday = getDateStr(viewDate) === todayDate;
-  isPast = viewDate < new Date(now.toDateString());
-  stepState = {}; stepProducts = {};
-  updateDateNav();
-  if(isToday) {
-    document.getElementById('routineFooter').style.display = 'flex';
-    deactivateSave();
-    loadSteps();
-  } else if(isPast) {
-    document.getElementById('routineFooter').style.display = 'none';
-    loadPastLog();
-  } else {
-    document.getElementById('routineFooter').style.display = 'none';
-    loadFuturePreview();
-  }
-}
-
-function updateDateNav() {
-  const d = viewDate;
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const isCurrentYear = d.getFullYear() === now.getFullYear();
-  document.getElementById('routineDateText').textContent = 
-    getDayFull(d) + ', ' + months[d.getMonth()] + ' ' + d.getDate() + (isCurrentYear ? '' : ' ' + d.getFullYear());
-  document.getElementById('routineDayBadge').textContent = isToday ? 'Today' : isPast ? 'Past' : 'Upcoming';
-  document.getElementById('nextDayBtn').disabled = false;
-}
-
 let currentSession = (now.getHours() >= 3 && now.getHours() < 15) ? 'Morning' : 'Evening';
 let steps = [];
 let stepProducts = {};
 let ownedProducts = [];
 let kitFilter = 'All';
 let products = [];
+// Planner globals
+let plannerData = { routines:[], scheduled:[], goals:[], experiments:[] };
+let plannerActiveTab = 'operator';
+let plannerProducts = [];
+let plannerFormType = null;
+let calMonth = new Date().getMonth();
+let calYear  = new Date().getFullYear();
+let scheduleData = { scheduleId:null, liveSessions:[], draftSessions:[] };
+let trackerSessions = [];
+let currentSessionId = null;
+let trackerSteps = [];
+let stepState = {};
+let hasChanges = false;
+const selectedWeekdays = new Set();
 
 async function api(table, params='') {
   const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}${params}`, {
@@ -1026,11 +1011,6 @@ async function initSelfCare() {
 }
 
 // ── DYNAMIC TRACKER ──────────────────────────────────────────────────────────
-let trackerSessions = [];
-let currentSessionId = null;
-let trackerSteps = [];
-let stepState = {};
-let hasChanges = false;
 
 async function loadTrackerSessions() {
   try {
@@ -3429,12 +3409,7 @@ requestAnimationFrame(() => requestAnimationFrame(() => {
 
 // ── PLANNER ──────────────────────────────────────────────────────────────────
 
-let plannerData = { routines:[], scheduled:[], goals:[], experiments:[] };
-let plannerActiveTab = 'operator';
-let plannerProducts = [];
-let plannerFormType = null;
-let calMonth = new Date().getMonth();
-let calYear  = new Date().getFullYear();
+// planner vars moved to global scope
 
 async function initPlanner() {
   await loadPlannerData();
@@ -3542,7 +3517,6 @@ async function deleteRoutineStep(stepId, routineId) {
 
 // ── SCHEDULER ────────────────────────────────────────────────────────────────
 
-let scheduleData = { scheduleId:null, liveSessions:[], draftSessions:[] };
 
 async function loadScheduleData() {
   try {
@@ -3658,7 +3632,6 @@ function openCalDay(day){
   openPlannerSubpage(label,html);
 }
 
-const selectedWeekdays=new Set();
 
 async function openAddSession(){
   openPlannerSubpage('New Session',`
