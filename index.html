@@ -2313,7 +2313,7 @@ function filterLibrary() {
 function renderLibraryGrid(products) {
   const grid = document.getElementById('libGrid');
   if(!products.length) {
-    grid.innerHTML = `<div style="grid-column:span 2"><div class="empty-state"><div class="empty-glyph">∅</div><div class="empty-title">Nothing here yet</div><div class="empty-sub">Tap + to add your first product, or try a different filter</div></div></div>`;
+    grid.innerHTML = `<div style="grid-column:span 3"><div class="empty-state"><div class="empty-glyph">∅</div><div class="empty-title">Nothing here yet</div><div class="empty-sub">Tap + to add your first product, or try a different filter</div></div></div>`;
     return;
   }
 
