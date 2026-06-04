@@ -4,11 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="LeoOS">
 <meta name="theme-color" content="#080808">
-<!-- manifest removed - causes 401 -->
+<link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon.png">
 <script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.19.1/umd/index.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -642,7 +641,10 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
       </div>
       <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
     </div>
-    <div class="step-list" id="stepList" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch"></div>
+    <div class="ptr-wrap" id="selfcarePtrWrap">
+      <div class="ptr-indicator"><div class="ptr-spinner" id="selfcareSpinner"><div class="ptr-spinner-ring"></div></div></div>
+      <div class="step-list" id="stepList" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;min-height:0"></div>
+    </div>
     <div class="save-bar" id="saveBar" style="display:none">
       <button class="save-btn" id="saveBtn" onclick="saveRoutine()">Save</button>
     </div>
@@ -1215,6 +1217,10 @@ async function initSelfCare() {
   viewDate = new Date(now); isToday = true; isPast = false;
   updateDateNav();
   await loadTrackerSessions();
+  setupPTR('selfcarePtrWrap','stepList','selfcareSpinner', async()=>{
+    currentSessionId = null;
+    await loadTrackerSessions();
+  });
 }
 
 // ── DYNAMIC TRACKER ──────────────────────────────────────────────────────────
@@ -2633,7 +2639,7 @@ function setupPTR(wrapperId, scrollId, spinnerId, refreshFn) {
 // ============================================================
 async function loadHomeAlerts() {
   const today = new Date();
-  const data = await api('products', '?order=name.asc');
+  const data = await api('products', '?status=eq.Owned&order=name.asc');
   const alerts = [];
 
   (data||[]).forEach(p => {
