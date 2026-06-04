@@ -280,43 +280,6 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
 .checkin-date{font-size:10px;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em}
 .checkin-notes{font-size:12px;color:var(--text2);line-height:1.5}
 
-.tracker-tabs{display:flex;gap:6px;padding:10px 20px;overflow-x:auto;flex-shrink:0;-webkit-overflow-scrolling:touch}
-.tracker-tabs::-webkit-scrollbar{display:none}
-.tracker-tab{flex-shrink:0;padding:0 14px;height:28px;border-radius:16px;border:0.5px solid var(--border);background:transparent;color:var(--text3);font-size:11px;cursor:pointer;transition:all 0.2s;font-family:var(--sans);white-space:nowrap}
-.tracker-tab.active{background:var(--bg3);color:var(--text);border-color:var(--border2)}
-.tracker-step{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:0.5px solid var(--border);cursor:pointer;transition:background 0.15s}
-.tracker-step:active{background:var(--bg2)}
-.tracker-step.checked .tracker-step-name{color:var(--text3);text-decoration:line-through}
-.tracker-step-check{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 0.2s;font-size:11px;color:var(--bg)}
-.tracker-step-check.checked{background:var(--accent);border-color:var(--accent)}
-.tracker-step-name{font-size:13px;color:var(--text);flex:1}
-.sched-section{margin-bottom:16px}
-.sched-section-title{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;padding:0 2px}
-.sched-session-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:8px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:12px}
-.sched-session-card:active{background:var(--bg3);transform:scale(0.99)}
-.sched-session-icon{font-size:20px;width:38px;height:38px;background:var(--bg3);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.sched-session-info{flex:1;min-width:0}
-.sched-session-name{font-size:13px;font-weight:500;color:var(--text)}
-.sched-session-rule{font-size:11px;color:var(--text3);margin-top:2px}
-.sched-session-items{font-size:11px;color:var(--text2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sched-change-badge{font-size:9px;padding:2px 6px;border-radius:6px;flex-shrink:0;font-weight:600;text-transform:uppercase;letter-spacing:0.04em}
-.badge-new{background:rgba(74,124,89,0.2);color:#4a7c59}
-.badge-edited{background:rgba(200,184,154,0.2);color:var(--accent)}
-.badge-deleted{background:rgba(180,60,60,0.15);color:#c45}
-.push-bar{position:sticky;bottom:0;background:var(--bg);padding:12px 0 4px;margin-top:8px}
-.push-btn{width:100%;padding:14px;border-radius:14px;border:none;background:var(--accent);color:var(--bg);font-size:14px;font-weight:600;cursor:pointer;font-family:var(--serif);letter-spacing:0.04em;display:flex;align-items:center;justify-content:center;gap:8px}
-.push-btn:active{opacity:0.85}
-.push-btn:disabled{opacity:0.4;cursor:default}
-.diff-block{border-radius:12px;padding:12px 14px;margin-bottom:8px;border:0.5px solid var(--border)}
-.diff-added{background:rgba(74,124,89,0.08);border-color:rgba(74,124,89,0.3)}
-.diff-removed{background:rgba(180,60,60,0.06);border-color:rgba(180,60,60,0.2)}
-.diff-edited{background:rgba(200,184,154,0.08);border-color:rgba(200,184,154,0.3)}
-.planner-subpage{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg);z-index:300;display:none;flex-direction:column;transform:translateX(100%);transition:transform 0.35s cubic-bezier(0.16,1,0.3,1)}
-.planner-subpage.open{transform:translateX(0)}
-.planner-subpage-header{display:flex;align-items:center;gap:12px;padding:calc(var(--safe-top) + 16px) 16px 12px;border-bottom:0.5px solid var(--border);flex-shrink:0}
-.planner-back-btn{background:var(--bg3);border:0.5px solid var(--border2);color:var(--text2);padding:6px 12px;border-radius:12px;font-size:12px;cursor:pointer;font-family:var(--sans);display:flex;align-items:center;gap:4px}
-.planner-subpage-title{font-family:var(--serif);font-size:18px;color:var(--text);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.planner-subpage-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px}
 /* EMPTY / LOADING */
 .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 40px;text-align:center;flex:1}
 .empty-glyph{font-family:var(--serif);font-size:48px;color:var(--text3);margin-bottom:16px;font-style:italic}
@@ -625,7 +588,10 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
       <div class="page-label">Leo OS</div>
       <div class="page-title">Self Care</div>
     </div>
-    <div class="tracker-tabs" id="trackerSessionTabs"></div>
+    <div class="session-toggle">
+      <button class="sess-btn active" id="amBtn" onclick="setSession('Morning')">🌅 Morning</button>
+      <button class="sess-btn" id="pmBtn" onclick="setSession('Evening')">🌙 Evening</button>
+    </div>
     <div class="date-nav">
       <button class="date-arrow" onclick="shiftDay(-1)">&#8592;</button>
       <div class="date-center">
@@ -634,23 +600,221 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
       </div>
       <button class="date-arrow" onclick="shiftDay(1)" id="nextDayBtn">&#8594;</button>
     </div>
-    <div class="progress-wrap">
-      <div class="progress-info">
-        <span id="progressLabel" class="progress-label">0 / 0</span>
-        <span id="completionBadge" class="completion-badge"></span>
+    <div class="progress-bar-wrap">
+      <div class="progress-meta">
+        <span class="progress-label" id="progressLabel">morning routine</span>
+        <span class="progress-count" id="progressCount">0 / 0</span>
       </div>
       <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
     </div>
-    <div class="step-list" id="stepList" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch"></div>
-    <div class="save-bar" id="saveBar" style="display:none">
-      <button class="save-btn" id="saveBtn" onclick="saveRoutine()">Save</button>
+    <div class="step-list" id="stepList">
+      <div class="loading"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div>
     </div>
     <div class="done-overlay" id="doneOverlay">
       <div class="done-glyph">✦</div>
       <div class="done-title">All done.</div>
-      <div class="done-sub" id="doneSubtext"></div>
+      <div class="done-sub" id="doneSub"></div>
+      <button class="done-reset" onclick="resetRoutine()">reset</button>
+    </div>
+    <div class="routine-footer" id="routineFooter">
+      <button class="skip-all-btn" onclick="skipAll()">Skip All</button>
+      <button class="save-btn" id="saveBtn" onclick="saveRoutine()">Save Routine</button>
     </div>
   </div>
+
+  <!-- KIT -->
+  <div class="screen" id="screen-kit">
+    <div class="page-header">
+      <div class="page-label">Self Care</div>
+      <div class="page-title">My Kit</div>
+      <div class="page-subtitle" id="kitSubtitle"><span id="kitSubtitleNum" style="transition:opacity 0.3s ease"></span><span id="kitSubtitleText"></span></div>
+    </div>
+    <div style="display:flex;align-items:center;padding:8px 14px 8px 20px;gap:6px;flex-shrink:0">
+      <div id="kitFilter" style="display:flex;gap:6px;overflow-x:auto;flex:1;-webkit-overflow-scrolling:touch;scrollbar-width:none"></div>
+      <button class="lib-sort-pill" id="kitSortPill" onclick="openKitSortMenu()" style="margin-left:8px">
+        <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M1 3h12M3 7h8M5 11h4" stroke="var(--bg)" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M7 1L4 4M7 1l3 3M7 13L4 10M7 13l3-3" stroke="var(--bg)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <select class="lib-sort-select" id="kitSort" onchange="renderKit()" style="position:absolute;opacity:0;pointer-events:none;width:1px;height:1px">
+        <option value="date_desc">Date ↓</option>
+        <option value="date_asc">Date ↑</option>
+        <option value="name_asc">Name ↑</option>
+        <option value="name_desc">Name ↓</option>
+        <option value="price_asc">Price ↑</option>
+        <option value="price_desc">Price ↓</option>
+        <option value="amount_desc">Amount ↓</option>
+        <option value="amount_asc">Amount ↑</option>
+      </select>
+    </div>
+    <div class="ptr-wrap" id="kitPtrWrap">
+      <div class="ptr-indicator"><div class="ptr-spinner" id="kitSpinner"><div class="ptr-spinner-ring"></div></div></div>
+      <div class="scroll" id="kitScroll">
+        <div id="kitGrid">
+        <div id="kitGrid"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIBRARY -->
+  <div class="screen" id="screen-library">
+    <div class="page-header" style="padding-bottom:12px;display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div class="page-label">Leo OS</div>
+        <div class="page-title">Library</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="scan-btn" onclick="toggleCompareMode()" id="compareToggle" title="Compare products" style="font-size:12px;font-family:var(--sans);width:auto;padding:0 10px;border-radius:20px">Compare</button>
+        <button class="scan-btn" onclick="openBarcodeScanner()" title="Scan barcode">⌻</button>
+        <button class="add-product-btn" onclick="openProductForm()">+</button>
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div class="lib-search-wrap">
+      <div class="lib-search-inner">
+        <span class="lib-search-icon">⌕</span>
+        <input class="lib-search" id="libSearch" placeholder="Search products..." oninput="filterLibrary()">
+      </div>
+    </div>
+
+    <!-- List tabs + sort pill -->
+    <div class="lib-lists">
+      <div class="lib-lists-inner" id="libLists"></div>
+      <button class="lib-sort-pill" id="libSortPill" onclick="openLibSortMenu()">
+        <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M1 3h12M3 7h8M5 11h4" stroke="var(--bg)" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M7 1L4 4M7 1l3 3M7 13L4 10M7 13l3-3" stroke="var(--bg)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <select class="lib-sort-select" id="libSort" onchange="filterLibrary()" style="position:absolute;opacity:0;pointer-events:none;width:1px;height:1px">
+        <option value="name">Name</option>
+        <option value="brand">Brand</option>
+        <option value="rating">Rating</option>
+        <option value="newest">Newest</option>
+      </select>
+    </div>
+
+    <!-- Filter row -->
+    <div class="lib-filter-row" id="libFilterRow"></div>
+
+    <!-- Grid -->
+    <div class="ptr-wrap" id="libPtrWrap">
+      <div class="ptr-indicator"><div class="ptr-spinner" id="libSpinner"><div class="ptr-spinner-ring"></div></div></div>
+      <div class="scroll" id="libScroll">
+        <div class="lib-grid" id="libGrid">
+          <div style="grid-column:span 2" class="loading"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRODUCT DETAIL OVERLAY -->
+  <div class="detail-overlay" id="detailOverlay">
+    <div class="detail-sheet" id="detailSheet">
+      <div class="detail-actions">
+        <button class="detail-action-btn" onclick="editProduct()">Edit</button>
+        <button class="detail-action-btn detail-delete-btn" onclick="deleteProduct()">Delete</button>
+      </div>
+      <button class="detail-close" onclick="closeDetail()">✕</button>
+      <div class="detail-body" id="detailBody"></div>
+    </div>
+  </div>
+
+  <!-- ADD PRODUCT FORM OVERLAY -->
+  <div class="form-overlay" id="formOverlay">
+    <div class="form-sheet" id="formSheet">
+      <div class="form-header">
+        <button class="form-back" id="formBack" onclick="formPrev()">←</button>
+        <div class="form-step-indicator" id="formStepIndicator"></div>
+        <button class="form-close" onclick="closeProductForm()">✕</button>
+      </div>
+      <div class="form-title-row">
+        <div class="form-step-label" id="formStepLabel"></div>
+        <div class="form-step-title" id="formStepTitle"></div>
+      </div>
+      <div class="form-body" id="formBody"></div>
+      <div class="form-footer">
+        <button class="form-next-btn" id="formNextBtn" onclick="formNext()">Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPARE OVERLAY -->
+  <div class="form-overlay" id="compareOverlay">
+    <div class="form-sheet" style="max-height:96vh">
+      <div class="form-header">
+        <div style="font-size:13px;color:var(--text2);font-weight:500">Compare Products</div>
+        <button class="form-close" onclick="closeCompare()">✕</button>
+      </div>
+      <div style="flex:1;overflow-y:auto;padding:16px 20px" id="compareBody"></div>
+    </div>
+  </div>
+
+  <!-- BARCODE SCANNER -->
+  <div id="barcodeOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,0);z-index:500;display:none;align-items:flex-end;backdrop-filter:blur(0px);transition:background 0.35s ease,backdrop-filter 0.35s ease"><div id="barcodeSheet" style="background:#000;border-radius:24px 24px 0 0;width:100%;height:92vh;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;transform:translateY(100%);transition:transform 0.45s cubic-bezier(0.16,1,0.3,1);overflow:hidden">
+    <video id="barcodeVideo" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0" playsinline muted></video>
+    
+    <!-- Viewfinder -->
+    <div style="position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;width:100%;padding:0 30px">
+      <div style="width:100%;max-width:300px;height:130px;position:relative;margin-bottom:20px">
+        <div style="position:absolute;inset:0;border:2px solid var(--accent);border-radius:12px;opacity:0.9"></div>
+        <div style="position:absolute;top:-1px;left:-1px;width:24px;height:24px;border-top:3px solid var(--accent);border-left:3px solid var(--accent);border-radius:10px 0 0 0"></div>
+        <div style="position:absolute;top:-1px;right:-1px;width:24px;height:24px;border-top:3px solid var(--accent);border-right:3px solid var(--accent);border-radius:0 10px 0 0"></div>
+        <div style="position:absolute;bottom:-1px;left:-1px;width:24px;height:24px;border-bottom:3px solid var(--accent);border-left:3px solid var(--accent);border-radius:0 0 0 10px"></div>
+        <div style="position:absolute;bottom:-1px;right:-1px;width:24px;height:24px;border-bottom:3px solid var(--accent);border-right:3px solid var(--accent);border-radius:0 0 10px 0"></div>
+        <div id="scanLine" style="position:absolute;top:0;left:4px;right:4px;height:2px;background:var(--accent);border-radius:2px;opacity:0.8;animation:scanAnim 2s ease-in-out infinite"></div>
+      </div>
+      <div id="barcodeStatus" style="font-size:13px;color:rgba(255,255,255,0.7);margin-bottom:24px;text-align:center">Point camera at barcode</div>
+      
+      <!-- Manual entry toggle -->
+      <div id="manualWrap" style="width:100%;max-width:300px;display:none;flex-direction:column;gap:8px">
+        <div style="display:flex;gap:8px">
+          <input id="manualBarcodeInput" style="flex:1;background:rgba(255,255,255,0.1);border:0.5px solid rgba(255,255,255,0.2);border-radius:10px;padding:10px 14px;color:#fff;font-size:14px;outline:none;font-family:var(--sans)" placeholder="Enter barcode number..." type="number">
+          <button onclick="submitManualBarcode()" style="background:var(--accent);border:none;color:var(--bg);padding:10px 16px;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);white-space:nowrap">Look up</button>
+        </div>
+      </div>
+
+      <button onclick="toggleManualEntry()" id="manualToggleBtn" style="font-size:12px;color:rgba(255,255,255,0.4);background:transparent;border:none;padding:8px;cursor:pointer;font-family:var(--sans)">Enter barcode manually</button>
+    </div>
+
+    <button onclick="closeBarcodeScanner()" style="position:absolute;top:calc(20px + env(safe-area-inset-top,0px));right:20px;background:rgba(30,30,30,0.8);border:0.5px solid rgba(255,255,255,0.1);color:#fff;width:36px;height:36px;border-radius:50%;font-size:16px;cursor:pointer;z-index:3;backdrop-filter:blur(4px)">✕</button>
+  </div></div>
+
+  <!-- ADD TO KIT FLOW -->
+  <div class="kit-flow-overlay" id="kitFlowOverlay">
+    <div class="kit-flow-sheet">
+      <div class="kit-flow-header">
+        <div class="kit-flow-title">Add to My Kit</div>
+        <button onclick="closeKitFlow()" style="background:var(--bg3);border:0.5px solid var(--border2);color:var(--text3);width:30px;height:30px;border-radius:50%;font-size:12px;cursor:pointer;font-family:var(--sans)">✕</button>
+      </div>
+      <div class="kit-flow-body" id="kitFlowBody"></div>
+      <div class="kit-flow-footer">
+        <button class="kit-save-btn" onclick="saveKitItem()">Add to Kit</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP PICKER OVERLAY — identical structure to kit-flow-overlay -->
+  <div class="kit-flow-overlay" id="stepPickerOverlay" style="z-index:500">
+    <div class="kit-flow-sheet">
+      <div class="kit-flow-header">
+        <div id="stepPickerTitle" style="font-family:var(--serif);font-size:20px;color:var(--text)"></div>
+        <button onclick="closeStepPicker()" class="form-close">✕</button>
+      </div>
+      <div class="kit-flow-body" id="stepPickerList" style="padding:16px 20px 20px"></div>
+    </div>
+  </div>
+
+  <!-- PURCHASE SOURCE OVERLAY -->
+  <div class="kit-flow-overlay" id="purchaseOverlay" style="z-index:600">
+    <div class="kit-flow-sheet">
+      <div class="kit-flow-header">
+        <div style="font-family:var(--serif);font-size:20px;color:var(--text)">Where did you buy it?</div>
+        <button onclick="closePurchaseOverlay()" style="background:var(--bg3);border:0.5px solid var(--border2);color:var(--text3);width:30px;height:30px;border-radius:50%;font-size:12px;cursor:pointer;font-family:var(--sans)">✕</button>
+      </div>
+      <div class="kit-flow-body" id="purchaseBody" style="padding:16px 20px 20px"></div>
+    </div>
+  </div>
+
   <!-- KIT ITEM EDIT OVERLAY -->
   <div class="kit-flow-overlay" id="kitEditOverlay" style="z-index:600">
     <div class="kit-flow-sheet">
@@ -671,19 +835,32 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
       </div>
       <button class="planner-add-btn" id="plannerAddBtn" onclick="openPlannerAdd()">+</button>
     </div>
+    <!-- Inner tab bar -->
     <div class="planner-tabs">
-      <button class="planner-tab active" id="ptab-operator"  onclick="switchPlannerTab('operator')">Operator</button>
-      <button class="planner-tab"        id="ptab-scheduler" onclick="switchPlannerTab('scheduler')">Scheduler</button>
-      <button class="planner-tab"        id="ptab-goals"     onclick="switchPlannerTab('goals')">Goals</button>
-      <button class="planner-tab"        id="ptab-lab"       onclick="switchPlannerTab('lab')">Lab</button>
+      <button class="planner-tab active" id="ptab-operator"   onclick="switchPlannerTab('operator')">Operator</button>
+      <button class="planner-tab"        id="ptab-scheduler"  onclick="switchPlannerTab('scheduler')">Scheduler</button>
+      <button class="planner-tab"        id="ptab-goals"      onclick="switchPlannerTab('goals')">Goals</button>
+      <button class="planner-tab"        id="ptab-lab"        onclick="switchPlannerTab('lab')">Lab</button>
     </div>
-    <div class="planner-pane active" id="pane-operator"><div id="operatorContent"></div></div>
-    <div class="planner-pane" id="pane-scheduler"><div id="schedulerContent"></div></div>
-    <div class="planner-pane" id="pane-goals"><div id="goalsContent"></div></div>
-    <div class="planner-pane" id="pane-lab"><div id="labContent"></div></div>
+    <!-- Operator pane -->
+    <div class="planner-pane active" id="pane-operator">
+      <div id="operatorContent"></div>
+    </div>
+    <!-- Scheduler pane -->
+    <div class="planner-pane" id="pane-scheduler">
+      <div id="schedulerContent"></div>
+    </div>
+    <!-- Goals pane -->
+    <div class="planner-pane" id="pane-goals">
+      <div id="goalsContent"></div>
+    </div>
+    <!-- Lab pane -->
+    <div class="planner-pane" id="pane-lab">
+      <div id="labContent"></div>
+    </div>
   </div>
 
-  <!-- PLANNER SUB-PAGE -->
+  <!-- PLANNER SUB-PAGE (slide in from right) -->
   <div class="planner-subpage" id="plannerSubpage">
     <div class="planner-subpage-header">
       <button class="planner-back-btn" onclick="closePlannerSubpage()">‹ Back</button>
@@ -692,6 +869,7 @@ html,body{height:100%;background:var(--bg);font-family:var(--sans);color:var(--t
     </div>
     <div class="planner-subpage-body" id="plannerSubpageBody"></div>
   </div>
+
   <!-- PLANNER ADD TYPE PICKER -->
   <div class="kit-flow-overlay" id="plannerAddOverlay" style="z-index:600">
     <div class="kit-flow-sheet">
@@ -997,185 +1175,319 @@ function initHome() {
 // SELF CARE
 async function initSelfCare() {
   viewDate = new Date(now); isToday = true; isPast = false;
+  document.getElementById('amBtn').classList.toggle('active', currentSession==='Morning');
+  document.getElementById('pmBtn').classList.toggle('active', currentSession==='Evening');
+  document.getElementById('routineFooter').style.display = 'flex';
   updateDateNav();
-  await loadTrackerSessions();
-}
-
-let trackerSessions = [];
-let currentSessionId = null;
-let trackerSteps = [];
-let stepState = {};
-let hasChanges = false;
-
-async function loadTrackerSessions() {
-  try {
-    const schedules = await api('schedules','?is_active=eq.true&limit=1');
-    const sched = schedules?.[0];
-    if(!sched) { renderNoSchedule(); return; }
-    const allSessions = await api('schedule_sessions',`?schedule_id=eq.${sched.id}&order=display_order.asc`);
-    if(!allSessions?.length) { renderNoSchedule(); return; }
-    const today = viewDate||new Date();
-    const dow = today.getDay(), dom = today.getDate(), dateStr = getDateStr(today);
-    trackerSessions = allSessions.filter(s => {
-      if(s.rule_type==='daily') return true;
-      if(s.rule_type==='weekly') return (s.rule_days||[]).includes(dow);
-      if(s.rule_type==='monthly') return dom===s.rule_day_of_month;
-      if(s.rule_type==='once') return s.rule_date===dateStr;
-      return false;
-    });
-    if(!trackerSessions.length) { renderNoSessionsToday(); return; }
-    const tabs = document.getElementById('trackerSessionTabs');
-    if(tabs) tabs.innerHTML = trackerSessions.map(s =>
-      `<button class="tracker-tab${currentSessionId===s.id?' active':''}" id="ttab-${s.id}" onclick="setTrackerSession('${s.id}')">${s.icon||''} ${s.name}</button>`
-    ).join('');
-    if(!currentSessionId || !trackerSessions.find(s=>s.id===currentSessionId)) {
-      currentSessionId = trackerSessions[0].id;
-    }
-    document.querySelectorAll('.tracker-tab').forEach(t=>t.classList.remove('active'));
-    document.getElementById('ttab-'+currentSessionId)?.classList.add('active');
-    await loadTrackerSteps();
-  } catch(e) { console.error('loadTrackerSessions:', e); renderNoSchedule(); }
-}
-
-function renderNoSchedule() {
-  const tabs = document.getElementById('trackerSessionTabs');
-  if(tabs) tabs.innerHTML = '';
-  const list = document.getElementById('stepList');
-  if(list) list.innerHTML = `<div style="padding:40px 20px;text-align:center"><div style="font-size:32px;margin-bottom:12px">📋</div><div style="font-size:15px;font-weight:500;color:var(--text);margin-bottom:8px">No schedule yet</div><div style="font-size:13px;color:var(--text3)">Build your schedule in the Plan tab and push it live</div></div>`;
-}
-
-function renderNoSessionsToday() {
-  const tabs = document.getElementById('trackerSessionTabs');
-  if(tabs) tabs.innerHTML = '';
-  const day = (viewDate||new Date()).toLocaleDateString('en',{weekday:'long'});
-  const list = document.getElementById('stepList');
-  if(list) list.innerHTML = `<div style="padding:40px 20px;text-align:center"><div style="font-size:32px;margin-bottom:12px">✨</div><div style="font-size:15px;font-weight:500;color:var(--text);margin-bottom:8px">Free ${day}</div><div style="font-size:13px;color:var(--text3)">No sessions scheduled today</div></div>`;
-  const pf = document.getElementById('progressFill'); if(pf) pf.style.width='0%';
-  const pl = document.getElementById('progressLabel'); if(pl) pl.textContent='';
-}
-
-async function setTrackerSession(sessionId) {
-  if(currentSessionId===sessionId) return;
-  const list = document.getElementById('stepList');
-  if(list){list.style.transition='opacity 0.3s ease';list.style.opacity='0';}
-  setTimeout(async()=>{
-    currentSessionId=sessionId;
-    document.querySelectorAll('.tracker-tab').forEach(t=>t.classList.remove('active'));
-    document.getElementById('ttab-'+sessionId)?.classList.add('active');
-    await loadTrackerSteps();
-    if(list)list.style.opacity='1';
-  },300);
-}
-
-async function loadTrackerSteps() {
-  const session = trackerSessions.find(s=>s.id===currentSessionId);
-  if(!session) return;
-  const list = document.getElementById('stepList');
-  if(list) list.innerHTML = '<div class="loading"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div>';
-  const items = await api('session_items',`?session_id=eq.${session.id}&order=order_index.asc`).catch(()=>[]);
-  trackerSteps = [];
-  for(const item of items||[]) {
-    if(item.item_type==='routine' && item.routine_id) {
-      const rsteps = await api('routine_steps',`?routine_id=eq.${item.routine_id}&order=order_index.asc`).catch(()=>[]);
-      (rsteps||[]).forEach(s=>trackerSteps.push({key:`${session.id}::${s.id}`,name:s.step_name,product_id:s.product_id}));
-    } else if(item.item_type==='step') {
-      trackerSteps.push({key:`${session.id}::${item.id}`,name:item.step_name,product_id:item.product_id});
-    }
+  if(!ownedProducts.length) {
+    const data = await api('products','?status=eq.Owned&order=name.asc');
+    ownedProducts = data||[];
   }
-  const dateStr=getDateStr(viewDate||new Date());
-  const existing=await api('tracker_log',`?date=eq.${dateStr}&session_id=eq.${session.id}`).catch(()=>[]);
-  stepState={};
-  (existing||[]).forEach(e=>{stepState[e.step_name]=e.checked?'done':'pending';});
-  hasChanges=false;
-  renderTrackerSteps();
-  deactivateSave();
+  await loadSteps();
 }
 
-function renderTrackerSteps() {
-  const list = document.getElementById('stepList');
-  if(!list) return;
-  if(!trackerSteps.length) {
-    list.innerHTML=`<div style="padding:40px 20px;text-align:center;font-size:13px;color:var(--text3)">No steps in this session yet.<br>Add steps in the Plan tab.</div>`;
-    const pf=document.getElementById('progressFill');if(pf)pf.style.width='0%';
-    const pl=document.getElementById('progressLabel');if(pl)pl.textContent='';
+function setSession(s) {
+  if(currentSession === s) return;
+  currentSession = s;
+  document.getElementById('amBtn').classList.toggle('active',s==='Morning');
+  document.getElementById('pmBtn').classList.toggle('active',s==='Evening');
+  stepState={};stepProducts={};
+  const stepList = document.getElementById('stepList');
+  const pastView = document.getElementById('pastView');
+  const doneOverlay = document.getElementById('doneOverlay');
+  const targets = [stepList, pastView, doneOverlay].filter(Boolean);
+  // Fade out
+  targets.forEach(el => { el.style.transition='opacity 0.4s ease'; el.style.opacity='0'; });
+  setTimeout(async () => {
+    // Load content while invisible
+    if(isToday) { deactivateSave(); await loadSteps(); }
+    else if(isPast) { await loadPastLog(); }
+    else { await loadFuturePreview(); }
+    // Fade in after render
+    const newTargets = [
+      document.getElementById('stepList'),
+      document.getElementById('pastView'),
+      document.getElementById('doneOverlay')
+    ].filter(Boolean);
+    newTargets.forEach(el => { el.style.transition='opacity 0.4s ease'; el.style.opacity='0'; });
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      newTargets.forEach(el => { el.style.opacity='1'; });
+    }));
+  }, 400);
+}
+
+async function loadSteps() {
+  document.getElementById('doneOverlay').style.display='none';
+  document.getElementById('stepList').style.display='block';
+  document.getElementById('stepList').innerHTML='<div class="loading"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div>';
+  const existingPast = document.getElementById('pastView');
+  if(existingPast) existingPast.remove();
+
+  // Fetch daily + weekly steps for today
+  const vDay = getDayShort(viewDate);
+  const vDayOfMonth = viewDate.getDate();
+  const [daily, weekly, monthly] = await Promise.all([
+    api('routine_tasks',`?time_of_day=eq.${currentSession}&frequency=eq.Daily&order=order.asc`),
+    api('routine_tasks',`?time_of_day=eq.${currentSession}&frequency=eq.Weekly&days=cs.{"${vDay}"}&order=order.asc`),
+    vDayOfMonth===1 ? api('routine_tasks',`?time_of_day=eq.${currentSession}&frequency=eq.Monthly&order=order.asc`) : Promise.resolve([])
+  ]);
+
+  // Merge and sort by order
+  const all = [...(daily||[]), ...(weekly||[]), ...(monthly||[])];
+  all.sort((a,b)=>a.order-b.order);
+  steps = all;
+
+  if(!steps.length) {
+    document.getElementById('stepList').innerHTML='<div class="empty-state"><div class="empty-glyph">∅</div><div class="empty-title">No steps for today</div><div class="empty-sub">Enjoy your day off</div></div>';
     return;
   }
-  const done=trackerSteps.filter(s=>stepState[s.name]==='done').length;
-  const total=trackerSteps.length;
+
+  steps.forEach(s=>{if(!stepState[s.id])stepState[s.id]='pending';});
+  renderSteps();
+}
+
+function renderSteps() {
+  const total=steps.length;
+  const done=steps.filter(s=>stepState[s.id]==='done').length;
+  const skipped=steps.filter(s=>stepState[s.id]==='skipped').length;
   const pct=Math.round((done/total)*100);
-  const pf=document.getElementById('progressFill');if(pf)pf.style.width=pct+'%';
-  const pl=document.getElementById('progressLabel');if(pl)pl.textContent=`${done} / ${total}`;
-  list.innerHTML=trackerSteps.map(s=>{
-    const checked=stepState[s.name]==='done';
-    return `<div class="tracker-step${checked?' checked':''}" onclick="toggleTrackerStep('${s.name.replace(/'/g,"\'")}')">
-      <div class="tracker-step-check${checked?' checked':''}">${checked?'✓':''}</div>
-      <div class="tracker-step-name">${s.name}</div>
+
+  document.getElementById('progressLabel').textContent=currentSession==='Morning'?'morning routine':'evening routine';
+  document.getElementById('progressCount').textContent=`${done} / ${total}`;
+  document.getElementById('progressFill').style.width=pct+'%';
+
+  if(done+skipped===total&&total>0){
+    document.getElementById('stepList').style.display='none';
+    const o=document.getElementById('doneOverlay');
+    o.style.display='flex';o.style.flexDirection='column';
+    document.getElementById('doneSub').textContent=`${done} done · ${skipped} skipped`;
+    return;
+  }
+
+  document.getElementById('doneOverlay').style.display='none';
+  document.getElementById('stepList').style.display='block';
+
+  document.getElementById('stepList').innerHTML=steps.map((s,i)=>{
+    const st=stepState[s.id];
+    const isDone=st==='done';
+    const isSkipped=st==='skipped';
+    const freqBadge=s.frequency==='Weekly'?'<span class="freq-badge freq-weekly">weekly</span>':s.frequency==='Monthly'?'<span class="freq-badge freq-monthly">monthly</span>':'';
+    const note=s.insertion_note?`<div class="step-note">${s.insertion_note}</div>`:'';
+
+    // Product picker — only show when done
+    const pickerHtml=buildProductPicker(s.id, isDone);
+
+    return `<div class="step-row${isDone?' done':isSkipped?' skipped':''}" id="row-${s.id}">
+      <div class="step-main" onclick="toggleStep('${s.id}')">
+        <span class="step-num">${i+1}</span>
+        <div class="check-circle"><div class="checkmark"></div></div>
+        <div class="step-info">
+          <div class="step-name">${s.name}</div>
+          ${note}
+        </div>
+        ${freqBadge}
+        <button class="skip-btn" onclick="event.stopPropagation();toggleSkip('${s.id}')">${isSkipped?'undo':'skip'}</button>
+      </div>
+      ${pickerHtml}
     </div>`;
   }).join('');
-  if(done===total&&total>0){const d=document.getElementById('doneOverlay');if(d)d.style.display='flex';}
-  else{const d=document.getElementById('doneOverlay');if(d)d.style.display='none';}
 }
 
-function toggleTrackerStep(stepName) {
-  stepState[stepName]=stepState[stepName]==='done'?'pending':'done';
-  hasChanges=true;
+function buildProductPicker(stepId, show) {
+  if(!show) return `<div class="product-picker" id="picker-${stepId}"></div>`;
+  const selected=stepProducts[stepId]||null;
+  if(!ownedProducts.length) return `<div class="product-picker" id="picker-${stepId}"><span class="no-products">No products in kit yet</span></div>`;
+  const chips=ownedProducts.map(p=>`<button class="product-chip${selected===p.id?' selected':''}" onclick="selectProduct('${stepId}','${p.id}')">${p.name}</button>`).join('');
+  return `<div class="product-picker" id="picker-${stepId}">
+    <div class="product-picker-label">Which product did you use?</div>
+    <div class="product-chips">${chips}</div>
+  </div>`;
+}
+
+function selectProduct(stepId, productId) {
+  stepProducts[stepId]=stepProducts[stepId]===productId?null:productId;
   activateSave();
-  renderTrackerSteps();
+  const picker=document.getElementById(`picker-${stepId}`);
+  if(picker) picker.outerHTML=buildProductPicker(stepId,true);
 }
 
-function activateSave() {
-  const bar=document.getElementById('saveBar');if(bar)bar.style.display='flex';
-  const btn=document.getElementById('saveBtn');if(btn)btn.classList.add('active');
+function toggleStep(id) {
+  stepState[id]=stepState[id]==='done'?'pending':'done';
+  if(stepState[id]==='pending') delete stepProducts[id];
+  activateSave();
+  renderSteps();
 }
 
-function deactivateSave() {
-  const bar=document.getElementById('saveBar');if(bar)bar.style.display='none';
-  const btn=document.getElementById('saveBtn');if(btn){btn.disabled=false;btn.textContent='Save';btn.classList.remove('active');}
-  hasChanges=false;
+function toggleSkip(id) {
+  stepState[id]=stepState[id]==='skipped'?'pending':'skipped';
+  activateSave();
+  renderSteps();
+}
+
+function skipAll() {
+  steps.forEach(s=>stepState[s.id]='skipped');
+  activateSave();
+  renderSteps();
+}
+
+function resetRoutine() {
+  steps.forEach(s=>{stepState[s.id]='pending';delete stepProducts[s.id];});
+  document.getElementById('stepList').style.display='block';
+  document.getElementById('doneOverlay').style.display='none';
+  renderSteps();
+}
+
+async function loadPastLog() {
+  const dateStr = getDateStr(viewDate);
+  const vDay = getDayShort(viewDate);
+  const vDayOfMonth = viewDate.getDate();
+
+  // Get what was logged
+  const logged = await api('daily_log', `?date=eq.${dateStr}&time_of_day=eq.${currentSession}&order=order.asc`);
+
+  // Show step list area as past view
+  document.getElementById('doneOverlay').style.display = 'none';
+  document.getElementById('stepList').style.display = 'none';
+
+  // Remove old past view if exists
+  const existing = document.getElementById('pastView');
+  if(existing) existing.remove();
+
+  const container = document.createElement('div');
+  container.id = 'pastView';
+  container.className = 'past-log';
+
+  if(!logged || !logged.length) {
+    // Show what the routine would have been, all marked as not done
+    const vDay = getDayShort(viewDate);
+    const vDayOfMonth = viewDate.getDate();
+    const [daily, weekly, monthly] = await Promise.all([
+      api('routine_tasks',`?time_of_day=eq.${currentSession}&frequency=eq.Daily&order=order.asc`),
+      api('routine_tasks',`?time_of_day=eq.${currentSession}&frequency=eq.Weekly&days=cs.{"${vDay}"}&order=order.asc`),
+      vDayOfMonth===1 ? api('routine_tasks',`?time_of_day=eq.${currentSession}&frequency=eq.Monthly&order=order.asc`) : Promise.resolve([])
+    ]);
+    const all = [...(daily||[]),...(weekly||[]),...(monthly||[])];
+    all.sort((a,b)=>a.order-b.order);
+
+    container.innerHTML = `<div class="past-header missed-header">Not completed · ${all.length} steps</div>` +
+      all.map((s,i) => `
+        <div class="past-item was-skipped">
+          <div class="past-status-icon past-missed-icon">✕</div>
+          <div class="past-item-info">
+            <div class="past-item-name">${i+1}. ${s.name}</div>
+          </div>
+          ${s.frequency!=='Daily'?`<span class="freq-badge-small ${s.frequency==='Weekly'?'freq-weekly':'freq-monthly'}">${s.frequency.toLowerCase()}</span>`:''}
+        </div>`).join('');
+  } else {
+    // Get product names for logged entries
+    const productIds = logged.map(l=>l.product_used).filter(Boolean);
+    let productMap = {};
+    if(productIds.length) {
+      const prods = await api('products', `?id=in.(${productIds.join(',')})&select=id,name`);
+      (prods||[]).forEach(p => productMap[p.id] = p.name);
+    }
+
+    const doneItems = logged.filter(l=>l.status==='Done');
+    const skippedItems = logged.filter(l=>l.status==='Skipped');
+
+    let html = '';
+    if(doneItems.length) {
+      html += `<div class="past-header">✓ Completed · ${doneItems.length}</div>`;
+      html += doneItems.map(l => `
+        <div class="past-item">
+          <div class="past-status-icon past-done-icon">✓</div>
+          <div class="past-item-info">
+            <div class="past-item-name">${l.step_name}</div>
+            ${l.product_used && productMap[l.product_used] ? `<div class="past-item-product">${productMap[l.product_used]}</div>` : ''}
+          </div>
+        </div>`).join('');
+    }
+    if(skippedItems.length) {
+      html += `<div class="past-header" style="margin-top:${doneItems.length?'20px':'0'}">Skipped · ${skippedItems.length}</div>`;
+      html += skippedItems.map(l => `
+        <div class="past-item was-skipped">
+          <div class="past-status-icon past-skip-icon">—</div>
+          <div class="past-item-info">
+            <div class="past-item-name">${l.step_name}</div>
+          </div>
+        </div>`).join('');
+    }
+    container.innerHTML = html;
+  }
+
+  document.getElementById('stepList').insertAdjacentElement('afterend', container);
+}
+
+async function loadFuturePreview() {
+  const vDay = getDayShort(viewDate);
+  const vDayOfMonth = viewDate.getDate();
+
+  const [daily, weekly, monthly] = await Promise.all([
+    api('routine_tasks',`?time_of_day=eq.${currentSession}&frequency=eq.Daily&order=order.asc`),
+    api('routine_tasks',`?time_of_day=eq.${currentSession}&frequency=eq.Weekly&days=cs.{"${vDay}"}&order=order.asc`),
+    vDayOfMonth===1 ? api('routine_tasks',`?time_of_day=eq.${currentSession}&frequency=eq.Monthly&order=order.asc`) : Promise.resolve([])
+  ]);
+
+  const all = [...(daily||[]),...(weekly||[]),...(monthly||[])];
+  all.sort((a,b)=>a.order-b.order);
+
+  document.getElementById('doneOverlay').style.display='none';
+  document.getElementById('stepList').style.display='none';
+  const existing = document.getElementById('pastView');
+  if(existing) existing.remove();
+
+  const container = document.createElement('div');
+  container.id = 'pastView';
+  container.className = 'past-log';
+
+  container.innerHTML = `<div class="past-header">Upcoming · ${all.length} steps</div>` +
+    all.map((s,i) => `
+      <div class="future-item">
+        <div class="future-dot"></div>
+        <div class="future-item-name">${i+1}. ${s.name}
+          ${s.frequency==='Weekly'?'<span class="freq-badge-small freq-weekly">weekly</span>':s.frequency==='Monthly'?'<span class="freq-badge-small freq-monthly">monthly</span>':''}
+        </div>
+      </div>`).join('');
+
+  document.getElementById('stepList').insertAdjacentElement('afterend', container);
 }
 
 async function saveRoutine() {
   if(!hasChanges) return;
   const btn=document.getElementById('saveBtn');
   btn.disabled=true;btn.textContent='Saving...';
-  const session=trackerSessions.find(s=>s.id===currentSessionId);
-  if(!session){btn.disabled=false;return;}
-  const dateStr=getDateStr(viewDate||new Date());
-  await fetch(`${SUPABASE_URL}/rest/v1/tracker_log?date=eq.${dateStr}&session_id=eq.${session.id}`,{method:'DELETE',headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`}});
-  const entries=trackerSteps.map(s=>({date:dateStr,session_id:session.id,step_name:s.name,product_id:s.product_id||null,checked:stepState[s.name]==='done',checked_at:stepState[s.name]==='done'?new Date().toISOString():null}));
-  const ok=await apiPost('tracker_log',entries);
+
+  const entries=steps
+    .filter(s=>stepState[s.id]!=='pending')
+    .map(s=>({
+      date:saveDateStr,
+      step_name:s.name,
+      time_of_day:currentSession,
+      status:stepState[s.id]==='done'?'Done':'Skipped',
+      order:s.order,
+      product_used:stepProducts[s.id]||null
+    }));
+
+  if(!entries.length){showToast('Nothing to save yet');btn.disabled=false;btn.classList.remove('active');return;}
+
+  // Delete existing entries for today + this session first
+  const saveDateStr = getDateStr(viewDate);
+  await fetch(`${SUPABASE_URL}/rest/v1/daily_log?date=eq.${saveDateStr}&time_of_day=eq.${currentSession}`, {
+    method:'DELETE',
+    headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`}
+  });
+
+  const ok=await apiPost('daily_log',entries);
   btn.disabled=false;
-  if(ok){deactivateSave();showToast(`✓ ${entries.filter(e=>e.checked).length} steps logged`);}
-  else{btn.textContent='Save';btn.classList.add('active');showToast('Something went wrong');}
+  btn.textContent='Save Routine';
+  if(ok){
+    deactivateSave();
+    showToast(`✓ ${entries.length} steps logged`);
+  } else {
+    btn.classList.add('active');
+    showToast('Something went wrong');
+  }
 }
-
-function updateDateNav() {
-  const today=new Date(now);
-  isToday=getDateStr(viewDate||today)===getDateStr(today);
-  isPast=(viewDate||today)<today&&!isToday;
-  const nb=document.getElementById('nextDayBtn');if(nb)nb.disabled=isToday;
-  const rt=document.getElementById('routineDateText');
-  if(rt)rt.textContent=isToday?'Today':(viewDate||today).toLocaleDateString('en',{month:'short',day:'numeric'});
-  const rb=document.getElementById('routineDayBadge');
-  if(rb)rb.textContent=(viewDate||today).toLocaleDateString('en',{weekday:'long'});
-}
-
-function shiftDay(dir) {
-  if(!viewDate)viewDate=new Date(now);
-  viewDate.setDate(viewDate.getDate()+dir);
-  const today=new Date(now);
-  isToday=getDateStr(viewDate)===getDateStr(today);
-  isPast=viewDate<today&&!isToday;
-  updateDateNav();
-  const list=document.getElementById('stepList');
-  if(list){list.style.transition='opacity 0.3s ease';list.style.opacity='0';}
-  setTimeout(async()=>{
-    currentSessionId=null;
-    await loadTrackerSessions();
-    if(list)list.style.opacity='1';
-  },300);
-}
-
 
 // KIT
 let kitItems = [];
@@ -3520,282 +3832,94 @@ async function deleteRoutineStep(stepId, routineId) {
 }
 
 // ── SCHEDULER ────────────────────────────────────────────────────────────────
-
-let scheduleData = { scheduleId:null, liveSessions:[], draftSessions:[] };
-
-async function loadScheduleData() {
-  try {
-    const schedules = await api('schedules','?is_active=eq.true&limit=1');
-    const sched = schedules?.[0];
-    if(!sched) return;
-    scheduleData.scheduleId = sched.id;
-    const [live, draft] = await Promise.all([
-      api('schedule_sessions',`?schedule_id=eq.${sched.id}&order=display_order.asc`),
-      api('draft_sessions',`?schedule_id=eq.${sched.id}&order=display_order.asc`)
-    ]);
-    scheduleData.liveSessions  = live||[];
-    scheduleData.draftSessions = draft||[];
-    for(const s of scheduleData.draftSessions) {
-      s._items = await api('draft_session_items',`?draft_session_id=eq.${s.id}&order=order_index.asc`).catch(()=>[]);
-    }
-  } catch(e) { console.error('loadScheduleData:', e); }
-}
-
-async function renderScheduler() {
-  await loadScheduleData();
+function renderScheduler() {
   const el = document.getElementById('schedulerContent');
-  if(!el) return;
-  const draft = scheduleData.draftSessions.filter(s=>s.change_status!=='deleted');
-  const hasChanges = scheduleData.draftSessions.some(s=>s.change_status!=='unchanged');
-  const groups = {daily:[],weekly:[],monthly:[],once:[]};
-  draft.forEach(s=>(groups[s.rule_type]||groups.once).push(s));
+  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const DAYS   = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+  const today  = new Date();
 
-  const WDAYS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  const ruleLabel = s => {
-    if(s.rule_type==='daily') return 'Every day';
-    if(s.rule_type==='weekly') return 'Every '+((s.rule_days||[]).map(d=>WDAYS[d]).join(', ')||'—');
-    if(s.rule_type==='monthly') return `Every ${s.rule_day_of_month}th of month`;
-    if(s.rule_type==='once'&&s.rule_date) return `Once · ${new Date(s.rule_date+'T00:00:00').toLocaleDateString('en',{month:'short',day:'numeric'})}`;
-    return s.rule_type;
-  };
-  const badge = s => s.change_status==='new'?`<span class="sched-change-badge badge-new">New</span>`:s.change_status==='edited'?`<span class="sched-change-badge badge-edited">Edited</span>`:'';
-  const card = s => {
-    const items=(s._items||[]).map(i=>i.item_type==='routine'?(plannerData.routines.find(r=>r.id===i.routine_id)?.name||'Routine'):(i.step_name||'Step')).join(' · ')||'No items yet';
-    return `<div class="sched-session-card" onclick="openSessionDetail('${s.id}')">
-      <div class="sched-session-icon">${s.icon||'🌅'}</div>
-      <div class="sched-session-info">
-        <div class="sched-session-name">${s.name}</div>
-        <div class="sched-session-rule">${ruleLabel(s)}</div>
-        <div class="sched-session-items">${items}</div>
-      </div>
-      ${badge(s)}
-      <span style="color:var(--text3);font-size:16px;margin-left:4px">›</span>
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+  const daysInPrev  = new Date(calYear, calMonth, 0).getDate();
+
+  // Build dot data per day from scheduled_treatments
+  const dotMap = {};
+  plannerData.scheduled.forEach(s => {
+    const d = new Date(s.scheduled_date+'T00:00:00');
+    if(d.getMonth()===calMonth && d.getFullYear()===calYear) {
+      const k = d.getDate();
+      if(!dotMap[k]) dotMap[k] = [];
+      dotMap[k].push('#c8b89a');
+    }
+  });
+
+  let cells = '';
+  // Prev month padding
+  for(let i=firstDay-1;i>=0;i--) {
+    cells += `<div class="cal-day other-month"><div class="cal-day-num">${daysInPrev-i}</div></div>`;
+  }
+  // Current month
+  for(let d=1;d<=daysInMonth;d++) {
+    const isToday = d===today.getDate() && calMonth===today.getMonth() && calYear===today.getFullYear();
+    const dots = (dotMap[d]||[]).slice(0,4).map(c=>`<div class="cal-dot" style="background:${c}"></div>`).join('');
+    cells += `<div class="cal-day${isToday?' today':''}" onclick="openCalDay(${d})">
+      <div class="cal-day-num">${d}</div>
+      <div class="cal-dots">${dots}</div>
     </div>`;
-  };
-  const group = (title,arr) => arr.length?`<div class="sched-section"><div class="sched-section-title">${title}</div>${arr.map(card).join('')}</div>`:'';
-
-  const sessionsHtml = group('Daily',groups.daily)+group('Weekly',groups.weekly)+group('Monthly',groups.monthly)+group('One-time',groups.once);
+  }
+  // Next month padding
+  const total = firstDay + daysInMonth;
+  const remaining = (7 - (total%7))%7;
+  for(let i=1;i<=remaining;i++) {
+    cells += `<div class="cal-day other-month"><div class="cal-day-num">${i}</div></div>`;
+  }
 
   el.innerHTML = `
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-      <div style="font-size:12px;color:var(--text3)">${draft.length} session${draft.length!==1?'s':''} · ${hasChanges?'<span style="color:var(--accent)">unsaved changes</span>':'up to date'}</div>
-      <button onclick="openAddSession()" style="padding:6px 14px;border-radius:12px;border:0.5px solid var(--border);background:transparent;color:var(--text2);font-size:12px;cursor:pointer;font-family:var(--sans)">+ Session</button>
+    <div class="cal-header">
+      <button class="cal-nav-btn" onclick="shiftCalMonth(-1)">‹</button>
+      <div class="cal-month-label">${MONTHS[calMonth]} ${calYear}</div>
+      <button class="cal-nav-btn" onclick="shiftCalMonth(1)">›</button>
     </div>
-    ${sessionsHtml||'<div class="empty-state"><div class="empty-glyph">📅</div><div class="empty-title">No sessions yet</div><div class="empty-sub">Tap "+ Session" to build your schedule</div></div>'}
-    <div class="push-bar">
-      <button class="push-btn" onclick="openPushFlow()" ${!hasChanges?'disabled':''}>↑ Push Changes</button>
+    <div class="cal-grid">
+      ${DAYS.map(d=>`<div class="cal-day-label">${d}</div>`).join('')}
+      ${cells}
+    </div>
+    <div style="margin-top:20px">
+      <div class="form-label" style="margin-bottom:10px">Upcoming Treatments</div>
+      ${plannerData.scheduled.length
+        ? plannerData.scheduled.slice(0,10).map(s => {
+            const d = new Date(s.scheduled_date+'T00:00:00').toLocaleDateString('en',{weekday:'short',month:'short',day:'numeric'});
+            return `<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:0.5px solid var(--border)">
+              <span style="font-size:11px;color:var(--accent);width:80px;flex-shrink:0">${d}</span>
+              <span style="font-size:13px;color:var(--text);flex:1">${s.name}</span>
+              <button onclick="markScheduledDone('${s.id}')" style="background:none;border:none;color:var(--text3);font-size:16px;cursor:pointer">✓</button>
+            </div>`;
+          }).join('')
+        : `<div style="padding:20px 0;text-align:center;font-size:12px;color:var(--text3)">No upcoming treatments</div>`}
     </div>`;
-
-  // Calendar below
-  const calDiv = document.createElement('div');
-  calDiv.style.marginTop='24px';
-  const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
-  const DAYS=['Su','Mo','Tu','We','Th','Fr','Sa'];
-  const today=new Date();
-  const firstDay=new Date(calYear,calMonth,1).getDay();
-  const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
-  const daysInPrev=new Date(calYear,calMonth,0).getDate();
-  const dotMap={};
-  plannerData.scheduled.forEach(s=>{
-    const d=new Date(s.scheduled_date+'T00:00:00');
-    if(d.getMonth()===calMonth&&d.getFullYear()===calYear){
-      const k=d.getDate();if(!dotMap[k])dotMap[k]=[];dotMap[k].push('var(--accent)');
-    }
-  });
-  draft.forEach(s=>{
-    for(let d=1;d<=daysInMonth;d++){
-      const date=new Date(calYear,calMonth,d);
-      const dow=date.getDay(),dom=date.getDate();
-      const ds=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-      let fires=false;
-      if(s.rule_type==='daily')fires=true;
-      else if(s.rule_type==='weekly')fires=(s.rule_days||[]).includes(dow);
-      else if(s.rule_type==='monthly')fires=dom===s.rule_day_of_month;
-      else if(s.rule_type==='once')fires=s.rule_date===ds;
-      if(fires){if(!dotMap[d])dotMap[d]=[];if(dotMap[d].length<3)dotMap[d].push('var(--border2)');}
-    }
-  });
-  let cells='';
-  for(let i=firstDay-1;i>=0;i--)cells+=`<div class="cal-day other-month"><div class="cal-day-num">${daysInPrev-i}</div></div>`;
-  for(let d=1;d<=daysInMonth;d++){
-    const isToday=d===today.getDate()&&calMonth===today.getMonth()&&calYear===today.getFullYear();
-    const dots=(dotMap[d]||[]).slice(0,4).map(c=>`<div class="cal-dot" style="background:${c}"></div>`).join('');
-    cells+=`<div class="cal-day${isToday?' today':''}" onclick="openCalDay(${d})"><div class="cal-day-num">${d}</div><div class="cal-dots">${dots}</div></div>`;
-  }
-  const rem=(7-((firstDay+daysInMonth)%7))%7;
-  for(let i=1;i<=rem;i++)cells+=`<div class="cal-day other-month"><div class="cal-day-num">${i}</div></div>`;
-  calDiv.innerHTML=`<div class="cal-header"><button class="cal-nav-btn" onclick="shiftCalMonth(-1)">‹</button><div class="cal-month-label">${MONTHS[calMonth]} ${calYear}</div><button class="cal-nav-btn" onclick="shiftCalMonth(1)">›</button></div><div class="cal-grid">${DAYS.map(d=>`<div class="cal-day-label">${d}</div>`).join('')}${cells}</div>`;
-  el.appendChild(calDiv);
 }
 
-function shiftCalMonth(dir){calMonth+=dir;if(calMonth>11){calMonth=0;calYear++;}if(calMonth<0){calMonth=11;calYear--;}renderScheduler();}
-
-function openCalDay(day){
-  const date=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-  const dateObj=new Date(date+'T00:00:00');
-  const dow=dateObj.getDay(),dom=dateObj.getDate();
-  const label=dateObj.toLocaleDateString('en',{weekday:'long',month:'long',day:'numeric'});
-  const firing=scheduleData.draftSessions.filter(s=>{
-    if(s.change_status==='deleted')return false;
-    if(s.rule_type==='daily')return true;
-    if(s.rule_type==='weekly')return(s.rule_days||[]).includes(dow);
-    if(s.rule_type==='monthly')return dom===s.rule_day_of_month;
-    if(s.rule_type==='once')return s.rule_date===date;
-    return false;
-  });
-  const treatments=plannerData.scheduled.filter(s=>s.scheduled_date===date);
-  if(!firing.length&&!treatments.length){showToast('Nothing on this day');return;}
-  const html=firing.map(s=>{
-    const items=(s._items||[]).map(i=>i.item_type==='routine'?`<div style="padding:5px 0;font-size:12px;color:var(--text2)">📋 ${plannerData.routines.find(r=>r.id===i.routine_id)?.name||'Routine'}</div>`:`<div style="padding:5px 0;font-size:12px;color:var(--text2)">• ${i.step_name}</div>`).join('');
-    return `<div style="margin-bottom:14px"><div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px">${s.icon} ${s.name}</div>${items||'<div style="font-size:11px;color:var(--text3)">No items yet</div>'}</div>`;
-  }).join('')+treatments.map(t=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-top:0.5px solid var(--border)"><span style="font-size:13px;color:var(--text);flex:1">📅 ${t.name}</span><button onclick="markScheduledDone('${t.id}')" style="background:none;border:none;color:var(--accent);font-size:13px;cursor:pointer;font-family:var(--sans)">Done</button></div>`).join('');
-  openPlannerSubpage(label,html);
+function shiftCalMonth(dir) {
+  calMonth += dir;
+  if(calMonth > 11) { calMonth=0; calYear++; }
+  if(calMonth < 0)  { calMonth=11; calYear--; }
+  renderScheduler();
 }
 
-// ── SESSION MANAGEMENT ────────────────────────────────────────────────────────
-const selectedWeekdays = new Set();
-
-async function openAddSession(){
-  openPlannerSubpage('New Session',`
-    <div class="form-field"><div class="form-label">Name</div><input class="form-input" id="ns_name" placeholder="e.g. Morning, Evening, Sunday Reset"></div>
-    <div class="form-field"><div class="form-label">Icon</div><input class="form-input" id="ns_icon" placeholder="🌅" maxlength="4" style="width:80px"></div>
-    <div class="form-field"><div class="form-label">Recurrence</div>
-      <select class="form-input" id="ns_rule" onchange="updateRuleUI()" style="color:var(--text2)">
-        <option value="daily">Every day</option>
-        <option value="weekly">Weekly — specific days</option>
-        <option value="monthly">Monthly — specific date</option>
-        <option value="once">Once — specific date</option>
-      </select></div>
-    <div id="ns_rule_extra"></div>
-    <button onclick="saveNewSession()" style="width:100%;padding:14px;border-radius:14px;border:none;background:var(--accent);color:var(--bg);font-size:14px;font-weight:500;cursor:pointer;font-family:var(--sans);margin-top:8px">Create Session</button>
-  `);
-  setTimeout(updateRuleUI,100);
+function openCalDay(day) {
+  const date = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+  const items = plannerData.scheduled.filter(s=>s.scheduled_date===date);
+  const d = new Date(date+'T00:00:00').toLocaleDateString('en',{weekday:'long',month:'long',day:'numeric'});
+  if(!items.length) { showToast('Nothing scheduled this day'); return; }
+  const list = items.map(s=>`
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:0.5px solid var(--border)">
+      <span style="font-size:13px;color:var(--text);flex:1">${s.name}</span>
+      ${s.note?`<span style="font-size:11px;color:var(--text3)">${s.note}</span>`:''}
+      <button onclick="markScheduledDone('${s.id}')" style="background:none;border:none;color:var(--accent);font-size:13px;cursor:pointer;font-family:var(--sans)">Done</button>
+    </div>`).join('');
+  openPlannerSubpage(d, list);
 }
 
-function updateRuleUI(){
-  const rule=document.getElementById('ns_rule')?.value;
-  const extra=document.getElementById('ns_rule_extra');
-  if(!extra)return;
-  const DAYS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  if(rule==='weekly')extra.innerHTML=`<div class="form-field"><div class="form-label">Days</div><div style="display:flex;gap:6px;flex-wrap:wrap">${DAYS.map((d,i)=>`<button class="pill filter-btn" id="wd_${i}" onclick="toggleWeekday(${i})" style="min-width:44px">${d}</button>`).join('')}</div></div>`;
-  else if(rule==='monthly')extra.innerHTML=`<div class="form-field"><div class="form-label">Day of month</div><input class="form-input" type="number" id="ns_dom" min="1" max="31" placeholder="e.g. 1" style="width:100px"></div>`;
-  else if(rule==='once')extra.innerHTML=`<div class="form-field"><div class="form-label">Date</div><input class="form-input" type="date" id="ns_date" style="color:var(--text2)"></div>`;
-  else extra.innerHTML='';
-}
-
-function toggleWeekday(i){
-  if(selectedWeekdays.has(i))selectedWeekdays.delete(i);else selectedWeekdays.add(i);
-  document.getElementById('wd_'+i)?.classList.toggle('active',selectedWeekdays.has(i));
-}
-
-async function saveNewSession(){
-  const name=document.getElementById('ns_name')?.value.trim();
-  if(!name){showToast('Enter a session name');return;}
-  const rule=document.getElementById('ns_rule')?.value;
-  const icon=document.getElementById('ns_icon')?.value.trim()||'🌅';
-  if(!scheduleData.scheduleId){showToast('No active schedule found');return;}
-  let data={schedule_id:scheduleData.scheduleId,name,icon,rule_type:rule,display_order:scheduleData.draftSessions.length,change_status:'new'};
-  if(rule==='weekly')data.rule_days=[...selectedWeekdays];
-  if(rule==='monthly')data.rule_day_of_month=parseInt(document.getElementById('ns_dom')?.value)||1;
-  if(rule==='once')data.rule_date=document.getElementById('ns_date')?.value;
-  selectedWeekdays.clear();
-  const res=await fetch(`${SUPABASE_URL}/rest/v1/draft_sessions`,{method:'POST',headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(data)});
-  if(res.ok){showToast('Session created');closePlannerSubpage();await renderScheduler();}
-  else showToast('Error creating session');
-}
-
-async function openSessionDetail(draftId){
-  await loadScheduleData();
-  const s=scheduleData.draftSessions.find(x=>x.id===draftId);
-  if(!s)return;
-  const items=s._items||[];
-  const WDAYS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  const ruleText=s.rule_type==='daily'?'Every day':s.rule_type==='weekly'?'Every '+((s.rule_days||[]).map(d=>WDAYS[d]).join(', ')):s.rule_type==='monthly'?`Every ${s.rule_day_of_month}th`:s.rule_date||'Once';
-  const itemHtml=items.map((it,idx)=>`<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border)"><span style="font-size:11px;color:var(--text3);width:18px">${idx+1}</span><span style="font-size:13px;color:var(--text);flex:1">${it.item_type==='routine'?'📋 '+(plannerData.routines.find(r=>r.id===it.routine_id)?.name||'Routine'):'• '+(it.step_name||'Step')}</span><button onclick="deleteDraftItem('${it.id}','${draftId}')" style="background:none;border:none;color:var(--text3);font-size:16px;cursor:pointer">×</button></div>`).join('');
-  const routineOptions=plannerData.routines.map(r=>`<option value="${r.id}">${r.emoji||'📋'} ${r.name}</option>`).join('');
-  openPlannerSubpage(s.icon+' '+s.name,`
-    <div style="font-size:11px;color:var(--text3);margin-bottom:16px">${ruleText}</div>
-    <div class="form-label" style="margin-bottom:8px">Items</div>
-    <div id="sessionItemList">${itemHtml||'<div style="padding:12px 0;font-size:12px;color:var(--text3)">No items yet</div>'}</div>
-    <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px">
-      <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em">Add routine</div>
-      <div style="display:flex;gap:8px">
-        <select class="form-input" id="si_routine" style="flex:1;color:var(--text2)"><option value="">— pick routine —</option>${routineOptions}</select>
-        <button onclick="addSessionItem('${draftId}','routine')" style="padding:10px 14px;border-radius:12px;border:none;background:var(--accent);color:var(--bg);font-size:13px;cursor:pointer;font-family:var(--sans);flex-shrink:0">Add</button>
-      </div>
-      <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-top:4px">Add single step</div>
-      <div style="display:flex;gap:8px">
-        <input class="form-input" id="si_step" placeholder="Step name..." style="flex:1">
-        <button onclick="addSessionItem('${draftId}','step')" style="padding:10px 14px;border-radius:12px;border:0.5px solid var(--border);background:var(--bg3);color:var(--text);font-size:13px;cursor:pointer;font-family:var(--sans);flex-shrink:0">Add</button>
-      </div>
-    </div>
-    <button onclick="deleteSession('${draftId}')" style="width:100%;padding:12px;border-radius:14px;border:0.5px solid var(--border2);background:transparent;color:var(--red,#c45);font-size:13px;cursor:pointer;font-family:var(--sans);margin-top:20px">Remove Session</button>
-  `);
-}
-
-async function addSessionItem(draftId,type){
-  const session=scheduleData.draftSessions.find(s=>s.id===draftId);
-  const nextIdx=(session?._items||[]).length;
-  let data={draft_session_id:draftId,item_type:type,order_index:nextIdx};
-  if(type==='routine'){data.routine_id=document.getElementById('si_routine')?.value;if(!data.routine_id){showToast('Pick a routine');return;}}
-  else{data.step_name=document.getElementById('si_step')?.value.trim();if(!data.step_name){showToast('Enter a step name');return;}}
-  const res=await fetch(`${SUPABASE_URL}/rest/v1/draft_session_items`,{method:'POST',headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(data)});
-  if(res.ok){
-    if(session?.change_status==='unchanged')await fetch(`${SUPABASE_URL}/rest/v1/draft_sessions?id=eq.${draftId}`,{method:'PATCH',headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({change_status:'edited'})});
-    showToast('Added');await loadScheduleData();openSessionDetail(draftId);await renderScheduler();
-  }
-}
-
-async function deleteDraftItem(itemId,draftId){
-  await fetch(`${SUPABASE_URL}/rest/v1/draft_session_items?id=eq.${itemId}`,{method:'DELETE',headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`}});
-  await loadScheduleData();openSessionDetail(draftId);renderScheduler();
-}
-
-async function deleteSession(draftId){
-  const s=scheduleData.draftSessions.find(x=>x.id===draftId);
-  if(s?.change_status==='new')await fetch(`${SUPABASE_URL}/rest/v1/draft_sessions?id=eq.${draftId}`,{method:'DELETE',headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`}});
-  else await fetch(`${SUPABASE_URL}/rest/v1/draft_sessions?id=eq.${draftId}`,{method:'PATCH',headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({change_status:'deleted'})});
-  closePlannerSubpage();await renderScheduler();
-}
-
-// ── PUSH FLOW ─────────────────────────────────────────────────────────────────
-async function openPushFlow(){
-  const draft=scheduleData.draftSessions;
-  const added=draft.filter(s=>s.change_status==='new');
-  const edited=draft.filter(s=>s.change_status==='edited');
-  const deleted=draft.filter(s=>s.change_status==='deleted');
-  const diffHtml=`
-    ${added.length?`<div style="margin-bottom:12px"><div style="font-size:11px;color:#4a7c59;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px">Added</div>${added.map(s=>`<div class="diff-block diff-added"><span style="font-size:13px;color:var(--text)">${s.icon} ${s.name}</span></div>`).join('')}</div>`:''}
-    ${edited.length?`<div style="margin-bottom:12px"><div style="font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px">Edited</div>${edited.map(s=>`<div class="diff-block diff-edited"><span style="font-size:13px;color:var(--text)">${s.icon} ${s.name}</span></div>`).join('')}</div>`:''}
-    ${deleted.length?`<div style="margin-bottom:12px"><div style="font-size:11px;color:#c45;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px">Removed</div>${deleted.map(s=>`<div class="diff-block diff-removed"><span style="font-size:13px;color:var(--text)">${s.icon} ${s.name}</span></div>`).join('')}</div>`:''}`;
-  const summaryHtml=draft.filter(s=>s.change_status!=='deleted').map(s=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border)"><span style="font-size:16px">${s.icon}</span><span style="font-size:13px;color:var(--text)">${s.name}</span><span style="font-size:10px;color:var(--text3);margin-left:auto">${s.rule_type}</span></div>`).join('');
-  openPlannerSubpage('Push Changes',`
-    <div style="margin-bottom:20px"><div class="form-label" style="margin-bottom:10px">What's changing</div>${diffHtml||'<div style="font-size:12px;color:var(--text3)">No changes</div>'}</div>
-    <div style="margin-bottom:24px"><div class="form-label" style="margin-bottom:10px">New schedule overview</div>${summaryHtml||'<div style="font-size:12px;color:var(--text3)">Empty</div>'}</div>
-    <button onclick="confirmPush()" style="width:100%;padding:14px;border-radius:14px;border:none;background:var(--accent);color:var(--bg);font-size:14px;font-weight:600;cursor:pointer;font-family:var(--serif);letter-spacing:0.04em">↑ Confirm Push</button>
-    <button onclick="closePlannerSubpage()" style="width:100%;padding:12px;border-radius:14px;border:0.5px solid var(--border2);background:transparent;color:var(--text3);font-size:13px;cursor:pointer;font-family:var(--sans);margin-top:8px">Cancel</button>
-  `);
-}
-
-async function confirmPush(){
-  showToast('Pushing...');
-  const sid=scheduleData.scheduleId;
-  try{
-    await fetch(`${SUPABASE_URL}/rest/v1/schedule_sessions?schedule_id=eq.${sid}`,{method:'DELETE',headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`}});
-    const toPublish=scheduleData.draftSessions.filter(s=>s.change_status!=='deleted');
-    for(const ds of toPublish){
-      const liveRes=await fetch(`${SUPABASE_URL}/rest/v1/schedule_sessions`,{method:'POST',headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`,'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify({schedule_id:sid,name:ds.name,icon:ds.icon,rule_type:ds.rule_type,rule_days:ds.rule_days,rule_day_of_month:ds.rule_day_of_month,rule_date:ds.rule_date,display_order:ds.display_order})});
-      const [liveSession]=await liveRes.json();
-      for(const item of ds._items||[]){
-        await fetch(`${SUPABASE_URL}/rest/v1/session_items`,{method:'POST',headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({session_id:liveSession.id,item_type:item.item_type,routine_id:item.routine_id||null,step_name:item.step_name||null,product_id:item.product_id||null,order_index:item.order_index})});
-      }
-    }
-    await fetch(`${SUPABASE_URL}/rest/v1/draft_sessions?schedule_id=eq.${sid}&change_status=neq.deleted`,{method:'PATCH',headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({change_status:'unchanged'})});
-    await fetch(`${SUPABASE_URL}/rest/v1/draft_sessions?schedule_id=eq.${sid}&change_status=eq.deleted`,{method:'DELETE',headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`}});
-    await fetch(`${SUPABASE_URL}/rest/v1/schedules?id=eq.${sid}`,{method:'PATCH',headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify({pushed_at:new Date().toISOString()})});
-    showToast('✓ Schedule pushed live');closePlannerSubpage();await renderScheduler();
-  }catch(e){console.error('Push failed:',e);showToast('Push failed');}
-}
 // ── GOALS ────────────────────────────────────────────────────────────────────
 function renderGoals() {
   const el = document.getElementById('goalsContent');
