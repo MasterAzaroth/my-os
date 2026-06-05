@@ -1946,17 +1946,10 @@ function renderFormStep() {
     const subcats = SUBCATEGORIES[formData.category] || [];
     body.innerHTML = `
       <div class="form-field">
-        <div class="form-label">Category</div>
+        <div class="form-label">Subcategory</div>
         <div class="form-chips-wrap" id="subcatChips">
           ${getAllSubcats(formData.category).map(s => `<button class="form-chip${formData.subcategory===s?' selected':''}" onclick="selectSubcat('${s}')">${s}</button>`).join('')}
           <button class="form-chip" onclick="addCustomSubcat()" style="border-style:dashed">+ Custom</button>
-        </div>
-      </div>
-      <div class="form-field">
-        <div class="form-label">Subcategory <span style="font-size:10px;color:var(--text3);font-weight:400">(optional)</span></div>
-        <div class="form-chips-wrap" id="subsubcatChips">
-          ${getAllSubSubcats(formData.subcategory||'').map(s => `<button class="form-chip${formData.subsubcategory===s?' selected':''}" onclick="selectSubSubcat('${s.replace(/'/g,String.fromCharCode(39))}')">${s}</button>`).join('')}
-          ${formData.subcategory ? `<button class="form-chip" onclick="addCustomSubSubcat('${formData.subcategory}')" style="border-style:dashed">+ Custom</button>` : '<span style="font-size:11px;color:var(--text3)">Select a category first</span>'}
         </div>
       </div>
       <div class="form-field">
@@ -2238,7 +2231,6 @@ async function submitProduct() {
     brand: formData.brand,
     category: formData.category,
     subcategory: formData.subcategory||null,
-    subsubcategory: formData.subsubcategory||null,
     description: formData.description||null,
     personal_notes: formData.personal_notes||null,
     ingredients: formData.ingredients||null,
@@ -2517,7 +2509,7 @@ async function openDetail(productId) {
     <div class="detail-hero">
       <div class="detail-hero-img">${heroImg}</div>
       <div class="detail-hero-info">
-        <div class="detail-hero-category">${p.category||''}${p.subcategory?' · '+p.subcategory:''}${p.subsubcategory?' · '+p.subsubcategory:''}</div>
+        <div class="detail-hero-category">${p.category||''}${p.subcategory?' · '+p.subcategory:''}</div>
         <div class="detail-hero-name">${p.name}</div>
         <div class="detail-hero-brand">${p.brand||''}</div>
         <div class="detail-hero-rating" id="detailRatingInline-${p.id}">
@@ -3533,36 +3525,6 @@ async function saveNotes(productId) {
 // CUSTOM SUBCATEGORIES
 // ============================================================
 let customSubcats = JSON.parse(localStorage.getItem('customSubcats')||'{}');
-let customSubSubcats = JSON.parse(localStorage.getItem('customSubSubcats')||'{}');
-
-function getAllSubSubcats(category) {
-  if(!category) return [];
-  return customSubSubcats[category] || [];
-}
-
-function selectSubSubcat(s) {
-  formData.subsubcategory = s;
-  document.querySelectorAll('#subsubcatChips .form-chip').forEach(b => {
-    b.classList.toggle('selected', b.textContent === s);
-  });
-}
-
-function addCustomSubSubcat(cat) {
-  const val = prompt('Enter custom subcategory name:');
-  if(!val?.trim()) return;
-  if(!customSubSubcats[cat]) customSubSubcats[cat] = [];
-  if(!customSubSubcats[cat].includes(val.trim())) {
-    customSubSubcats[cat].push(val.trim());
-    localStorage.setItem('customSubSubcats', JSON.stringify(customSubSubcats));
-  }
-  formData.subsubcategory = val.trim();
-  const wrap = document.getElementById('subsubcatChips');
-  if(wrap) {
-    wrap.innerHTML = getAllSubSubcats(cat).map(s =>
-      `<button class="form-chip${formData.subsubcategory===s?' selected':''}" onclick="selectSubSubcat('${s.replace(/'/g,"\'")}'">${s}</button>`
-    ).join('') + `<button class="form-chip" onclick="addCustomSubSubcat('${cat}')" style="border-style:dashed">+ Custom</button>`;
-  }
-}
 
 function getAllSubcats(category) {
   const defaults = SUBCATEGORIES[category] || [];
@@ -3572,14 +3534,6 @@ function getAllSubcats(category) {
 
 function selectSubcat(s) {
   formData.subcategory = s;
-  formData.subsubcategory = null;
-  // Refresh subsubcat chips
-  const wrap = document.getElementById('subsubcatChips');
-  if(wrap) {
-    wrap.innerHTML = getAllSubSubcats(s).map(sub =>
-      `<button class="form-chip" onclick="selectSubSubcat('${sub.replace(/'/g,"\'")}'">${sub}</button>`
-    ).join('') + `<button class="form-chip" onclick="addCustomSubSubcat('${s}')" style="border-style:dashed">+ Custom</button>`;
-  }
   document.querySelectorAll('#subcatChips .form-chip').forEach(b => {
     b.classList.toggle('selected', b.textContent === s);
   });
@@ -4330,356 +4284,156 @@ function toggleBodyArea(area, btn) {
 
 function renderBodySvg(view, side) {
   const ba = formData.body_areas || [];
-  const s = z => ba.includes(z) ? 'var(--accent)' : 'var(--bg3)';
-  const op = z => ba.includes(z) ? '0.6' : '1';
-  const zoneStyle = z => `fill:${s(z)};fill-opacity:${op(z)};stroke:var(--border2);stroke-width:0.5;cursor:pointer;transition:fill 0.15s`;
+  const on  = z => ba.includes(z);
+  const fill = z => on(z) ? 'var(--accent)' : 'var(--bg3)';
+  const op   = z => on(z) ? '0.85' : '0.5';
+  const z    = (zone, attrs, shape) =>
+    `<${shape} ${attrs} style="fill:${fill(zone)};fill-opacity:${op(zone)};stroke:var(--border2);stroke-width:0.6;cursor:pointer;transition:fill 0.15s,fill-opacity 0.15s" onclick="toggleBodyAreaSvg('${zone}',this)"/>`;
+  const zp   = (zone, d) =>
+    `<path d="${d}" style="fill:${fill(zone)};fill-opacity:${op(zone)};stroke:var(--border2);stroke-width:0.6;cursor:pointer;transition:fill 0.15s,fill-opacity 0.15s" onclick="toggleBodyAreaSvg('${zone}',this)"/>`;
+  const lbl  = (x,y,t) => `<text x="${x}" y="${y}" style="font-size:8px;fill:var(--text3);text-anchor:middle;dominant-baseline:middle;pointer-events:none;font-family:var(--sans)">${t}</text>`;
 
+  // ── FACE ──────────────────────────────────────────────────────────────────
   if(view === 'face') {
-    // Clean face SVG - same volcanioo head but face zones overlaid
-    return `<svg viewBox="0 0 160 200" xmlns="http://www.w3.org/2000/svg" style="max-width:150px;width:100%">
-      <style>.fz{stroke:var(--border2);stroke-width:0.8;cursor:pointer;transition:fill 0.15s,opacity 0.15s;fill-opacity:0.7}
-      .fz:active{fill-opacity:0.9}.fo{fill:none;stroke:var(--text2);stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
-      .fd{fill:none;stroke:var(--text3);stroke-width:0.7;stroke-linecap:round;pointer-events:none}
-      .fl{font-size:7px;fill:var(--text3);text-anchor:middle;dominant-baseline:middle;pointer-events:none}</style>
-
-      <!-- Hair -->
-      <path class="fz" style="${zoneStyle('🦱 Hair')}" onclick="toggleBodyAreaSvg('🦱 Hair',this)"
-        d="M28,80 C28,38 38,10 80,8 C122,10 132,38 132,80 C128,65 120,44 110,36 C98,26 64,26 50,36 C40,44 32,65 28,80Z"/>
-      <!-- Face outline (non-interactive) -->
-      <path class="fo" d="M32,80 C28,92 26,106 28,118 C30,140 42,158 58,168 C64,172 72,175 80,175 C88,175 96,172 102,168 C118,158 130,140 132,118 C134,106 132,92 128,80"/>
+    return `<svg viewBox="0 0 160 220" xmlns="http://www.w3.org/2000/svg" style="max-width:150px;width:100%">
+      <!-- Hair cap -->
+      ${zp('🦱 Hair', 'M30,85 Q30,30 80,24 Q130,30 130,85 Q118,68 80,65 Q42,68 30,85Z')}
+      <!-- Face base (non-interactive background) -->
+      <ellipse cx="80" cy="118" rx="48" ry="58" style="fill:var(--bg2);stroke:var(--border);stroke-width:0.8;pointer-events:none"/>
       <!-- Forehead -->
-      <path class="fz" style="${zoneStyle('Forehead')}" onclick="toggleBodyAreaSvg('Forehead',this)"
-        d="M46,78 C48,58 58,40 80,38 C102,40 112,58 114,78Z"/>
-      <!-- Left eye -->
-      <ellipse class="fz" style="${zoneStyle('Eyes')}" onclick="toggleBodyAreaSvg('Eyes',this)" cx="61" cy="102" rx="17" ry="10"/>
-      <!-- Right eye -->
-      <ellipse class="fz" style="${zoneStyle('Eyes')}" onclick="toggleBodyAreaSvg('Eyes',this)" cx="99" cy="102" rx="17" ry="10"/>
-      <!-- Eye details -->
-      <path class="fo" d="M46,101 Q52,94 61,94 Q70,94 76,101 Q70,109 61,109 Q52,109 46,101Z"/>
-      <path class="fo" d="M84,101 Q90,94 99,94 Q108,94 114,101 Q108,109 99,109 Q90,109 84,101Z"/>
-      <circle cx="61" cy="101" r="4" fill="var(--text2)" style="pointer-events:none"/>
-      <circle cx="99" cy="101" r="4" fill="var(--text2)" style="pointer-events:none"/>
-      <circle cx="61" cy="100" r="1.5" fill="var(--bg)" style="pointer-events:none"/>
-      <circle cx="99" cy="100" r="1.5" fill="var(--bg)" style="pointer-events:none"/>
-      <!-- Eyebrows -->
-      <path class="fd" d="M46,90 Q54,84 70,87"/>
-      <path class="fd" d="M90,87 Q106,84 114,90"/>
+      ${zp('Forehead', 'M38,100 Q40,76 80,72 Q120,76 122,100 Q110,90 80,88 Q50,90 38,100Z')}
+      <!-- Left cheek -->
+      ${z('Cheeks', 'cx="42" cy="126" rx="16" ry="14"', 'ellipse')}
+      <!-- Right cheek -->
+      ${z('Cheeks', 'cx="118" cy="126" rx="16" ry="14"', 'ellipse')}
       <!-- Nose -->
-      <path class="fz" style="${zoneStyle('Nose')}" onclick="toggleBodyAreaSvg('Nose',this)"
-        d="M72,110 Q70,124 66,132 Q72,138 80,139 Q88,138 94,132 Q90,124 88,110Z"/>
-      <path class="fo" d="M76,110 Q74,124 68,130 Q74,136 80,137 Q86,136 92,130 Q86,124 84,110"/>
-      <path class="fd" d="M68,130 Q66,134 66,136"/>
-      <path class="fd" d="M92,130 Q94,134 94,136"/>
-      <!-- Cheeks -->
-      <ellipse class="fz" style="${zoneStyle('Cheeks')}" onclick="toggleBodyAreaSvg('Cheeks',this)" cx="42" cy="128" rx="14" ry="11"/>
-      <ellipse class="fz" style="${zoneStyle('Cheeks')}" onclick="toggleBodyAreaSvg('Cheeks',this)" cx="118" cy="128" rx="14" ry="11"/>
+      ${zp('Nose', 'M72,108 Q70,122 68,130 Q74,136 80,137 Q86,136 92,130 Q90,122 88,108Z')}
+      <!-- Left eye -->
+      ${zp('Eyes', 'M46,104 Q54,96 66,96 Q74,96 78,104 Q74,112 66,112 Q54,112 46,104Z')}
+      <!-- Right eye -->
+      ${zp('Eyes', 'M82,104 Q86,96 94,96 Q106,96 114,104 Q106,112 94,112 Q86,112 82,104Z')}
+      <!-- Eye pupils (decorative) -->
+      <circle cx="62" cy="104" r="4" style="fill:var(--bg);pointer-events:none;opacity:0.6"/>
+      <circle cx="98" cy="104" r="4" style="fill:var(--bg);pointer-events:none;opacity:0.6"/>
       <!-- Lips -->
-      <path class="fz" style="${zoneStyle('👄 Lips')}" onclick="toggleBodyAreaSvg('👄 Lips',this)"
-        d="M64,142 Q72,137 80,137 Q88,137 96,142 Q91,154 80,156 Q69,154 64,142Z"/>
-      <path class="fo" d="M64,142 Q72,136 80,136 Q88,136 96,142"/>
-      <path class="fo" d="M64,142 Q68,152 80,154 Q92,152 96,142"/>
-      <path class="fd" d="M68,142 Q80,147 92,142"/>
+      ${zp('👄 Lips', 'M62,140 Q70,134 80,134 Q90,134 98,140 Q92,154 80,156 Q68,154 62,140Z')}
       <!-- Chin -->
-      <path class="fz" style="${zoneStyle('Chin')}" onclick="toggleBodyAreaSvg('Chin',this)"
-        d="M66,158 Q70,174 80,176 Q90,174 94,158Z"/>
+      ${zp('Chin', 'M66,158 Q70,172 80,174 Q90,172 94,158 Q86,156 80,156 Q74,156 66,158Z')}
       <!-- Neck -->
-      <path class="fz" style="${zoneStyle('Neck')}" onclick="toggleBodyAreaSvg('Neck',this)"
-        d="M62,176 Q58,188 58,200 L102,200 Q102,188 98,176Z"/>
-      <path class="fo" d="M62,176 Q58,190 60,200"/>
-      <path class="fo" d="M98,176 Q102,190 100,200"/>
-      <!-- Ear outlines -->
-      <path class="fo" d="M28,96 Q22,104 22,114 Q22,124 28,130 Q24,122 24,114 Q24,106 28,96Z"/>
-      <path class="fo" d="M132,96 Q138,104 138,114 Q138,124 132,130 Q136,122 136,114 Q136,106 132,96Z"/>
+      ${zp('Neck', 'M64,176 Q60,190 62,210 L98,210 Q100,190 96,176 Q88,180 80,180 Q72,180 64,176Z')}
+      <!-- Ear left -->
+      <path d="M32,106 Q24,116 24,124 Q24,132 32,136" style="fill:none;stroke:var(--border);stroke-width:2;pointer-events:none"/>
+      <!-- Ear right -->
+      <path d="M128,106 Q136,116 136,124 Q136,132 128,136" style="fill:none;stroke:var(--border);stroke-width:2;pointer-events:none"/>
+      <!-- Eyebrow lines -->
+      <path d="M46,92 Q56,86 72,90" style="fill:none;stroke:var(--text2);stroke-width:1.5;stroke-linecap:round;pointer-events:none;opacity:0.5"/>
+      <path d="M88,90 Q104,86 114,92" style="fill:none;stroke:var(--text2);stroke-width:1.5;stroke-linecap:round;pointer-events:none;opacity:0.5"/>
       <!-- Labels -->
-      <text x="80" y="56" class="fl">Forehead</text>
-      <text x="61" y="102" class="fl" style="font-size:6px">Eye</text>
-      <text x="99" y="102" class="fl" style="font-size:6px">Eye</text>
-      <text x="42" y="129" class="fl" style="font-size:6px">Cheek</text>
-      <text x="118" y="129" class="fl" style="font-size:6px">Cheek</text>
-      <text x="80" y="126" class="fl" style="font-size:6px">Nose</text>
-      <text x="80" y="147" class="fl" style="font-size:6px">Lips</text>
-      <text x="80" y="168" class="fl" style="font-size:6px">Chin</text>
-      <text x="80" y="192" class="fl" style="font-size:6px">Neck</text>
-      <text x="80" y="20" class="fl">Hair</text>
+      ${lbl(80,46,'Hair')}
+      ${lbl(80,80,'Forehead')}
+      ${lbl(62,104,'Eye')}
+      ${lbl(98,104,'Eye')}
+      ${lbl(36,126,'Cheek')}
+      ${lbl(124,126,'Cheek')}
+      ${lbl(80,126,'Nose')}
+      ${lbl(80,146,'Lips')}
+      ${lbl(80,168,'Chin')}
+      ${lbl(80,198,'Neck')}
     </svg>`;
   }
 
-  // --- BODY VIEWS (using real paths from volcanioo, MIT license) ---
-  const strokeCol = 'var(--text2)';
-
+  // ── BODY FRONT ────────────────────────────────────────────────────────────
   if(side === 'front') {
-    return `<svg viewBox="0 0 200 520" xmlns="http://www.w3.org/2000/svg" style="max-width:130px;width:100%">
-      <style>.bz{stroke:var(--border2);stroke-width:0.8;cursor:pointer;transition:fill 0.15s,opacity 0.15s}
-      .bz:active{fill-opacity:0.9}.bo{fill:none;stroke:var(--text2);stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
-      .bl{font-size:8px;fill:var(--text3);text-anchor:middle;dominant-baseline:middle;pointer-events:none}</style>
-
+    return `<svg viewBox="0 0 200 480" xmlns="http://www.w3.org/2000/svg" style="max-width:140px;width:100%">
       <!-- Head -->
-      <g transform="translate(72,2) scale(1.02)" onclick="toggleBodyAreaSvg('🦱 Hair',this)" style="cursor:pointer">
-        <path class="bz" style="${zoneStyle('🦱 Hair')}"
-          d="M15.92,68.5 l8.8,12.546 l3.97,13.984 l-9.254,-7.38 l-4.622,-15.848z
-             M43.02,68.5 l-8.8,12.546 l-3.976,13.988 l9.254,-7.38 l4.622,-15.848z
-             M49.13,40.725 l0.108,-11.775 L28.078,14.208 L8.123,26.133 L8.09,40.19 l-3.24,0.215 l1.462,9.732 l5.208,1.81 l2.36,11.63 l9.72,11.018 l10.856,-0.324 l9.56,-10.37 l1.918,-11.952 l5.207,-1.81 l1.342,-9.517z
-             M6.045,38.885 L5.788,25.065 L28.226,11.9 L51.844,27.655 L51.628,38.025 L56.604,20.94 L42.556,2.376 L25.49,0 L10.803,3.673 L0.002,24.415z"/>
-      </g>
+      ${z('🦱 Hair', 'cx="100" cy="38" rx="28" ry="34"', 'ellipse')}
       <!-- Neck -->
-      <rect class="bz" style="${zoneStyle('Neck')}" onclick="toggleBodyAreaSvg('Neck',this)"
-        x="84" y="100" width="32" height="26" rx="6"/>
-
-      <!-- Left shoulder -->
-      <g transform="translate(16,112)" onclick="toggleBodyAreaSvg('Shoulders',this)" style="cursor:pointer">
-        <path class="bz" style="${zoneStyle('Shoulders')}"
-          d="M38.244,-0.004 l1.98,9.232 l-11.653,2.857 l-7.474,-2.637z
-             M17.005,10.536 L12.962,8.35 L0.306,22.35 L0.244,27.675 c0,0 16.52,-17.015 16.764,-17.14z
-             M18.29,11.116 C18.3,11.396 0.528,30.038 0.528,30.038 L-0.01,46.595 L6.147,36.045 L18.017,30.989 L26.374,15.6z"/>
-      </g>
-      <!-- Right shoulder -->
-      <g transform="translate(144,112) scale(-1,1) translate(-55,0)" onclick="toggleBodyAreaSvg('Shoulders',this)" style="cursor:pointer">
-        <path class="bz" style="${zoneStyle('Shoulders')}"
-          d="M38.244,-0.004 l1.98,9.232 l-11.653,2.857 l-7.474,-2.637z
-             M17.005,10.536 L12.962,8.35 L0.306,22.35 L0.244,27.675 c0,0 16.52,-17.015 16.764,-17.14z
-             M18.29,11.116 C18.3,11.396 0.528,30.038 0.528,30.038 L-0.01,46.595 L6.147,36.045 L18.017,30.989 L26.374,15.6z"/>
-      </g>
-
+      ${z('Neck', 'x="88" y="70" width="24" height="22" rx="6"', 'rect')}
+      <!-- Shoulders -->
+      ${zp('Shoulders', 'M72,92 Q42,88 28,102 Q24,112 30,122 Q44,108 72,106Z')}
+      ${zp('Shoulders', 'M128,92 Q158,88 172,102 Q176,112 170,122 Q156,108 128,106Z')}
       <!-- Chest -->
-      <g transform="translate(57,128)" onclick="toggleBodyAreaSvg('Chest',this)" style="cursor:pointer">
-        <path class="bz" style="${zoneStyle('Chest')}"
-          d="M19.32,0 l-9.225,16.488 l-10.1,5.056 l6.15,4.836 l4.832,14.07 l11.2,4.616 l17.85,-8.828 l-4.452,-34.7z
-             M47.934,0 l9.225,16.488 l10.1,5.056 l-6.15,4.836 l-4.833,14.07 l-11.2,4.616 l-17.844,-8.828 l4.45,-34.7z"/>
-      </g>
-
+      ${zp('Chest', 'M72,106 L72,154 Q80,158 100,158 Q120,158 128,154 L128,106 Q116,96 100,94 Q84,96 72,106Z')}
       <!-- Stomach -->
-      <g transform="translate(62,173)" onclick="toggleBodyAreaSvg('Stomach',this)" style="cursor:pointer">
-        <path class="bz" style="${zoneStyle('Stomach')}"
-          d="M19.25,7.49 l16.6,-7.5 l-0.5,12.16 l-14.943,7.662z
-             M-10.322,8.9 l6.9,3.848 l-0.8,-9.116z M5.617,-8.732 L-18.68,2.15 L-13.7,15.6z
-             M-8.17,9.267 l9.015,5.514 l1.54,11.028 l-8.795,-5.735z
-             M15.53,5.89 l0.332,8.662 l12.286,-2.665 l0.664,-11.826z
-             M14.61,84.783 L11.28,53.062 l-0.08,-20.53 L-0.454,26.796 l-1.32,37.5z
-             M22.735,35.64 L22.57,46.3 l11.787,3.166 l0.166,-16.657z
-             M8.575,30.385 L16.49,35.9 l1.1,11.25 l-8.8,-7.06z
-             M8.79,22.74 L-0.883,15.46 l-0.84,9.78 L-7.006,38 l10.564,14.594 l5.5,0.883 l1.98,-20.735z
-             M56,7.488 l-16.6,-7.5 l0.5,12.16 l14.942,7.66z
-             M66.32,8.9 l-6.9,3.847 l0.8,-9.116z M60.703,-8.733 L84.93,2.148 l-4.98,13.447z
-             M68.17,9.267 l-9.015,5.514 l-1.54,11.03 l8.8,-5.736z
-             M52.64,15.157 l-0.332,8.662 l-12.285,-2.665 l-0.664,-11.827z
-             M38.03,84.783 l3.234,-31.536 l0.082,-20.532 l11.65,-5.735 l1.32,37.5z
-             M51.81,12.826 l0.166,10.66 l-11.786,3.168 l-0.166,-16.657z
-             M65.97,7.57 l-7.915,5.514 l-1.1,11.25 l8.794,-7.06z
-             M57.18,30.313 l9.673,-7.28 l0.84,9.78 l6.862,12.66 l-10.564,14.597 l-5.5,0.883 l-1.975,-20.74z"/>
-      </g>
-
+      ${zp('Stomach', 'M76,158 L76,210 Q88,216 100,216 Q112,216 124,210 L124,158 Q112,162 100,162 Q88,162 76,158Z')}
       <!-- Left arm -->
-      <g transform="translate(4,154)" onclick="toggleBodyAreaSvg('Arms',this)" style="cursor:pointer">
-        <path class="bz" style="${zoneStyle('Arms')}"
-          d="M21.12,56.5 a1.678,1.678 0 0 1 -0.427,0.33 l0.935,8.224 l12.977,-13.89 l1.2,-8.958 a168.2,168.2 0 0 0 -14.685,14.294z
-             M22.507,69.022 l-18.07,48.91 l5.757,1.333 l19.125,-39.44 l3.518,-22.047 l-10.33,11.244z
-             M17.229,50.062 l2.638,18.74 l-17.2,46.023 l-2.657,-1.775 l6.644,-35.518 l10.575,-27.47z
-             M36.034,37.739 a1.78,1.78 0 0 1 0.407,-0.24 l3.666,-27.345 l-7.037,-10.139 l-7.258,10.58 l-6.16,37.04 l0.566,4.973 a151.447,151.447 0 0 1 15.808,-14.87 l0.008,0.001z
-             M22.292,8.833 l-3.3,35.276 l-2.2,-26.238 l5.5,-9.038z"/>
-      </g>
-      <!-- Right arm -->
-      <g transform="translate(158,154) scale(-1,1) translate(-40,0)" onclick="toggleBodyAreaSvg('Arms',this)" style="cursor:pointer">
-        <path class="bz" style="${zoneStyle('Arms')}"
-          d="M21.12,56.5 a1.678,1.678 0 0 1 -0.427,0.33 l0.935,8.224 l12.977,-13.89 l1.2,-8.958 a168.2,168.2 0 0 0 -14.685,14.294z
-             M22.507,69.022 l-18.07,48.91 l5.757,1.333 l19.125,-39.44 l3.518,-22.047 l-10.33,11.244z
-             M17.229,50.062 l2.638,18.74 l-17.2,46.023 l-2.657,-1.775 l6.644,-35.518 l10.575,-27.47z
-             M36.034,37.739 a1.78,1.78 0 0 1 0.407,-0.24 l3.666,-27.345 l-7.037,-10.139 l-7.258,10.58 l-6.16,37.04 l0.566,4.973 a151.447,151.447 0 0 1 15.808,-14.87 l0.008,0.001z
-             M22.292,8.833 l-3.3,35.276 l-2.2,-26.238 l5.5,-9.038z"/>
-      </g>
-
+      ${zp('Arms', 'M28,102 Q14,118 8,150 Q6,170 12,188 Q20,178 28,158 Q34,134 38,118 Z')}
+      ${zp('Arms', 'M172,102 Q186,118 192,150 Q194,170 188,188 Q180,178 172,158 Q166,134 162,118 Z')}
       <!-- Left hand -->
-      <g transform="translate(6,298)" onclick="toggleBodyAreaSvg('🤲 Hands',this)" style="cursor:pointer">
-        <path class="bz" style="${zoneStyle('🤲 Hands')}"
-          d="M21.255,-0.002 l2.88,6.9 l8.412,1.335 l0.664,12.458 l-4.427,17.8 l-2.878,-0.22 l2.8,-11.847 l-2.99,-0.084 l-4.676,12.6 l-3.544,-0.446 l4.4,-12.736 l-3.072,-0.584 l-5.978,13.543 l-4.428,-0.445 l6.088,-14.1 l-2.1,-1.25 L4.878,34.934 L1.114,34.489 L12.4,12.9 L11.293,11.12 L0.665,15.57 L0,13.124 L8.635,5.338z"/>
-      </g>
-      <!-- Right hand -->
-      <g transform="translate(162,298) scale(-1,1) translate(-35,0)" onclick="toggleBodyAreaSvg('🤲 Hands',this)" style="cursor:pointer">
-        <path class="bz" style="${zoneStyle('🤲 Hands')}"
-          d="M21.255,-0.002 l2.88,6.9 l8.412,1.335 l0.664,12.458 l-4.427,17.8 l-2.878,-0.22 l2.8,-11.847 l-2.99,-0.084 l-4.676,12.6 l-3.544,-0.446 l4.4,-12.736 l-3.072,-0.584 l-5.978,13.543 l-4.428,-0.445 l6.088,-14.1 l-2.1,-1.25 L4.878,34.934 L1.114,34.489 L12.4,12.9 L11.293,11.12 L0.665,15.57 L0,13.124 L8.635,5.338z"/>
-      </g>
-
+      ${zp('🤲 Hands', 'M12,188 Q6,200 8,216 Q14,228 24,226 Q30,210 28,196 Z')}
+      ${zp('🤲 Hands', 'M188,188 Q194,200 192,216 Q186,228 176,226 Q170,210 172,196 Z')}
+      <!-- Groin -->
+      ${zp('Groin', 'M80,214 Q80,224 100,228 Q120,224 120,214 Q110,218 100,218 Q90,218 80,214Z')}
       <!-- Left leg -->
-      <g transform="translate(42,342) scale(1.1)" onclick="toggleBodyAreaSvg('Legs',this)" style="cursor:pointer">
-        <path class="bz" style="${zoneStyle('Legs')}"
-          d="M18.002,139.995 l-0.664,5.99 l4.647,5.77 l1.55,9.1 l3.1,1.33 l2.655,-13.755 l1.77,-4.88 l-1.55,-3.107z
-             M38.584,140.439 l-3.32,9.318 l-7.082,13.755 l1.77,12.647 l5.09,-14.2 l4.205,-7.982z
-             M12.027,126.794 l5.09,27.29 l-3.32,-1.777 l-2.656,8.875z
-             M34.822,183.168 l-1.55,4.88 l-3.32,20.634 l-0.442,27.51 l4.65,26.847 l-0.223,-34.39 l4.87,-13.754 l0.663,-15.087z
-             M24.199,195.592 l1.106,41.267 l-16.82,-29.07 l5.533,-36.384z
-             M14.489,4.587 l0,22.476 l15.71,31.073 l9.923,30.85 l-1.033,-21.375z
-             M39.979,34.835 l0.118,-0.148 l-0.793,-2.024 l-16.545,-18.16 l-1.242,-0.44 l10.984,28.378z
-             M33.724,45.601 l6.812,17.6 l2.274,-21.596 l-1.344,-3.43z
-             M7.254,63.421 l0.827,25.34 l12.816,35.257 l-3.928,10.136 l-12.61,-44.51z
-             M31.819,76.042 l0.345,0.826 l6.47,15.48 l-4.177,38.342 l-6.594,-3.526 l5.715,-35.7z
-             M10.354,1.345 l0.827,21.373 L4.153,65.026 L0.847,30.871z
-             M12.422,28.668 l14.677,32.391 l3.307,26 l-6.2,36.58 l-13.437,-37.241 l-0.827,-38.342z"/>
-      </g>
+      ${zp('Legs', 'M80,226 Q72,250 70,300 Q68,340 74,370 Q82,356 86,320 Q88,284 88,254 Z')}
+      ${zp('Legs', 'M120,226 Q128,250 130,300 Q132,340 126,370 Q118,356 114,320 Q112,284 112,254 Z')}
       <!-- Right leg -->
-      <g transform="translate(108,342) scale(1.1)" onclick="toggleBodyAreaSvg('Legs',this)" style="cursor:pointer">
-        <path class="bz" style="${zoneStyle('Legs')}"
-          d="M26.665,139.791 l0.663,5.99 l-4.647,5.77 l-1.55,9.1 l-3.1,1.33 l-2.655,-13.755 l-1.77,-4.88 l1.55,-3.107z
-             M6.083,140.235 l3.32,9.318 l7.08,13.755 l-1.77,12.647 l-5.09,-14.2 l-4.2,-7.987z
-             M9.845,170.395 l1.55,4.88 l3.32,20.633 l0.442,27.51 l-4.648,26.847 l0.22,-34.39 l-4.867,-13.754 l-0.67,-15.087z
-             M20.467,182.819 l-1.107,41.267 l9.627,-4.55 l-5.533,-36.384z
-             M30.178,4.225 l0,22.476 l-15.713,31.072 l-9.923,30.85 l1.033,-21.375z
-             M4.685,34.474 l-0.118,-0.15 l0.793,-2.023 l16.545,-18.16 l1.24,-0.44 l-10.98,28.377z
-             M10.94,45.238 l-6.812,17.6 l-2.274,-21.595 l1.344,-3.43z
-             M37.41,63.058 l-0.827,25.342 l-12.816,35.256 l3.927,10.136 l12.61,-44.51z
-             M13.613,76.609 l-0.346,0.825 l-6.47,15.48 l4.178,38.342 l6.594,-3.527 l-5.715,-35.7z
-             M31.405,4.832 l-0.826,21.375 l7.03,42.308 l3.306,-34.155z
-             M29.339,32.157 l-14.677,32.392 l-3.308,26 l6.2,36.58 l13.436,-37.24 l0.827,-38.34z"/>
-      </g>
-
+      ${zp('Legs', 'M88,254 Q88,290 90,326 Q92,356 94,374 Q100,378 106,374 Q108,356 110,326 Q112,290 112,254 Z')}
       <!-- Left foot -->
-      <g transform="translate(38,480)" onclick="toggleBodyAreaSvg('🦶 Feet',this)" style="cursor:pointer">
-        <path class="bz" style="${zoneStyle('🦶 Feet')}"
-          d="M25.533,7.989 l-0.664,18.415 l-1.55,6.435 l-4.647,0 l-1.327,-4.437 l-1.55,-0.222 l0.332,4.437 l-5.864,-1.778 l-1.55,-0.887 l-6.64,-1.442 l-0.22,-5.214 l6.418,-10.87 l4.426,-5.548 l12.836,1.111z"/>
-      </g>
-      <!-- Right foot -->
-      <g transform="translate(108,480) scale(-1,1) translate(-40,0)" onclick="toggleBodyAreaSvg('🦶 Feet',this)" style="cursor:pointer">
-        <path class="bz" style="${zoneStyle('🦶 Feet')}"
-          d="M25.533,7.989 l-0.664,18.415 l-1.55,6.435 l-4.647,0 l-1.327,-4.437 l-1.55,-0.222 l0.332,4.437 l-5.864,-1.778 l-1.55,-0.887 l-6.64,-1.442 l-0.22,-5.214 l6.418,-10.87 l4.426,-5.548 l12.836,1.111z"/>
-      </g>
-
+      ${zp('🦶 Feet', 'M70,372 Q64,388 66,400 Q72,408 84,406 Q90,394 86,376 Z')}
+      ${zp('🦶 Feet', 'M130,372 Q136,388 134,400 Q128,408 116,406 Q110,394 114,376 Z')}
       <!-- Labels -->
-      <text x="100" y="40" class="bl">Head</text>
-      <text x="100" y="113" class="bl">Neck</text>
-      <text x="100" y="165" class="bl">Chest</text>
-      <text x="100" y="220" class="bl">Stomach</text>
-      <text x="20" y="210" class="bl" style="font-size:6px">Arm</text>
-      <text x="180" y="210" class="bl" style="font-size:6px">Arm</text>
-      <text x="20" y="322" class="bl" style="font-size:6px">Hand</text>
-      <text x="180" y="322" class="bl" style="font-size:6px">Hand</text>
-      <text x="72" y="400" class="bl">Leg</text>
-      <text x="132" y="400" class="bl">Leg</text>
-      <text x="60" y="504" class="bl" style="font-size:6px">Foot</text>
-      <text x="140" y="504" class="bl" style="font-size:6px">Foot</text>
+      ${lbl(100,38,'Head')}
+      ${lbl(100,80,'Neck')}
+      ${lbl(28,112,'Shoulder')}
+      ${lbl(172,112,'Shoulder')}
+      ${lbl(100,128,'Chest')}
+      ${lbl(100,184,'Stomach')}
+      ${lbl(16,148,'Arm')}
+      ${lbl(184,148,'Arm')}
+      ${lbl(14,208,'Hand')}
+      ${lbl(186,208,'Hand')}
+      ${lbl(82,314,'Leg')}
+      ${lbl(118,314,'Leg')}
+      ${lbl(74,392,'Foot')}
+      ${lbl(126,392,'Foot')}
     </svg>`;
   }
 
-  // Back view - mirror + back-specific zones
-  return `<svg viewBox="0 0 200 520" xmlns="http://www.w3.org/2000/svg" style="max-width:130px;width:100%">
-    <style>.bz{stroke:var(--border2);stroke-width:0.8;cursor:pointer;transition:fill 0.15s,opacity 0.15s}
-    .bz:active{fill-opacity:0.9}.bo{fill:none;stroke:var(--text2);stroke-width:1.2;pointer-events:none}
-    .bl{font-size:8px;fill:var(--text3);text-anchor:middle;dominant-baseline:middle;pointer-events:none}</style>
-
+  // ── BODY BACK ─────────────────────────────────────────────────────────────
+  return `<svg viewBox="0 0 200 480" xmlns="http://www.w3.org/2000/svg" style="max-width:140px;width:100%">
     <!-- Head back -->
-    <g transform="translate(72,2) scale(1.02)" onclick="toggleBodyAreaSvg('🦱 Hair',this)" style="cursor:pointer">
-      <path class="bz" style="${zoneStyle('🦱 Hair')}"
-        d="M15.92,68.5 l8.8,12.546 l3.97,13.984 l-9.254,-7.38 l-4.622,-15.848z
-           M43.02,68.5 l-8.8,12.546 l-3.976,13.988 l9.254,-7.38 l4.622,-15.848z
-           M49.13,40.725 l0.108,-11.775 L28.078,14.208 L8.123,26.133 L8.09,40.19 l-3.24,0.215 l1.462,9.732 l5.208,1.81 l2.36,11.63 l9.72,11.018 l10.856,-0.324 l9.56,-10.37 l1.918,-11.952 l5.207,-1.81 l1.342,-9.517z
-           M6.045,38.885 L5.788,25.065 L28.226,11.9 L51.844,27.655 L51.628,38.025 L56.604,20.94 L42.556,2.376 L25.49,0 L10.803,3.673 L0.002,24.415z"/>
-    </g>
+    ${z('🦱 Hair', 'cx="100" cy="38" rx="28" ry="34"', 'ellipse')}
     <!-- Neck -->
-    <rect class="bz" style="${zoneStyle('Neck')}" onclick="toggleBodyAreaSvg('Neck',this)" x="84" y="100" width="32" height="26" rx="6"/>
-
-    <!-- Back (upper + lower combined) -->
-    <g transform="translate(50,126)" onclick="toggleBodyAreaSvg('Back',this)" style="cursor:pointer">
-      <rect class="bz" style="${zoneStyle('Back')}" x="0" y="0" width="100" height="124" rx="8"/>
-    </g>
+    ${z('Neck', 'x="88" y="70" width="24" height="22" rx="6"', 'rect')}
     <!-- Shoulders -->
-    <g transform="translate(16,112)" onclick="toggleBodyAreaSvg('Shoulders',this)" style="cursor:pointer">
-      <path class="bz" style="${zoneStyle('Shoulders')}"
-        d="M38.244,-0.004 l1.98,9.232 l-11.653,2.857 l-7.474,-2.637z
-           M17.005,10.536 L12.962,8.35 L0.306,22.35 L0.244,27.675 c0,0 16.52,-17.015 16.764,-17.14z
-           M18.29,11.116 L-0.01,46.595 L6.147,36.045 L18.017,30.989 L26.374,15.6z"/>
-    </g>
-    <g transform="translate(144,112) scale(-1,1) translate(-55,0)" onclick="toggleBodyAreaSvg('Shoulders',this)" style="cursor:pointer">
-      <path class="bz" style="${zoneStyle('Shoulders')}"
-        d="M38.244,-0.004 l1.98,9.232 l-11.653,2.857 l-7.474,-2.637z
-           M17.005,10.536 L12.962,8.35 L0.306,22.35 L0.244,27.675 c0,0 16.52,-17.015 16.764,-17.14z
-           M18.29,11.116 L-0.01,46.595 L6.147,36.045 L18.017,30.989 L26.374,15.6z"/>
-    </g>
-
-    <!-- Glutes -->
-    <g transform="translate(50,250)" onclick="toggleBodyAreaSvg('Glutes',this)" style="cursor:pointer">
-      <path class="bz" style="${zoneStyle('Glutes')}"
-        d="M0,0 C0,0 10,60 50,62 C90,60 100,0 100,0Z"/>
-    </g>
-
-    <!-- Arms back -->
-    <g transform="translate(4,154)" onclick="toggleBodyAreaSvg('Arms',this)" style="cursor:pointer">
-      <path class="bz" style="${zoneStyle('Arms')}"
-        d="M21.12,56.5 a1.678,1.678 0 0 1 -0.427,0.33 l0.935,8.224 l12.977,-13.89 l1.2,-8.958 a168.2,168.2 0 0 0 -14.685,14.294z
-           M22.507,69.022 l-18.07,48.91 l5.757,1.333 l19.125,-39.44 l3.518,-22.047 l-10.33,11.244z
-           M17.229,50.062 l2.638,18.74 l-17.2,46.023 l-2.657,-1.775 l6.644,-35.518 l10.575,-27.47z
-           M36.034,37.739 a1.78,1.78 0 0 1 0.407,-0.24 l3.666,-27.345 l-7.037,-10.139 l-7.258,10.58 l-6.16,37.04 l0.566,4.973 a151.447,151.447 0 0 1 15.808,-14.87z
-           M22.292,8.833 l-3.3,35.276 l-2.2,-26.238 l5.5,-9.038z"/>
-    </g>
-    <g transform="translate(158,154) scale(-1,1) translate(-40,0)" onclick="toggleBodyAreaSvg('Arms',this)" style="cursor:pointer">
-      <path class="bz" style="${zoneStyle('Arms')}"
-        d="M21.12,56.5 a1.678,1.678 0 0 1 -0.427,0.33 l0.935,8.224 l12.977,-13.89 l1.2,-8.958 a168.2,168.2 0 0 0 -14.685,14.294z
-           M22.507,69.022 l-18.07,48.91 l5.757,1.333 l19.125,-39.44 l3.518,-22.047 l-10.33,11.244z
-           M17.229,50.062 l2.638,18.74 l-17.2,46.023 l-2.657,-1.775 l6.644,-35.518 l10.575,-27.47z
-           M36.034,37.739 a1.78,1.78 0 0 1 0.407,-0.24 l3.666,-27.345 l-7.037,-10.139 l-7.258,10.58 l-6.16,37.04 l0.566,4.973 a151.447,151.447 0 0 1 15.808,-14.87z
-           M22.292,8.833 l-3.3,35.276 l-2.2,-26.238 l5.5,-9.038z"/>
-    </g>
-
+    ${zp('Shoulders', 'M72,92 Q42,88 28,102 Q24,112 30,122 Q44,108 72,106Z')}
+    ${zp('Shoulders', 'M128,92 Q158,88 172,102 Q176,112 170,122 Q156,108 128,106Z')}
+    <!-- Upper back -->
+    ${zp('Upper Back', 'M72,106 L72,154 Q80,158 100,158 Q120,158 128,154 L128,106 Q116,96 100,94 Q84,96 72,106Z')}
+    <!-- Lower back -->
+    ${zp('Lower Back', 'M76,158 L76,210 Q88,216 100,216 Q112,216 124,210 L124,158 Q112,162 100,162 Q88,162 76,158Z')}
+    <!-- Left arm -->
+    ${zp('Arms', 'M28,102 Q14,118 8,150 Q6,170 12,188 Q20,178 28,158 Q34,134 38,118 Z')}
+    ${zp('Arms', 'M172,102 Q186,118 192,150 Q194,170 188,188 Q180,178 172,158 Q166,134 162,118 Z')}
     <!-- Hands -->
-    <g transform="translate(6,298)" onclick="toggleBodyAreaSvg('🤲 Hands',this)" style="cursor:pointer">
-      <path class="bz" style="${zoneStyle('🤲 Hands')}"
-        d="M21.255,-0.002 l2.88,6.9 l8.412,1.335 l0.664,12.458 l-4.427,17.8 l-2.878,-0.22 l2.8,-11.847 l-2.99,-0.084 l-4.676,12.6 l-3.544,-0.446 l4.4,-12.736 l-3.072,-0.584 l-5.978,13.543 l-4.428,-0.445 l6.088,-14.1 l-2.1,-1.25 L4.878,34.934 L1.114,34.489 L12.4,12.9 L11.293,11.12 L0.665,15.57 L0,13.124 L8.635,5.338z"/>
-    </g>
-    <g transform="translate(162,298) scale(-1,1) translate(-35,0)" onclick="toggleBodyAreaSvg('🤲 Hands',this)" style="cursor:pointer">
-      <path class="bz" style="${zoneStyle('🤲 Hands')}"
-        d="M21.255,-0.002 l2.88,6.9 l8.412,1.335 l0.664,12.458 l-4.427,17.8 l-2.878,-0.22 l2.8,-11.847 l-2.99,-0.084 l-4.676,12.6 l-3.544,-0.446 l4.4,-12.736 l-3.072,-0.584 l-5.978,13.543 l-4.428,-0.445 l6.088,-14.1 l-2.1,-1.25 L4.878,34.934 L1.114,34.489 L12.4,12.9 L11.293,11.12 L0.665,15.57 L0,13.124 L8.635,5.338z"/>
-    </g>
-
+    ${zp('🤲 Hands', 'M12,188 Q6,200 8,216 Q14,228 24,226 Q30,210 28,196 Z')}
+    ${zp('🤲 Hands', 'M188,188 Q194,200 192,216 Q186,228 176,226 Q170,210 172,196 Z')}
+    <!-- Glutes -->
+    ${zp('Glutes', 'M80,214 Q74,230 80,244 Q90,250 100,250 Q110,250 120,244 Q126,230 120,214 Q110,220 100,220 Q90,220 80,214Z')}
     <!-- Legs back -->
-    <g transform="translate(42,342) scale(1.1)" onclick="toggleBodyAreaSvg('Legs',this)" style="cursor:pointer">
-      <path class="bz" style="${zoneStyle('Legs')}"
-        d="M18.002,139.995 l-0.664,5.99 l4.647,5.77 l1.55,9.1 l3.1,1.33 l2.655,-13.755 l1.77,-4.88 l-1.55,-3.107z
-           M38.584,140.439 l-3.32,9.318 l-7.082,13.755 l1.77,12.647 l5.09,-14.2 l4.205,-7.982z
-           M12.027,126.794 l5.09,27.29 l-3.32,-1.777 l-2.656,8.875z
-           M34.822,183.168 l-1.55,4.88 l-3.32,20.634 l-0.442,27.51 l4.65,26.847 l-0.223,-34.39 l4.87,-13.754 l0.663,-15.087z
-           M24.199,195.592 l1.106,41.267 l-16.82,-29.07 l5.533,-36.384z
-           M14.489,4.587 l0,22.476 l15.71,31.073 l9.923,30.85 l-1.033,-21.375z
-           M39.979,34.835 l0.118,-0.148 l-0.793,-2.024 l-16.545,-18.16 l-1.242,-0.44 l10.984,28.378z
-           M33.724,45.601 l6.812,17.6 l2.274,-21.596 l-1.344,-3.43z
-           M7.254,63.421 l0.827,25.34 l12.816,35.257 l-3.928,10.136 l-12.61,-44.51z
-           M31.819,76.042 l0.345,0.826 l6.47,15.48 l-4.177,38.342 l-6.594,-3.526 l5.715,-35.7z
-           M10.354,1.345 l0.827,21.373 L4.153,65.026 L0.847,30.871z
-           M12.422,28.668 l14.677,32.391 l3.307,26 l-6.2,36.58 l-13.437,-37.241 l-0.827,-38.342z"/>
-    </g>
-    <g transform="translate(108,342) scale(1.1)" onclick="toggleBodyAreaSvg('Legs',this)" style="cursor:pointer">
-      <path class="bz" style="${zoneStyle('Legs')}"
-        d="M26.665,139.791 l0.663,5.99 l-4.647,5.77 l-1.55,9.1 l-3.1,1.33 l-2.655,-13.755 l-1.77,-4.88 l1.55,-3.107z
-           M6.083,140.235 l3.32,9.318 l7.08,13.755 l-1.77,12.647 l-5.09,-14.2 l-4.2,-7.987z
-           M9.845,170.395 l1.55,4.88 l3.32,20.633 l0.442,27.51 l-4.648,26.847 l0.22,-34.39 l-4.867,-13.754 l-0.67,-15.087z
-           M20.467,182.819 l-1.107,41.267 l9.627,-4.55 l-5.533,-36.384z
-           M30.178,4.225 l0,22.476 l-15.713,31.072 l-9.923,30.85 l1.033,-21.375z
-           M4.685,34.474 l-0.118,-0.15 l0.793,-2.023 l16.545,-18.16 l1.24,-0.44 l-10.98,28.377z
-           M10.94,45.238 l-6.812,17.6 l-2.274,-21.595 l1.344,-3.43z
-           M37.41,63.058 l-0.827,25.342 l-12.816,35.256 l3.927,10.136 l12.61,-44.51z
-           M13.613,76.609 l-0.346,0.825 l-6.47,15.48 l4.178,38.342 l6.594,-3.527 l-5.715,-35.7z
-           M31.405,4.832 l-0.826,21.375 l7.03,42.308 l3.306,-34.155z
-           M29.339,32.157 l-14.677,32.392 l-3.308,26 l6.2,36.58 l13.436,-37.24 l0.827,-38.34z"/>
-    </g>
-
+    ${zp('Legs', 'M80,248 Q72,272 70,310 Q68,348 74,374 Q82,360 86,324 Q88,288 88,258 Z')}
+    ${zp('Legs', 'M120,248 Q128,272 130,310 Q132,348 126,374 Q118,360 114,324 Q112,288 112,258 Z')}
+    ${zp('Legs', 'M88,258 Q88,294 90,330 Q92,358 94,376 Q100,380 106,376 Q108,358 110,330 Q112,294 112,258 Z')}
     <!-- Feet -->
-    <g transform="translate(38,480)" onclick="toggleBodyAreaSvg('🦶 Feet',this)" style="cursor:pointer">
-      <path class="bz" style="${zoneStyle('🦶 Feet')}"
-        d="M25.533,7.989 l-0.664,18.415 l-1.55,6.435 l-4.647,0 l-1.327,-4.437 l-1.55,-0.222 l0.332,4.437 l-5.864,-1.778 l-1.55,-0.887 l-6.64,-1.442 l-0.22,-5.214 l6.418,-10.87 l4.426,-5.548 l12.836,1.111z"/>
-    </g>
-    <g transform="translate(108,480) scale(-1,1) translate(-40,0)" onclick="toggleBodyAreaSvg('🦶 Feet',this)" style="cursor:pointer">
-      <path class="bz" style="${zoneStyle('🦶 Feet')}"
-        d="M25.533,7.989 l-0.664,18.415 l-1.55,6.435 l-4.647,0 l-1.327,-4.437 l-1.55,-0.222 l0.332,4.437 l-5.864,-1.778 l-1.55,-0.887 l-6.64,-1.442 l-0.22,-5.214 l6.418,-10.87 l4.426,-5.548 l12.836,1.111z"/>
-    </g>
-
+    ${zp('🦶 Feet', 'M74,372 Q66,386 70,400 Q76,408 88,404 Q92,390 86,374 Z')}
+    ${zp('🦶 Feet', 'M126,372 Q134,386 130,400 Q124,408 112,404 Q108,390 114,374 Z')}
     <!-- Labels -->
-    <text x="100" y="40" class="bl">Hair</text>
-    <text x="100" y="113" class="bl">Neck</text>
-    <text x="37" y="143" class="bl" style="font-size:6px">Shoulder</text>
-    <text x="163" y="143" class="bl" style="font-size:6px">Shoulder</text>
-    <text x="100" y="200" class="bl">Back</text>
-    <text x="100" y="275" class="bl">Glutes</text>
-    <text x="20" y="210" class="bl" style="font-size:6px">Arm</text>
-    <text x="180" y="210" class="bl" style="font-size:6px">Arm</text>
-    <text x="72" y="400" class="bl">Leg</text>
-    <text x="132" y="400" class="bl">Leg</text>
-    <text x="60" y="504" class="bl" style="font-size:6px">Foot</text>
-    <text x="140" y="504" class="bl" style="font-size:6px">Foot</text>
+    ${lbl(100,38,'Head')}
+    ${lbl(100,80,'Neck')}
+    ${lbl(28,112,'Shoulder')}
+    ${lbl(172,112,'Shoulder')}
+    ${lbl(100,128,'Upper Back')}
+    ${lbl(100,184,'Lower Back')}
+    ${lbl(16,148,'Arm')}
+    ${lbl(184,148,'Arm')}
+    ${lbl(14,208,'Hand')}
+    ${lbl(186,208,'Hand')}
+    ${lbl(100,232,'Glutes')}
+    ${lbl(82,318,'Leg')}
+    ${lbl(118,318,'Leg')}
+    ${lbl(74,394,'Foot')}
+    ${lbl(126,394,'Foot')}
   </svg>`;
 }
 
