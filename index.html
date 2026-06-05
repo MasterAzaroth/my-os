@@ -1740,37 +1740,6 @@ const SUBCATEGORIES = {
   '🏃 Movement & Exercise': ['Resistance Band','Weight','Mat','Clothing','Shoes','Equipment','Accessory'],
   '🔧 Tool & Appliance': ['Hair Tool','Skin Tool','Nail Tool','Oral Tool','Body Tool','Electric','Manual']
 };
-// Subcategory level (under category)
-let customSubSubcats = JSON.parse(localStorage.getItem('customSubSubcats')||'{}');
-function getAllSubSubcats(category) {
-  const defaults = [];
-  const custom = customSubSubcats[category] || [];
-  return [...defaults, ...custom];
-}
-function addCustomSubSubcat(cat) {
-  const val = prompt('Enter custom subcategory name:');
-  if(!val?.trim()) return;
-  if(!customSubSubcats[cat]) customSubSubcats[cat] = [];
-  if(!customSubSubcats[cat].includes(val.trim())) {
-    customSubSubcats[cat].push(val.trim());
-    localStorage.setItem('customSubSubcats', JSON.stringify(customSubSubcats));
-  }
-  formData.subsubcategory = val.trim();
-  renderSubSubcatChips(cat);
-}
-function selectSubSubcat(s) {
-  formData.subsubcategory = s;
-  document.querySelectorAll('[data-subsubcat]').forEach(b => b.classList.remove('selected'));
-  document.querySelector(`[data-subsubcat="${CSS.escape(s)}"]`)?.classList.add('selected');
-}
-function renderSubSubcatChips(cat) {
-  const wrap = document.getElementById('subsubcatChips');
-  if(!wrap) return;
-  const subs = getAllSubSubcats(cat);
-  wrap.innerHTML = subs.map(s =>
-    `<button class="form-chip${formData.subsubcategory===s?' selected':''}" data-subsubcat="${s}" onclick="selectSubSubcat('${s.replace(/'/g,"\'")}')">${s}</button>`
-  ).join('') + `<button class="form-chip" onclick="addCustomSubSubcat('${cat.replace(/'/g,"\'")}')">+ Custom</button>`;
-}
 const STATUSES = ['Owned','Not Owned'];
 const STOCKS = ['Full','Low','Empty'];
 const CONCENTRATIONS = ['Parfum','EDP','EDT','EDC','Body Mist','Hair Mist'];
@@ -1885,7 +1854,6 @@ function collectStep() {
   }
   if(formStep === 1) {
     formData.subcategory = document.getElementById('f_subcat')?.value.trim();
-    formData.subsubcategory = formData.subsubcategory || null;
     formData.description = document.getElementById('f_desc')?.value.trim();
   }
   if(formStep === 3) {
@@ -1939,7 +1907,7 @@ function renderFormStep() {
         <input class="form-input" id="f_brand" placeholder="e.g. La Roche-Posay" value="${formData.brand||''}">
       </div>
       <div class="form-field">
-        <div class="form-label">Type <span class="form-required">*</span></div>
+        <div class="form-label">Category <span class="form-required">*</span></div>
         <div class="form-chips-wrap" id="catChips">
           ${CATEGORIES.map(c => `<button class="form-chip${formData.category===c?' selected':''}" onclick="selectCategory('${c}')">${c}</button>`).join('')}
         </div>
@@ -1960,7 +1928,7 @@ function renderFormStep() {
     const subcats = SUBCATEGORIES[formData.category] || [];
     body.innerHTML = `
       <div class="form-field">
-        <div class="form-label">Category</div>
+        <div class="form-label">Subcategory</div>
         <div class="form-chips-wrap" id="subcatChips">
           ${getAllSubcats(formData.category).map(s => `<button class="form-chip${formData.subcategory===s?' selected':''}" onclick="selectSubcat('${s}')">${s}</button>`).join('')}
           <button class="form-chip" onclick="addCustomSubcat()" style="border-style:dashed">+ Custom</button>
@@ -2067,8 +2035,6 @@ function selectCategory(cat) {
   if(brand) formData.brand = brand;
   if(barcode) formData._barcode = barcode;
   formData.category = cat;
-  formData.subcategory = null;
-  formData.subsubcategory = null;
   renderFormStep();
 }
 
@@ -2225,7 +2191,6 @@ async function submitProduct() {
     brand: formData.brand,
     category: formData.category,
     subcategory: formData.subcategory||null,
-    subsubcategory: formData.subsubcategory||null,
     description: formData.description||null,
     personal_notes: formData.personal_notes||null,
     ingredients: formData.ingredients||null,
@@ -2504,7 +2469,7 @@ async function openDetail(productId) {
     <div class="detail-hero">
       <div class="detail-hero-img">${heroImg}</div>
       <div class="detail-hero-info">
-        <div class="detail-hero-category">${p.category||''}${p.subcategory?' · '+p.subcategory:''}${p.subsubcategory?' · '+p.subsubcategory:''}</div>
+        <div class="detail-hero-category">${p.category||''}${p.subcategory?' · '+p.subcategory:''}</div>
         <div class="detail-hero-name">${p.name}</div>
         <div class="detail-hero-brand">${p.brand||''}</div>
         <div class="detail-hero-rating" id="detailRatingInline-${p.id}">
@@ -3529,10 +3494,6 @@ function getAllSubcats(category) {
 
 function selectSubcat(s) {
   formData.subcategory = s;
-  formData.subsubcategory = null;
-  // Re-render subsubcat chips for new category
-  const wrap = document.getElementById('subsubcatChips');
-  if(wrap) renderSubSubcatChips(s);
   document.querySelectorAll('#subcatChips .form-chip').forEach(b => {
     b.classList.toggle('selected', b.textContent === s);
   });
