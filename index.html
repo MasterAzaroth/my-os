@@ -4285,120 +4285,314 @@ function toggleBodyArea(area, btn) {
 function renderBodySvg(view, side) {
   const ba = formData.body_areas || [];
   const sel = z => ba.includes(z) ? ' selected' : '';
+
   if(view === 'face') {
-    return `<svg viewBox="0 0 100 140" xmlns="http://www.w3.org/2000/svg">
-      <!-- Head outline -->
-      <ellipse cx="50" cy="52" rx="34" ry="42" class="body-zone${sel('🫧 Face')}" data-zone="🫧 Face" onclick="toggleBodyAreaSvg('🫧 Face',this)"/>
+    return `<svg viewBox="0 0 160 220" xmlns="http://www.w3.org/2000/svg" style="max-width:160px;width:100%">
+      <defs>
+        <style>
+          .bz{fill:transparent;stroke:var(--border2);stroke-width:1.2;cursor:pointer;transition:fill 0.15s,stroke 0.15s}
+          .bz.selected{fill:var(--accent);fill-opacity:0.35;stroke:var(--accent)}
+          .bz:active{fill:var(--accent);fill-opacity:0.2}
+          .outline{fill:none;stroke:var(--text3);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+          .detail{fill:none;stroke:var(--border2);stroke-width:0.8;stroke-linecap:round;pointer-events:none}
+          .bl{font-size:7px;fill:var(--text3);text-anchor:middle;pointer-events:none}
+        </style>
+      </defs>
+
+      <!-- Hair zone (clickable) -->
+      <path class="bz${sel('🦱 Hair')}" data-zone="🦱 Hair" onclick="toggleBodyAreaSvg('🦱 Hair',this)"
+        d="M35,72 Q30,42 38,26 Q50,6 80,8 Q108,8 118,28 Q126,46 122,70 Q114,54 110,44 Q102,20 80,18 Q56,18 48,44 Q44,56 38,72 Z"/>
+
       <!-- Forehead zone -->
-      <rect x="22" y="16" width="56" height="20" rx="12" class="body-zone${sel('Forehead')}" data-zone="Forehead" onclick="toggleBodyAreaSvg('Forehead',this)" fill-opacity="0.6"/>
-      <!-- Left eye -->
-      <ellipse cx="36" cy="48" rx="10" ry="7" class="body-zone${sel('Eyes')}" data-zone="Eyes" onclick="toggleBodyAreaSvg('Eyes',this)"/>
-      <!-- Right eye -->
-      <ellipse cx="64" cy="48" rx="10" ry="7" class="body-zone${sel('Eyes')}" data-zone="Eyes" onclick="toggleBodyAreaSvg('Eyes',this)"/>
-      <!-- Nose -->
-      <ellipse cx="50" cy="62" rx="7" ry="8" class="body-zone${sel('Nose')}" data-zone="Nose" onclick="toggleBodyAreaSvg('Nose',this)"/>
-      <!-- Left cheek -->
-      <ellipse cx="30" cy="68" rx="10" ry="8" class="body-zone${sel('Cheeks')}" data-zone="Cheeks" onclick="toggleBodyAreaSvg('Cheeks',this)"/>
-      <!-- Right cheek -->
-      <ellipse cx="70" cy="68" rx="10" ry="8" class="body-zone${sel('Cheeks')}" data-zone="Cheeks" onclick="toggleBodyAreaSvg('Cheeks',this)"/>
-      <!-- Lips -->
-      <ellipse cx="50" cy="78" rx="12" ry="6" class="body-zone${sel('👄 Lips')}" data-zone="👄 Lips" onclick="toggleBodyAreaSvg('👄 Lips',this)"/>
-      <!-- Chin -->
-      <ellipse cx="50" cy="88" rx="10" ry="6" class="body-zone${sel('Chin')}" data-zone="Chin" onclick="toggleBodyAreaSvg('Chin',this)"/>
-      <!-- Neck -->
-      <rect x="40" y="94" width="20" height="22" rx="6" class="body-zone${sel('Neck')}" data-zone="Neck" onclick="toggleBodyAreaSvg('Neck',this)"/>
-      <!-- Scalp/hair area -->
-      <ellipse cx="50" cy="18" rx="28" ry="14" class="body-zone${sel('🦱 Hair')}" data-zone="🦱 Hair" onclick="toggleBodyAreaSvg('🦱 Hair',this)" fill-opacity="0.5"/>
+      <path class="bz${sel('Forehead')}" data-zone="Forehead" onclick="toggleBodyAreaSvg('Forehead',this)"
+        d="M44,72 Q46,56 52,46 Q62,30 80,28 Q98,28 108,46 Q114,56 116,72 Z"/>
+
+      <!-- Face outline (non-clickable) -->
+      <path class="outline"
+        d="M44,72 Q36,90 36,108 Q36,132 45,146 Q52,158 62,164 Q70,170 80,170 Q90,170 98,164 Q108,158 115,146 Q124,132 124,108 Q124,90 116,72"/>
+
+      <!-- Left eye zone -->
+      <ellipse class="bz${sel('Eyes')}" data-zone="Eyes" onclick="toggleBodyAreaSvg('Eyes',this)"
+        cx="62" cy="98" rx="14" ry="9"/>
+      <!-- Right eye zone -->
+      <ellipse class="bz${sel('Eyes')}" data-zone="Eyes" onclick="toggleBodyAreaSvg('Eyes',this)"
+        cx="98" cy="98" rx="14" ry="9"/>
+
+      <!-- Eye details -->
+      <path class="outline" d="M50,97 Q55,91 62,91 Q70,91 74,97 Q70,104 62,104 Q54,104 50,97 Z"/>
+      <path class="outline" d="M86,97 Q91,91 98,91 Q106,91 110,97 Q106,104 98,104 Q90,104 86,97 Z"/>
+      <circle cx="62" cy="97" r="3.5" fill="var(--text3)" style="pointer-events:none"/>
+      <circle cx="98" cy="97" r="3.5" fill="var(--text3)" style="pointer-events:none"/>
+      <!-- Eyebrows -->
+      <path class="detail" d="M50,86 Q62,81 74,84"/>
+      <path class="detail" d="M86,84 Q98,81 110,86"/>
+
+      <!-- Nose zone -->
+      <path class="bz${sel('Nose')}" data-zone="Nose" onclick="toggleBodyAreaSvg('Nose',this)"
+        d="M72,108 Q70,118 68,126 Q72,132 80,133 Q88,132 92,126 Q90,118 88,108 Z"/>
+      <!-- Nose detail -->
+      <path class="outline" d="M76,108 Q74,118 70,124 Q75,130 80,131 Q85,130 90,124 Q86,118 84,108"/>
+      <path class="detail" d="M70,124 Q68,128 68,130"/>
+      <path class="detail" d="M90,124 Q92,128 92,130"/>
+
+      <!-- Cheeks zones -->
+      <ellipse class="bz${sel('Cheeks')}" data-zone="Cheeks" onclick="toggleBodyAreaSvg('Cheeks',this)"
+        cx="46" cy="122" rx="12" ry="10"/>
+      <ellipse class="bz${sel('Cheeks')}" data-zone="Cheeks" onclick="toggleBodyAreaSvg('Cheeks',this)"
+        cx="114" cy="122" rx="12" ry="10"/>
+
+      <!-- Lips zone -->
+      <path class="bz${sel('👄 Lips')}" data-zone="👄 Lips" onclick="toggleBodyAreaSvg('👄 Lips',this)"
+        d="M66,138 Q72,134 80,134 Q88,134 94,138 Q90,148 80,150 Q70,148 66,138 Z"/>
+      <!-- Lips detail -->
+      <path class="outline" d="M66,138 Q72,133 80,133 Q88,133 94,138"/>
+      <path class="outline" d="M66,138 Q70,146 80,148 Q90,146 94,138"/>
+      <path class="detail" d="M70,138 Q80,142 90,138"/>
+
+      <!-- Chin zone -->
+      <path class="bz${sel('Chin')}" data-zone="Chin" onclick="toggleBodyAreaSvg('Chin',this)"
+        d="M66,152 Q70,168 80,170 Q90,168 94,152 Z"/>
+
+      <!-- Neck zone -->
+      <path class="bz${sel('Neck')}" data-zone="Neck" onclick="toggleBodyAreaSvg('Neck',this)"
+        d="M64,170 Q60,182 60,196 Q70,200 80,200 Q90,200 100,196 Q100,182 96,170 Z"/>
+      <!-- Neck detail -->
+      <path class="outline" d="M64,170 Q60,184 62,198 Q70,202 80,202 Q90,202 98,198 Q100,184 96,170"/>
+
+      <!-- Ear details -->
+      <path class="outline" d="M36,102 Q30,108 30,116 Q30,124 36,128"/>
+      <path class="outline" d="M124,102 Q130,108 130,116 Q130,124 124,128"/>
+
       <!-- Labels -->
-      <text x="50" y="28" class="body-zone-label">Hair</text>
-      <text x="50" y="42" class="body-zone-label">Forehead</text>
-      <text x="36" y="51" class="body-zone-label" style="font-size:7px">Eye</text>
-      <text x="64" y="51" class="body-zone-label" style="font-size:7px">Eye</text>
-      <text x="50" y="64" class="body-zone-label">Nose</text>
-      <text x="28" y="70" class="body-zone-label" style="font-size:7px">Cheek</text>
-      <text x="72" y="70" class="body-zone-label" style="font-size:7px">Cheek</text>
-      <text x="50" y="80" class="body-zone-label">Lips</text>
-      <text x="50" y="90" class="body-zone-label">Chin</text>
-      <text x="50" y="107" class="body-zone-label">Neck</text>
+      <text x="80" y="44" class="bl">Forehead</text>
+      <text x="62" y="100" class="bl" style="font-size:6px">Eye</text>
+      <text x="98" y="100" class="bl" style="font-size:6px">Eye</text>
+      <text x="46" y="125" class="bl" style="font-size:6px">Cheek</text>
+      <text x="114" y="125" class="bl" style="font-size:6px">Cheek</text>
+      <text x="80" y="122" class="bl">Nose</text>
+      <text x="80" y="143" class="bl">Lips</text>
+      <text x="80" y="163" class="bl">Chin</text>
+      <text x="80" y="188" class="bl">Neck</text>
     </svg>`;
   }
-  // Body front or back
+
   if(side === 'front') {
-    return `<svg viewBox="0 0 100 220" xmlns="http://www.w3.org/2000/svg">
-      <!-- Head -->
-      <ellipse cx="50" cy="18" rx="16" ry="18" class="body-zone${sel('🦱 Hair')}" data-zone="🦱 Hair" onclick="toggleBodyAreaSvg('🦱 Hair',this)"/>
+    return `<svg viewBox="0 0 160 340" xmlns="http://www.w3.org/2000/svg" style="max-width:140px;width:100%">
+      <defs>
+        <style>
+          .bz{fill:transparent;stroke:var(--border2);stroke-width:1.2;cursor:pointer;transition:fill 0.15s,stroke 0.15s}
+          .bz.selected{fill:var(--accent);fill-opacity:0.35;stroke:var(--accent)}
+          .bz:active{fill:var(--accent);fill-opacity:0.2}
+          .outline{fill:none;stroke:var(--text3);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+          .detail{fill:none;stroke:var(--border2);stroke-width:0.8;stroke-linecap:round;pointer-events:none}
+          .bl{font-size:7px;fill:var(--text3);text-anchor:middle;pointer-events:none}
+        </style>
+      </defs>
+
+      <!-- Head zone -->
+      <ellipse class="bz${sel('🦱 Hair')}" data-zone="🦱 Hair" onclick="toggleBodyAreaSvg('🦱 Hair',this)"
+        cx="80" cy="28" rx="26" ry="28"/>
+      <ellipse class="outline" cx="80" cy="28" rx="26" ry="28"/>
+      <!-- Face features hint -->
+      <circle cx="71" cy="24" r="3" class="detail"/>
+      <circle cx="89" cy="24" r="3" class="detail"/>
+      <path class="detail" d="M74,34 Q80,38 86,34"/>
+
       <!-- Neck -->
-      <rect x="44" y="34" width="12" height="12" rx="4" class="body-zone${sel('Neck')}" data-zone="Neck" onclick="toggleBodyAreaSvg('Neck',this)"/>
-      <!-- Chest/torso -->
-      <rect x="28" y="46" width="44" height="44" rx="8" class="body-zone${sel('Chest')}" data-zone="Chest" onclick="toggleBodyAreaSvg('Chest',this)"/>
-      <!-- Stomach -->
-      <rect x="30" y="90" width="40" height="30" rx="6" class="body-zone${sel('Stomach')}" data-zone="Stomach" onclick="toggleBodyAreaSvg('Stomach',this)"/>
-      <!-- Left arm -->
-      <rect x="8" y="48" width="18" height="52" rx="9" class="body-zone${sel('Arms')}" data-zone="Arms" onclick="toggleBodyAreaSvg('Arms',this)"/>
-      <!-- Right arm -->
-      <rect x="74" y="48" width="18" height="52" rx="9" class="body-zone${sel('Arms')}" data-zone="Arms" onclick="toggleBodyAreaSvg('Arms',this)"/>
-      <!-- Left hand -->
-      <ellipse cx="17" cy="110" rx="9" ry="10" class="body-zone${sel('🤲 Hands')}" data-zone="🤲 Hands" onclick="toggleBodyAreaSvg('🤲 Hands',this)"/>
-      <!-- Right hand -->
-      <ellipse cx="83" cy="110" rx="9" ry="10" class="body-zone${sel('🤲 Hands')}" data-zone="🤲 Hands" onclick="toggleBodyAreaSvg('🤲 Hands',this)"/>
-      <!-- Left leg -->
-      <rect x="30" y="122" width="18" height="64" rx="9" class="body-zone${sel('Legs')}" data-zone="Legs" onclick="toggleBodyAreaSvg('Legs',this)"/>
-      <!-- Right leg -->
-      <rect x="52" y="122" width="18" height="64" rx="9" class="body-zone${sel('Legs')}" data-zone="Legs" onclick="toggleBodyAreaSvg('Legs',this)"/>
-      <!-- Left foot -->
-      <ellipse cx="39" cy="194" rx="12" ry="8" class="body-zone${sel('🦶 Feet')}" data-zone="🦶 Feet" onclick="toggleBodyAreaSvg('🦶 Feet',this)"/>
-      <!-- Right foot -->
-      <ellipse cx="61" cy="194" rx="12" ry="8" class="body-zone${sel('🦶 Feet')}" data-zone="🦶 Feet" onclick="toggleBodyAreaSvg('🦶 Feet',this)"/>
+      <path class="bz${sel('Neck')}" data-zone="Neck" onclick="toggleBodyAreaSvg('Neck',this)"
+        d="M70,54 L70,68 L90,68 L90,54 Z"/>
+      <path class="outline" d="M70,54 L70,68 L90,68 L90,54"/>
+
+      <!-- Chest/torso zone -->
+      <path class="bz${sel('Chest')}" data-zone="Chest" onclick="toggleBodyAreaSvg('Chest',this)"
+        d="M46,68 Q40,72 38,80 L38,130 Q38,136 44,138 L116,138 Q122,136 122,130 L122,80 Q120,72 114,68 Z"/>
+      <path class="outline" d="M46,68 Q38,72 36,82 L36,130 Q36,138 46,140 L114,140 Q124,138 124,130 L124,82 Q122,72 114,68"/>
+      <!-- Chest detail lines -->
+      <path class="detail" d="M60,76 Q80,88 100,76"/>
+      <path class="detail" d="M60,84 Q80,94 100,84"/>
+
+      <!-- Stomach zone -->
+      <path class="bz${sel('Stomach')}" data-zone="Stomach" onclick="toggleBodyAreaSvg('Stomach',this)"
+        d="M42,140 L42,180 Q42,186 50,188 L110,188 Q118,186 118,180 L118,140 Z"/>
+      <path class="outline" d="M42,140 L42,180 Q42,188 52,190 L108,190 Q118,188 118,180 L118,140"/>
+      <!-- Navel -->
+      <circle cx="80" cy="162" r="2.5" class="detail"/>
+      <!-- Belly line -->
+      <path class="detail" d="M80,142 L80,158"/>
+
+      <!-- Left arm zone -->
+      <path class="bz${sel('Arms')}" data-zone="Arms" onclick="toggleBodyAreaSvg('Arms',this)"
+        d="M36,72 Q24,76 18,88 L12,130 Q10,142 16,148 L28,148 Q34,142 36,130 L40,90 Z"/>
+      <path class="outline" d="M36,72 Q22,76 16,90 L10,132 Q8,144 16,150 L28,150 Q36,144 38,132 L42,90"/>
+
+      <!-- Right arm zone -->
+      <path class="bz${sel('Arms')}" data-zone="Arms" onclick="toggleBodyAreaSvg('Arms',this)"
+        d="M124,72 Q136,76 142,88 L148,130 Q150,142 144,148 L132,148 Q126,142 124,130 L120,90 Z"/>
+      <path class="outline" d="M124,72 Q138,76 144,90 L150,132 Q152,144 144,150 L132,150 Q124,144 122,132 L118,90"/>
+
+      <!-- Left hand zone -->
+      <path class="bz${sel('🤲 Hands')}" data-zone="🤲 Hands" onclick="toggleBodyAreaSvg('🤲 Hands',this)"
+        d="M10,150 Q4,158 6,170 Q8,180 20,182 Q30,180 34,170 Q36,158 30,150 Z"/>
+      <path class="outline" d="M10,150 Q4,160 6,172 Q8,182 20,184 Q32,182 36,172 Q38,160 30,150"/>
+      <!-- Finger hints -->
+      <path class="detail" d="M8,162 Q6,152 10,148"/>
+      <path class="detail" d="M14,158 Q12,148 16,144"/>
+      <path class="detail" d="M20,156 Q20,146 22,142"/>
+
+      <!-- Right hand zone -->
+      <path class="bz${sel('🤲 Hands')}" data-zone="🤲 Hands" onclick="toggleBodyAreaSvg('🤲 Hands',this)"
+        d="M150,150 Q156,158 154,170 Q152,180 140,182 Q130,180 126,170 Q124,158 130,150 Z"/>
+      <path class="outline" d="M150,150 Q156,160 154,172 Q152,182 140,184 Q128,182 124,172 Q122,160 130,150"/>
+
+      <!-- Left leg zone -->
+      <path class="bz${sel('Legs')}" data-zone="Legs" onclick="toggleBodyAreaSvg('Legs',this)"
+        d="M42,190 Q36,200 34,220 L34,278 Q34,286 42,288 L62,288 Q70,286 70,278 L68,220 Q66,200 60,190 Z"/>
+      <path class="outline" d="M42,190 Q34,202 32,222 L32,280 Q32,288 42,290 L62,290 Q72,288 72,280 L70,222 Q68,202 60,190"/>
+
+      <!-- Right leg zone -->
+      <path class="bz${sel('Legs')}" data-zone="Legs" onclick="toggleBodyAreaSvg('Legs',this)"
+        d="M100,190 Q106,200 112,220 L112,278 Q112,286 118,288 L138,288 Q146,286 146,278 L144,220 Q142,200 136,190 Z"/>
+      <path class="outline" d="M100,190 Q108,202 114,222 L114,280 Q114,288 120,290 L138,290 Q148,288 148,280 L146,222 Q144,202 138,190"/>
+
+      <!-- Left foot zone -->
+      <path class="bz${sel('🦶 Feet')}" data-zone="🦶 Feet" onclick="toggleBodyAreaSvg('🦶 Feet',this)"
+        d="M32,288 Q28,296 28,306 Q30,316 42,318 Q56,318 62,310 Q66,302 64,290 Z"/>
+      <path class="outline" d="M32,290 Q26,298 26,308 Q28,318 42,320 Q58,320 64,312 Q68,304 66,290"/>
+      <!-- Toe hints -->
+      <path class="detail" d="M30,308 Q28,314 32,318"/>
+      <path class="detail" d="M38,310 Q36,317 40,320"/>
+      <path class="detail" d="M46,312 Q46,319 50,320"/>
+
+      <!-- Right foot zone -->
+      <path class="bz${sel('🦶 Feet')}" data-zone="🦶 Feet" onclick="toggleBodyAreaSvg('🦶 Feet',this)"
+        d="M128,288 Q134,302 134,310 Q140,318 154,316 Q166,314 168,304 Q168,296 164,290 Z"/>
+      <path class="outline" d="M128,290 Q134,304 136,312 Q140,320 154,318 Q168,316 170,304 Q170,296 164,290"/>
+
       <!-- Labels -->
-      <text x="50" y="20" class="body-zone-label">Head</text>
-      <text x="50" y="72" class="body-zone-label">Chest</text>
-      <text x="50" y="108" class="body-zone-label">Stomach</text>
-      <text x="17" y="73" class="body-zone-label" style="font-size:7px">Arm</text>
-      <text x="83" y="73" class="body-zone-label" style="font-size:7px">Arm</text>
-      <text x="17" y="113" class="body-zone-label" style="font-size:7px">Hand</text>
-      <text x="83" y="113" class="body-zone-label" style="font-size:7px">Hand</text>
-      <text x="39" y="154" class="body-zone-label" style="font-size:7px">Leg</text>
-      <text x="61" y="154" class="body-zone-label" style="font-size:7px">Leg</text>
-      <text x="39" y="197" class="body-zone-label" style="font-size:7px">Foot</text>
-      <text x="61" y="197" class="body-zone-label" style="font-size:7px">Foot</text>
-    </svg>`;
-  } else {
-    // Back view
-    return `<svg viewBox="0 0 100 220" xmlns="http://www.w3.org/2000/svg">
-      <!-- Head back -->
-      <ellipse cx="50" cy="18" rx="16" ry="18" class="body-zone${sel('🦱 Hair')}" data-zone="🦱 Hair" onclick="toggleBodyAreaSvg('🦱 Hair',this)"/>
-      <!-- Neck back -->
-      <rect x="44" y="34" width="12" height="12" rx="4" class="body-zone${sel('Neck')}" data-zone="Neck" onclick="toggleBodyAreaSvg('Neck',this)"/>
-      <!-- Shoulders + upper back -->
-      <rect x="22" y="46" width="56" height="24" rx="8" class="body-zone${sel('Shoulders')}" data-zone="Shoulders" onclick="toggleBodyAreaSvg('Shoulders',this)"/>
-      <!-- Lower back -->
-      <rect x="28" y="70" width="44" height="50" rx="6" class="body-zone${sel('Back')}" data-zone="Back" onclick="toggleBodyAreaSvg('Back',this)"/>
-      <!-- Left arm -->
-      <rect x="8" y="48" width="18" height="52" rx="9" class="body-zone${sel('Arms')}" data-zone="Arms" onclick="toggleBodyAreaSvg('Arms',this)"/>
-      <!-- Right arm -->
-      <rect x="74" y="48" width="18" height="52" rx="9" class="body-zone${sel('Arms')}" data-zone="Arms" onclick="toggleBodyAreaSvg('Arms',this)"/>
-      <!-- Hands -->
-      <ellipse cx="17" cy="110" rx="9" ry="10" class="body-zone${sel('🤲 Hands')}" data-zone="🤲 Hands" onclick="toggleBodyAreaSvg('🤲 Hands',this)"/>
-      <ellipse cx="83" cy="110" rx="9" ry="10" class="body-zone${sel('🤲 Hands')}" data-zone="🤲 Hands" onclick="toggleBodyAreaSvg('🤲 Hands',this)"/>
-      <!-- Glutes -->
-      <rect x="30" y="120" width="40" height="22" rx="8" class="body-zone${sel('Glutes')}" data-zone="Glutes" onclick="toggleBodyAreaSvg('Glutes',this)"/>
-      <!-- Legs back -->
-      <rect x="30" y="144" width="18" height="42" rx="9" class="body-zone${sel('Legs')}" data-zone="Legs" onclick="toggleBodyAreaSvg('Legs',this)"/>
-      <rect x="52" y="144" width="18" height="42" rx="9" class="body-zone${sel('Legs')}" data-zone="Legs" onclick="toggleBodyAreaSvg('Legs',this)"/>
-      <!-- Feet back -->
-      <ellipse cx="39" cy="194" rx="12" ry="8" class="body-zone${sel('🦶 Feet')}" data-zone="🦶 Feet" onclick="toggleBodyAreaSvg('🦶 Feet',this)"/>
-      <ellipse cx="61" cy="194" rx="12" ry="8" class="body-zone${sel('🦶 Feet')}" data-zone="🦶 Feet" onclick="toggleBodyAreaSvg('🦶 Feet',this)"/>
-      <!-- Labels -->
-      <text x="50" y="20" class="body-zone-label">Head</text>
-      <text x="50" y="58" class="body-zone-label">Shoulders</text>
-      <text x="50" y="95" class="body-zone-label">Back</text>
-      <text x="17" y="73" class="body-zone-label" style="font-size:7px">Arm</text>
-      <text x="83" y="73" class="body-zone-label" style="font-size:7px">Arm</text>
-      <text x="50" y="132" class="body-zone-label" style="font-size:8px">Glutes</text>
-      <text x="39" y="165" class="body-zone-label" style="font-size:7px">Leg</text>
-      <text x="61" y="165" class="body-zone-label" style="font-size:7px">Leg</text>
+      <text x="80" y="30" class="bl">Head</text>
+      <text x="80" y="106" class="bl">Chest</text>
+      <text x="80" y="162" class="bl">Stomach</text>
+      <text x="22" y="112" class="bl" style="font-size:6px">Arm</text>
+      <text x="138" y="112" class="bl" style="font-size:6px">Arm</text>
+      <text x="22" y="168" class="bl" style="font-size:6px">Hand</text>
+      <text x="138" y="168" class="bl" style="font-size:6px">Hand</text>
+      <text x="50" y="240" class="bl">Leg</text>
+      <text x="130" y="240" class="bl">Leg</text>
+      <text x="46" y="308" class="bl" style="font-size:6px">Foot</text>
+      <text x="148" y="308" class="bl" style="font-size:6px">Foot</text>
     </svg>`;
   }
+
+  // Back view
+  return `<svg viewBox="0 0 160 340" xmlns="http://www.w3.org/2000/svg" style="max-width:140px;width:100%">
+    <defs>
+      <style>
+        .bz{fill:transparent;stroke:var(--border2);stroke-width:1.2;cursor:pointer;transition:fill 0.15s,stroke 0.15s}
+        .bz.selected{fill:var(--accent);fill-opacity:0.35;stroke:var(--accent)}
+        .bz:active{fill:var(--accent);fill-opacity:0.2}
+        .outline{fill:none;stroke:var(--text3);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+        .detail{fill:none;stroke:var(--border2);stroke-width:0.8;stroke-linecap:round;pointer-events:none}
+        .bl{font-size:7px;fill:var(--text3);text-anchor:middle;pointer-events:none}
+      </style>
+    </defs>
+
+    <!-- Head / hair zone -->
+    <ellipse class="bz${sel('🦱 Hair')}" data-zone="🦱 Hair" onclick="toggleBodyAreaSvg('🦱 Hair',this)"
+      cx="80" cy="28" rx="26" ry="28"/>
+    <ellipse class="outline" cx="80" cy="28" rx="26" ry="28"/>
+    <!-- Hair texture hints -->
+    <path class="detail" d="M60,14 Q70,8 80,8 Q90,8 100,14"/>
+    <path class="detail" d="M58,22 Q68,16 80,16 Q92,16 102,22"/>
+
+    <!-- Neck back -->
+    <path class="bz${sel('Neck')}" data-zone="Neck" onclick="toggleBodyAreaSvg('Neck',this)"
+      d="M70,54 L70,68 L90,68 L90,54 Z"/>
+    <path class="outline" d="M70,54 L70,68 L90,68 L90,54"/>
+    <!-- Neck lines -->
+    <path class="detail" d="M74,56 L74,66"/>
+    <path class="detail" d="M86,56 L86,66"/>
+
+    <!-- Shoulders + upper back zone -->
+    <path class="bz${sel('Shoulders')}" data-zone="Shoulders" onclick="toggleBodyAreaSvg('Shoulders',this)"
+      d="M46,68 Q36,70 32,80 L34,106 L126,106 L128,80 Q124,70 114,68 Z"/>
+    <path class="outline" d="M46,68 Q34,70 30,82 L32,108 L128,108 L130,82 Q126,70 114,68"/>
+    <!-- Shoulder blade hints -->
+    <path class="detail" d="M50,76 Q58,72 66,76 Q70,84 66,92 Q58,96 50,92 Q46,84 50,76"/>
+    <path class="detail" d="M110,76 Q102,72 94,76 Q90,84 94,92 Q102,96 110,92 Q114,84 110,76"/>
+
+    <!-- Lower back zone -->
+    <path class="bz${sel('Back')}" data-zone="Back" onclick="toggleBodyAreaSvg('Back',this)"
+      d="M34,108 L34,180 Q36,188 46,190 L114,190 Q124,188 126,180 L126,108 Z"/>
+    <path class="outline" d="M32,108 L32,180 Q34,190 46,192 L114,192 Q126,190 126,180 L126,108"/>
+    <!-- Spine line -->
+    <path class="detail" d="M80,110 L80,188"/>
+    <!-- Back muscle hints -->
+    <path class="detail" d="M68,116 Q60,122 62,132 Q64,142 72,144"/>
+    <path class="detail" d="M92,116 Q100,122 98,132 Q96,142 88,144"/>
+
+    <!-- Left arm zone -->
+    <path class="bz${sel('Arms')}" data-zone="Arms" onclick="toggleBodyAreaSvg('Arms',this)"
+      d="M30,82 Q20,86 14,98 L8,140 Q6,152 14,158 L26,158 Q34,152 36,140 L40,98 Z"/>
+    <path class="outline" d="M30,82 Q18,86 12,100 L6,142 Q4,154 14,160 L26,160 Q36,154 38,142 L42,100"/>
+
+    <!-- Right arm zone -->
+    <path class="bz${sel('Arms')}" data-zone="Arms" onclick="toggleBodyAreaSvg('Arms',this)"
+      d="M130,82 Q140,86 146,98 L152,140 Q154,152 146,158 L134,158 Q126,152 124,140 L120,98 Z"/>
+    <path class="outline" d="M130,82 Q142,86 148,100 L154,142 Q156,154 146,160 L134,160 Q124,154 122,142 L118,100"/>
+
+    <!-- Hands back -->
+    <path class="bz${sel('🤲 Hands')}" data-zone="🤲 Hands" onclick="toggleBodyAreaSvg('🤲 Hands',this)"
+      d="M6,160 Q2,170 4,180 Q8,190 20,190 Q30,188 34,178 Q36,168 30,160 Z"/>
+    <path class="outline" d="M6,160 Q2,172 4,182 Q8,192 20,192 Q32,190 36,180 Q38,168 30,160"/>
+    <path class="bz${sel('🤲 Hands')}" data-zone="🤲 Hands" onclick="toggleBodyAreaSvg('🤲 Hands',this)"
+      d="M154,160 Q158,170 156,180 Q152,190 140,190 Q130,188 126,178 Q124,168 130,160 Z"/>
+    <path class="outline" d="M154,160 Q158,172 156,182 Q152,192 140,192 Q128,190 124,180 Q122,168 130,160"/>
+
+    <!-- Glutes zone -->
+    <path class="bz${sel('Glutes')}" data-zone="Glutes" onclick="toggleBodyAreaSvg('Glutes',this)"
+      d="M34,192 Q32,210 36,224 Q44,234 56,234 Q68,232 74,220 Q78,210 76,192 Z"/>
+    <path class="bz${sel('Glutes')}" data-zone="Glutes" onclick="toggleBodyAreaSvg('Glutes',this)"
+      d="M84,192 Q82,210 86,224 Q94,234 104,232 Q116,230 124,220 Q128,208 126,192 Z"/>
+    <path class="outline" d="M34,192 Q30,212 36,226 Q44,236 56,236 Q70,234 76,222 Q82,210 80,192"/>
+    <path class="outline" d="M80,192 Q78,210 84,222 Q90,234 104,236 Q118,234 126,222 Q132,210 126,192"/>
+
+    <!-- Left leg back -->
+    <path class="bz${sel('Legs')}" data-zone="Legs" onclick="toggleBodyAreaSvg('Legs',this)"
+      d="M34,234 Q28,248 28,270 L30,290 Q32,298 42,300 L60,300 Q68,298 70,290 L72,268 Q72,246 66,234 Z"/>
+    <path class="outline" d="M32,234 Q26,250 26,272 L28,292 Q30,302 42,304 L60,304 Q70,302 72,292 L74,270 Q74,248 68,234"/>
+    <!-- Calf detail -->
+    <path class="detail" d="M40,252 Q48,246 56,252 Q60,262 56,272 Q48,278 40,272 Q36,262 40,252"/>
+
+    <!-- Right leg back -->
+    <path class="bz${sel('Legs')}" data-zone="Legs" onclick="toggleBodyAreaSvg('Legs',this)"
+      d="M94,234 Q100,248 102,270 L104,290 Q106,298 118,300 L136,300 Q146,298 148,290 L148,268 Q146,246 138,234 Z"/>
+    <path class="outline" d="M94,234 Q100,250 102,272 L104,292 Q106,302 118,304 L136,304 Q148,302 150,292 L150,270 Q148,248 140,234"/>
+
+    <!-- Left foot back -->
+    <path class="bz${sel('🦶 Feet')}" data-zone="🦶 Feet" onclick="toggleBodyAreaSvg('🦶 Feet',this)"
+      d="M28,300 Q24,312 28,320 Q34,328 50,326 Q64,322 68,312 Q70,302 68,300 Z"/>
+    <path class="outline" d="M26,302 Q22,314 26,322 Q32,330 50,328 Q66,324 70,314 Q72,304 70,302"/>
+
+    <!-- Right foot back -->
+    <path class="bz${sel('🦶 Feet')}" data-zone="🦶 Feet" onclick="toggleBodyAreaSvg('🦶 Feet',this)"
+      d="M104,300 Q102,312 106,320 Q114,328 130,326 Q146,322 150,312 Q152,302 150,300 Z"/>
+    <path class="outline" d="M104,302 Q100,314 104,322 Q112,330 130,328 Q148,324 152,314 Q154,304 152,302"/>
+
+    <!-- Labels -->
+    <text x="80" y="30" class="bl">Hair</text>
+    <text x="80" y="86" class="bl">Shoulders</text>
+    <text x="80" y="148" class="bl">Back</text>
+    <text x="20" y="124" class="bl" style="font-size:6px">Arm</text>
+    <text x="140" y="124" class="bl" style="font-size:6px">Arm</text>
+    <text x="20" y="178" class="bl" style="font-size:6px">Hand</text>
+    <text x="140" y="178" class="bl" style="font-size:6px">Hand</text>
+    <text x="52" y="215" class="bl">Glutes</text>
+    <text x="108" y="215" class="bl">Glutes</text>
+    <text x="50" y="270" class="bl">Leg</text>
+    <text x="126" y="270" class="bl">Leg</text>
+    <text x="48" y="318" class="bl" style="font-size:6px">Foot</text>
+    <text x="128" y="318" class="bl" style="font-size:6px">Foot</text>
+  </svg>`;
 }
 
 // ── END BODY AREA VISUAL SELECTOR ─────────────────────────────────────────────
