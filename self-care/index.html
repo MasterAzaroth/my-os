@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#080808">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/base.css">
+<title>Self Care — LeoOS</title>
+<style>
+.session-tabs{display:flex;gap:6px;padding:10px 20px;overflow-x:auto;flex-shrink:0;-webkit-overflow-scrolling:touch}
+.session-tabs::-webkit-scrollbar{display:none}
+.session-tab{flex-shrink:0;padding:0 14px;height:28px;border-radius:16px;border:0.5px solid var(--border);background:transparent;color:var(--text3);font-size:11px;cursor:pointer;transition:all 0.2s;font-family:var(--sans);white-space:nowrap}
+.session-tab.active{background:var(--bg3);color:var(--text);border-color:var(--border2)}
+.date-nav{display:flex;align-items:center;padding:0 20px 14px;gap:12px;flex-shrink:0}
+.date-arrow{background:none;border:0.5px solid var(--border);color:var(--text3);font-size:16px;width:32px;height:32px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;flex-shrink:0;font-family:var(--sans)}
+.date-arrow:active{background:var(--bg2);color:var(--text)}
+.date-arrow:disabled{opacity:0.2;pointer-events:none}
+.date-center{flex:1;text-align:center}
+.date-nav-text{font-size:14px;color:var(--text);font-weight:500}
+.date-nav-day{font-size:11px;color:var(--text3);margin-top:1px}
+.progress-wrap{padding:0 20px 12px;flex-shrink:0}
+.progress-info{display:flex;justify-content:space-between;margin-bottom:6px}
+.progress-label{font-size:11px;color:var(--text3)}
+.progress-track{height:2px;background:var(--border);border-radius:2px}
+.progress-fill{height:100%;border-radius:2px;background:var(--accent);transition:width 0.4s cubic-bezier(0.4,0,0.2,1)}
+.tracker-step{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:0.5px solid var(--border);cursor:pointer;transition:background 0.15s}
+.tracker-step:active{background:var(--bg2)}
+.tracker-step.checked .tracker-step-name{color:var(--text3);text-decoration:line-through}
+.tracker-step-check{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 0.2s;font-size:11px;color:var(--bg)}
+.tracker-step-check.checked{background:var(--accent);border-color:var(--accent)}
+.tracker-step-name{font-size:13px;color:var(--text);flex:1}
+.save-bar{padding:12px 20px calc(12px + var(--safe-bot));border-top:0.5px solid var(--border);flex-shrink:0;display:none}
+.save-btn{width:100%;padding:14px;border-radius:14px;border:none;background:var(--accent);color:var(--bg);font-size:14px;font-weight:500;cursor:pointer;font-family:var(--sans)}
+.done-overlay{display:none;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:40px;text-align:center}
+.done-glyph{font-family:var(--serif);font-size:64px;color:var(--accent);margin-bottom:20px;font-style:italic}
+.done-title{font-family:var(--serif);font-size:24px;color:var(--text);margin-bottom:8px}
+.done-sub{font-size:13px;color:var(--text3)}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="page">
+    <div class="page-header">
+      <div class="page-label">Self Care</div>
+      <div class="page-title">Routine</div>
+    </div>
+    <div class="session-tabs" id="sessionTabs"></div>
+    <div class="date-nav">
+      <button class="date-arrow" onclick="shiftDay(-1)">&#8592;</button>
+      <div class="date-center">
+        <div class="date-nav-text" id="routineDateText"></div>
+        <div class="date-nav-day" id="routineDayBadge"></div>
+      </div>
+      <button class="date-arrow" onclick="shiftDay(1)" id="nextDayBtn">&#8594;</button>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-info"><span id="progressLabel" class="progress-label"></span></div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    </div>
+    <div class="ptr-wrap" id="selfcarePtrWrap">
+      <div class="ptr-indicator"><div class="ptr-spinner" id="selfcareSpinner"><div class="ptr-spinner-ring"></div></div></div>
+      <div id="stepList" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;min-height:0"></div>
+    </div>
+    <div class="save-bar" id="saveBar">
+      <button class="save-btn" id="saveBtn" onclick="saveRoutine()">Save</button>
+    </div>
+    <div class="done-overlay" id="doneOverlay">
+      <div class="done-glyph">✦</div>
+      <div class="done-title">All done.</div>
+      <div class="done-sub" id="doneSubtext"></div>
+    </div>
+  </div>
+  <nav class="navbar">
+    <button class="nav-btn active" onclick="location.href='index.html'"><span class="nav-icon">🪞</span><span class="nav-label">Routine</span></button>
+    <button class="nav-btn" onclick="location.href='library.html'"><span class="nav-icon">◈</span><span class="nav-label">Library</span></button>
+    <button class="nav-btn nav-hub" onclick="goHub()"><span class="nav-icon">Self Care</span><span class="nav-label">tap for hub</span></button>
+    <button class="nav-btn" onclick="location.href='kit.html'"><span class="nav-icon">🧴</span><span class="nav-label">Kit</span></button>
+    <button class="nav-btn" onclick="location.href='plan.html'"><span class="nav-icon">📋</span><span class="nav-label">Plan</span></button>
+  </nav>
+  <div class="toast" id="toast"></div>
+</div>
+<script src="../js/core.js"></script>
+<script>
+let viewDate = new Date(now);
+let isToday = true;
+let trackerSessions = [];
+let currentSessionId = null;
+let trackerSteps = [];
+let stepState = {};
+let hasChanges = false;
+
+(async function init() {
+  updateDateNav();
+  await loadTrackerSessions();
+  setupPTR('selfcarePtrWrap','stepList','selfcareSpinner', async () => {
+    currentSessionId = null;
+    await loadTrackerSessions();
+  });
+})();
+
+async function loadTrackerSessions() {
+  try {
+    const schedules = await api('schedules','?is_active=eq.true&limit=1');
+    const sched = schedules?.[0];
+    if(!sched) { renderNoSchedule(); return; }
+    const allSessions = await api('schedule_sessions',`?schedule_id=eq.${sched.id}&order=display_order.asc`);
+    if(!allSessions?.length) { renderNoSchedule(); return; }
+    const dow=viewDate.getDay(), dom=viewDate.getDate(), dateStr=getDateStr(viewDate);
+    trackerSessions = allSessions.filter(s => {
+      if(s.rule_type==='daily') return true;
+      if(s.rule_type==='weekly') return (s.rule_days||[]).includes(dow);
+      if(s.rule_type==='monthly') return dom===s.rule_day_of_month;
+      if(s.rule_type==='once') return s.rule_date===dateStr;
+      return false;
+    });
+    if(!trackerSessions.length) { renderNoSessionsToday(); return; }
+    const tabs = document.getElementById('sessionTabs');
+    tabs.innerHTML = trackerSessions.map(s =>
+      `<button class="session-tab${currentSessionId===s.id?' active':''}" id="ttab-${s.id}" onclick="setTrackerSession('${s.id}')">${s.icon||''} ${s.name}</button>`
+    ).join('');
+    if(!currentSessionId || !trackerSessions.find(s=>s.id===currentSessionId)) currentSessionId = trackerSessions[0].id;
+    document.querySelectorAll('.session-tab').forEach(t=>t.classList.remove('active'));
+    document.getElementById('ttab-'+currentSessionId)?.classList.add('active');
+    await loadTrackerSteps();
+  } catch(e) { console.error(e); renderNoSchedule(); }
+}
+
+function renderNoSchedule() {
+  document.getElementById('sessionTabs').innerHTML='';
+  document.getElementById('stepList').innerHTML='<div style="padding:40px 20px;text-align:center"><div style="font-size:32px;margin-bottom:12px">📋</div><div style="font-size:15px;font-weight:500;color:var(--text);margin-bottom:8px">No schedule yet</div><div style="font-size:13px;color:var(--text3)">Build your schedule in the Plan tab and push it live</div></div>';
+  document.getElementById('progressFill').style.width='0%';
+}
+
+function renderNoSessionsToday() {
+  document.getElementById('sessionTabs').innerHTML='';
+  const day = viewDate.toLocaleDateString('en',{weekday:'long'});
+  document.getElementById('stepList').innerHTML=`<div style="padding:40px 20px;text-align:center"><div style="font-size:32px;margin-bottom:12px">✨</div><div style="font-size:15px;font-weight:500;color:var(--text);margin-bottom:8px">Free ${day}</div><div style="font-size:13px;color:var(--text3)">No sessions scheduled today</div></div>`;
+  document.getElementById('progressFill').style.width='0%';
+  document.getElementById('progressLabel').textContent='';
+}
+
+async function setTrackerSession(sessionId) {
+  if(currentSessionId===sessionId) return;
+  const list=document.getElementById('stepList');
+  list.style.transition='opacity 0.3s ease'; list.style.opacity='0';
+  setTimeout(async()=>{
+    currentSessionId=sessionId;
+    document.querySelectorAll('.session-tab').forEach(t=>t.classList.remove('active'));
+    document.getElementById('ttab-'+sessionId)?.classList.add('active');
+    await loadTrackerSteps();
+    list.style.opacity='1';
+  },300);
+}
+
+async function loadTrackerSteps() {
+  const session=trackerSessions.find(s=>s.id===currentSessionId); if(!session) return;
+  const list=document.getElementById('stepList');
+  list.innerHTML='<div class="loading"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div>';
+  const items=await api('session_items',`?session_id=eq.${session.id}&order=order_index.asc`).catch(()=>[]);
+  trackerSteps=[];
+  for(const item of items||[]) {
+    if(item.item_type==='routine'&&item.routine_id) {
+      const rs=await api('routine_steps',`?routine_id=eq.${item.routine_id}&order=order_index.asc`).catch(()=>[]);
+      (rs||[]).forEach(s=>trackerSteps.push({name:s.step_name,product_id:s.product_id}));
+    } else if(item.item_type==='step') trackerSteps.push({name:item.step_name,product_id:item.product_id});
+  }
+  const dateStr=getDateStr(viewDate);
+  const existing=await api('tracker_log',`?date=eq.${dateStr}&session_id=eq.${session.id}`).catch(()=>[]);
+  stepState={};
+  (existing||[]).forEach(e=>{stepState[e.step_name]=e.checked?'done':'pending';});
+  hasChanges=false;
+  renderTrackerSteps();
+  document.getElementById('saveBar').style.display='none';
+}
+
+function renderTrackerSteps() {
+  const list=document.getElementById('stepList'); if(!list) return;
+  if(!trackerSteps.length) {
+    list.innerHTML='<div style="padding:40px 20px;text-align:center;font-size:13px;color:var(--text3)">No steps yet — add them in the Plan tab.</div>';
+    document.getElementById('progressFill').style.width='0%';
+    document.getElementById('progressLabel').textContent='';
+    return;
+  }
+  const done=trackerSteps.filter(s=>stepState[s.name]==='done').length;
+  const total=trackerSteps.length;
+  document.getElementById('progressFill').style.width=Math.round(done/total*100)+'%';
+  document.getElementById('progressLabel').textContent=`${done} / ${total}`;
+  list.innerHTML=trackerSteps.map(s=>{
+    const checked=stepState[s.name]==='done';
+    return `<div class="tracker-step${checked?' checked':''}" onclick="toggleStep(this)" data-step="${s.name.replace(/"/g,'&quot;')}">
+      <div class="tracker-step-check${checked?' checked':''}">${checked?'✓':''}</div>
+      <div class="tracker-step-name">${escHtml(s.name)}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('doneOverlay').style.display=(done===total&&total>0)?'flex':'none';
+  if(done===total&&total>0) document.getElementById('doneSubtext').textContent=`${total} steps completed`;
+}
+
+function toggleStep(el) {
+  const stepName=el.dataset.step;
+  stepState[stepName]=stepState[stepName]==='done'?'pending':'done';
+  hasChanges=true;
+  document.getElementById('saveBar').style.display='flex';
+  renderTrackerSteps();
+}
+
+async function saveRoutine() {
+  if(!hasChanges) return;
+  const btn=document.getElementById('saveBtn');
+  btn.disabled=true; btn.textContent='Saving…';
+  const session=trackerSessions.find(s=>s.id===currentSessionId); if(!session){btn.disabled=false;return;}
+  const dateStr=getDateStr(viewDate);
+  await fetch(`${SUPABASE_URL}/rest/v1/tracker_log?date=eq.${dateStr}&session_id=eq.${session.id}`,{method:'DELETE',headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`}});
+  const entries=trackerSteps.map(s=>({date:dateStr,session_id:session.id,step_name:s.name,product_id:s.product_id||null,checked:stepState[s.name]==='done',checked_at:stepState[s.name]==='done'?new Date().toISOString():null}));
+  const ok=await apiPost('tracker_log',entries);
+  btn.disabled=false;
+  if(ok){hasChanges=false;document.getElementById('saveBar').style.display='none';showToast(`✓ ${entries.filter(e=>e.checked).length} steps logged`);}
+  else{btn.textContent='Save';showToast('Something went wrong');}
+}
+
+function updateDateNav() {
+  const today=new Date(now);
+  isToday=getDateStr(viewDate)===getDateStr(today);
+  document.getElementById('nextDayBtn').disabled=isToday;
+  document.getElementById('routineDateText').textContent=isToday?'Today':viewDate.toLocaleDateString('en',{month:'short',day:'numeric'});
+  document.getElementById('routineDayBadge').textContent=viewDate.toLocaleDateString('en',{weekday:'long'});
+}
+
+function shiftDay(dir) {
+  viewDate.setDate(viewDate.getDate()+dir);
+  isToday=getDateStr(viewDate)===getDateStr(new Date(now));
+  updateDateNav();
+  const list=document.getElementById('stepList');
+  list.style.transition='opacity 0.3s ease'; list.style.opacity='0';
+  setTimeout(async()=>{ currentSessionId=null; await loadTrackerSessions(); list.style.opacity='1'; },300);
+}
+</script>
+</body>
+</html>

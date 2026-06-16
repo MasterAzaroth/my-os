@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#080808">
+<script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.19.1/umd/index.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/base.css">
+<title>My Kit — LeoOS</title>
+<style>
+.kit-filter{display:flex;gap:6px;overflow-x:auto;flex-shrink:0;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.filter-btn{flex-shrink:0;padding:0 12px;height:28px;border-radius:16px;border:0.5px solid var(--border);background:transparent;color:var(--text3);font-size:11px;cursor:pointer;transition:all 0.2s;font-family:var(--sans)}
+.filter-btn.active{background:var(--bg3);color:var(--text);border-color:var(--border2)}
+.kit-grid-wrap{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;padding:10px 12px 24px}
+.kit-item-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;transition:all 0.2s;position:relative}
+.kit-item-card:active{transform:scale(0.97);background:var(--bg3)}
+.kit-item-img{width:100%;aspect-ratio:1/1;background:var(--bg3);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.kit-item-img img{width:100%;height:100%;object-fit:contain}
+.kit-item-img-placeholder{font-size:36px;color:var(--text3)}
+.kit-item-state-dot{position:absolute;top:8px;left:8px;font-size:11px;background:rgba(8,8,8,0.7);padding:2px 7px;border-radius:10px;backdrop-filter:blur(4px)}
+.kit-amount-bar{position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--border2)}
+.kit-amount-bar-fill{height:100%;background:var(--accent);transition:width 0.4s}
+.kit-item-body{padding:8px 10px 10px}
+.kit-item-name{font-size:11px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kit-item-sub{font-size:10px;color:var(--text3);margin-top:3px}
+/* Kit edit overlay */
+.kit-flow-overlay{position:fixed;inset:0;background:rgba(0,0,0,0);z-index:400;display:none;align-items:flex-end;backdrop-filter:blur(0px);transition:background 0.35s ease,backdrop-filter 0.35s ease}
+.kit-flow-overlay.open{display:flex}
+.kit-flow-overlay.visible{background:rgba(0,0,0,0.75);backdrop-filter:blur(6px)}
+.kit-flow-sheet{background:var(--bg);border-radius:24px 24px 0 0;width:100%;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;padding-bottom:env(safe-area-inset-bottom,20px);transform:translateY(100%);transition:transform 0.45s cubic-bezier(0.16,1,0.3,1)}
+.kit-flow-overlay.visible .kit-flow-sheet{transform:translateY(0)}
+.kit-flow-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:0.5px solid var(--border);flex-shrink:0}
+.kit-flow-title{font-family:var(--serif);font-size:20px;color:var(--text)}
+.kit-flow-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;overflow-x:hidden;min-height:0;padding:0 20px 20px}
+.kit-flow-body::-webkit-scrollbar{display:none}
+.lib-sort-pill{flex-shrink:0;display:flex;align-items:center;justify-content:center;gap:5px;padding:0 12px;height:28px;border-radius:16px;border:0.5px solid var(--accent);background:var(--accent);cursor:pointer;transition:all 0.2s;font-family:var(--sans)}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="page">
+    <div class="page-header">
+      <div class="page-label">Self Care</div>
+      <div class="page-title">My Kit</div>
+      <div class="page-subtitle"><span id="kitSubtitleNum" style="transition:opacity 0.3s ease"></span><span id="kitSubtitleText"></span></div>
+    </div>
+    <div style="display:flex;align-items:center;padding:8px 14px 8px 20px;gap:6px;flex-shrink:0">
+      <div id="kitFilter" class="kit-filter" style="flex:1"></div>
+      <button class="lib-sort-pill" onclick="openKitSortMenu()">
+        <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M1 3h12M3 7h8M5 11h4" stroke="var(--bg)" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <select id="kitSort" onchange="renderKit()" style="position:absolute;opacity:0;pointer-events:none;width:1px;height:1px">
+        <option value="date_desc">Date ↓</option><option value="date_asc">Date ↑</option>
+        <option value="name_asc">Name ↑</option><option value="name_desc">Name ↓</option>
+        <option value="amount_desc">Amount ↓</option><option value="amount_asc">Amount ↑</option>
+      </select>
+    </div>
+    <div class="ptr-wrap" id="kitPtrWrap">
+      <div class="ptr-indicator"><div class="ptr-spinner" id="kitSpinner"><div class="ptr-spinner-ring"></div></div></div>
+      <div class="scroll" id="kitScroll"><div id="kitGrid"></div></div>
+    </div>
+  </div>
+
+  <!-- Kit Edit Overlay -->
+  <div class="kit-flow-overlay" id="kitEditOverlay" style="z-index:600">
+    <div class="kit-flow-sheet">
+      <div class="kit-flow-header">
+        <div id="kitEditTitle" style="font-family:var(--serif);font-size:20px;color:var(--text)"></div>
+        <button onclick="closeOverlay('kitEditOverlay')" style="background:var(--bg3);border:0.5px solid var(--border2);color:var(--text3);width:30px;height:30px;border-radius:50%;font-size:12px;cursor:pointer;font-family:var(--sans)">✕</button>
+      </div>
+      <div class="kit-flow-body" id="kitEditBody"></div>
+    </div>
+  </div>
+
+  <nav class="navbar">
+    <button class="nav-btn" onclick="location.href='index.html'"><span class="nav-icon">🪞</span><span class="nav-label">Routine</span></button>
+    <button class="nav-btn" onclick="location.href='library.html'"><span class="nav-icon">◈</span><span class="nav-label">Library</span></button>
+    <button class="nav-btn nav-hub" onclick="goHub()"><span class="nav-icon">Self Care</span><span class="nav-label">tap for hub</span></button>
+    <button class="nav-btn active" onclick="location.href='kit.html'"><span class="nav-icon">🧴</span><span class="nav-label">Kit</span></button>
+    <button class="nav-btn" onclick="location.href='plan.html'"><span class="nav-icon">📋</span><span class="nav-label">Plan</span></button>
+  </nav>
+  <div class="toast" id="toast"></div>
+</div>
+<script src="../js/core.js"></script>
+<script src="../js/kit.js"></script>
+<script>
+let kitItems = [];
+let kitItemFilter = 'All';
+const KIT_FILTER_STATES = ['All','Active','Backup','Passive'];
+let kitEditItem = null;
+
+function openKitSortMenu() { document.getElementById('kitSort').click(); }
+function closeKitEdit() { closeOverlay('kitEditOverlay'); }
+
+(async function init() {
+  await initKit();
+  setupPTR('kitPtrWrap','kitScroll','kitSpinner', async () => { kitItems=[]; await initKit(); });
+})();
+</script>
+</body>
+</html>
