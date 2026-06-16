@@ -47,7 +47,11 @@
 .alert-dot-low{background:var(--yellow)}
 /* section label */
 .home-section-label{font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:var(--text3);font-weight:700;padding:20px 20px 10px}
-/* PILLAR GRID — live cards wide, locked compact row */
+/* hub bottom bar */
+.hub-bar{display:flex;justify-content:center;align-items:center;padding:14px 0 calc(14px + var(--safe-bot));border-top:0.5px solid var(--border);background:var(--bg);flex-shrink:0}
+.hub-home-btn{display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:none;cursor:pointer;padding:4px 28px;color:var(--accent);font-family:var(--sans)}
+.hub-home-icon{font-size:20px;line-height:1}
+.hub-home-label{font-size:9px;letter-spacing:0.1em;text-transform:uppercase;font-weight:600;color:var(--accent)}
 .home-grid{padding:0 16px 4px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .home-grid-locked{padding:0 16px 40px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .home-card{position:relative;background:var(--bg2);border:0.5px solid var(--border);border-radius:16px;cursor:pointer;transition:all 0.2s;overflow:hidden}
@@ -144,7 +148,13 @@
 
     </div>
   </div>
-  <!-- No navbar on hub — it IS the switcher -->
+  <nav class="navbar">
+    <button class="nav-btn" onclick="location.href='self-care/index.html'"><span class="nav-icon">🪞</span><span class="nav-label">Self Care</span></button>
+    <button class="nav-btn" onclick="location.href='self-care/library.html'"><span class="nav-icon">◈</span><span class="nav-label">Library</span></button>
+    <button class="nav-btn active" style="pointer-events:none"><span class="nav-icon">⌂</span><span class="nav-label">Home</span></button>
+    <button class="nav-btn" onclick="location.href='self-care/kit.html'"><span class="nav-icon">🧴</span><span class="nav-label">Kit</span></button>
+    <button class="nav-btn" onclick="location.href='self-care/plan.html'"><span class="nav-icon">📋</span><span class="nav-label">Plan</span></button>
+  </nav>
   <div class="toast" id="toast"></div>
 </div>
 

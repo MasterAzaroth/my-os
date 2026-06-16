@@ -312,14 +312,6 @@
 <script src="../js/core.js"></script>
 <script src="../js/library.js"></script>
 <script>
-let allProducts = [], allLists = [], productListMembership = {};
-let currentFilter = 'All', currentListId = null, compareMode = false, compareIds = [];
-let formData = {}, formStep = 0, formStepCount = 0;
-let currentDetailProductId = null;
-let kitFlowProductId = null, kitFlowData = {}, kitFlowStep = 0;
-let currentKitInstances = [], selectedKitSteps = new Set(), availableSessions = [];
-let ptrAttached = new Set();
-
 function openLibSortMenu() { document.getElementById('libSort').click(); }
 
 (async function init() {
