@@ -552,7 +552,6 @@ let allLists = [];
 let productListMembership = {}; // productId -> [listId, ...]
 let productPrices = {}; // productId -> [price rows]
 let activeListFilter = 'all';
-let activeCatFilter = 'All';
 let currentDetailProduct = null;
 
 async function initLibrary() {
@@ -581,8 +580,143 @@ async function initLibrary() {
   });
 
   renderListTabs();
-  renderCategoryFilters();
+  renderTypeGrid();
+}
+
+// ============================================================
+// PRODUCT TYPE GRID (Library home view)
+// ============================================================
+let currentTypeFilter = null; // null = grid view; set = inside a type
+const UNCATEGORIZED_KEY = '__uncategorized__';
+
+function renderTypeGrid() {
+  const grid = document.getElementById('typeGrid');
+  if (!allProducts.length) {
+    grid.innerHTML = `<div class="empty-state"><div class="empty-glyph">∅</div><div class="empty-title">Nothing here yet</div><div class="empty-sub">Tap + to add your first product</div></div>`;
+    document.getElementById('azRailTypes').innerHTML = '';
+    return;
+  }
+
+  // Group products by product_type
+  const groups = {};
+  const uncategorized = [];
+  allProducts.forEach(p => {
+    if (!p.product_type) { uncategorized.push(p); return; }
+    if (!groups[p.product_type]) groups[p.product_type] = [];
+    groups[p.product_type].push(p);
+  });
+
+  const typeNames = Object.keys(groups).sort((a,b) => a.localeCompare(b));
+
+  const tileHTML = (typeName, products) => {
+    const first = products[0];
+    const thumb = first.cover_image_url || first.image_url;
+    return `<div class="type-tile" data-letter="${typeName[0].toUpperCase()}" onclick="openTypeDetail('${typeName.replace(/'/g,"\\'")}')">
+      <div class="type-tile-thumb">${thumb ? `<img src="${thumb}" alt="">` : '🧴'}</div>
+      <div class="type-tile-info">
+        <div class="type-tile-name">${escHtml(typeName)}</div>
+        <div class="type-tile-count">${products.length} product${products.length===1?'':'s'}</div>
+      </div>
+      <div class="type-tile-chevron">›</div>
+    </div>`;
+  };
+
+  let html = typeNames.map(t => tileHTML(t, groups[t])).join('');
+
+  if (uncategorized.length) {
+    html += `<div class="type-section-label">Uncategorized</div>`;
+    html += `<div class="type-tile" data-letter="#" onclick="openTypeDetail('${UNCATEGORIZED_KEY}')">
+      <div class="type-tile-thumb">${(uncategorized[0].cover_image_url||uncategorized[0].image_url) ? `<img src="${uncategorized[0].cover_image_url||uncategorized[0].image_url}" alt="">` : '❓'}</div>
+      <div class="type-tile-info">
+        <div class="type-tile-name">No product type</div>
+        <div class="type-tile-count">${uncategorized.length} product${uncategorized.length===1?'':'s'}</div>
+      </div>
+      <div class="type-tile-chevron">›</div>
+    </div>`;
+  }
+
+  grid.innerHTML = html;
+  renderAZRail('azRailTypes', typeNames, 'typeGridScroll', '.type-tile');
+}
+
+function openTypeDetail(typeName) {
+  currentTypeFilter = typeName;
+  document.getElementById('typeGridView').classList.add('hidden');
+  document.getElementById('typeDetailView').classList.add('active');
+
+  const isUncat = typeName === UNCATEGORIZED_KEY;
+  document.getElementById('typeDetailLabel').textContent = 'Self Care · Library';
+  document.getElementById('typeDetailTitle').textContent = isUncat ? 'No product type' : typeName;
+
+  renderSubcatFilters(typeName);
+  renderListTabs();
   filterLibrary();
+}
+
+function closeTypeDetail() {
+  currentTypeFilter = null;
+  document.getElementById('typeDetailView').classList.remove('active');
+  document.getElementById('typeGridView').classList.remove('hidden');
+  document.getElementById('libSearch').value = '';
+  activeSubcatFilter = 'All';
+  renderTypeGrid();
+}
+
+let activeSubcatFilter = 'All';
+function renderSubcatFilters(typeName) {
+  const row = document.getElementById('libFilterRow');
+  if (typeName === UNCATEGORIZED_KEY) { row.innerHTML = ''; return; }
+  const productsOfType = allProducts.filter(p => p.product_type === typeName);
+  const subcats = ['All', ...new Set(productsOfType.map(p => p.subcategory).filter(Boolean))];
+  if (subcats.length <= 1) { row.innerHTML = ''; return; }
+  activeSubcatFilter = 'All';
+  row.innerHTML = subcats.map(s =>
+    `<button class="lib-filter-btn${s===activeSubcatFilter?' active':''}" onclick="setSubcatFilter('${s.replace(/'/g,"\\'")}')">${escHtml(s)}</button>`
+  ).join('');
+}
+
+function setSubcatFilter(s) {
+  activeSubcatFilter = s;
+  document.querySelectorAll('#libFilterRow .lib-filter-btn').forEach(b => b.classList.toggle('active', b.textContent.trim()===s.trim()));
+  filterLibrary();
+}
+
+// ── A-Z RAIL (shared by type grid and product list) ─────────────────────────
+function renderAZRail(railId, names, scrollId, tileSelector) {
+  const rail = document.getElementById(railId);
+  if (!rail) return;
+  const present = new Set(names.map(n => (n[0]||'#').toUpperCase()));
+  const alphabet = '#ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+  rail.innerHTML = alphabet.map(letter =>
+    `<div class="az-rail-letter${present.has(letter)?'':' dim'}" data-letter="${letter}">${letter}</div>`
+  ).join('');
+
+  let touching = false;
+  const jumpTo = (letter) => {
+    const scroll = document.getElementById(scrollId);
+    if (!scroll) return;
+    const target = scroll.querySelector(`[data-letter="${letter}"]`);
+    if (target) target.scrollIntoView({block:'start'});
+    rail.querySelectorAll('.az-rail-letter').forEach(el => el.classList.toggle('active', el.dataset.letter===letter));
+  };
+
+  const handleTouch = (e) => {
+    const touch = e.touches ? e.touches[0] : e;
+    const el = document.elementFromPoint(touch.clientX, touch.clientY);
+    if (el && el.classList.contains('az-rail-letter') && !el.classList.contains('dim')) {
+      jumpTo(el.dataset.letter);
+      if (navigator.vibrate) navigator.vibrate(3);
+    }
+  };
+
+  rail.ontouchstart = (e) => { touching = true; handleTouch(e); };
+  rail.ontouchmove = (e) => { if (touching) { e.preventDefault(); handleTouch(e); } };
+  rail.ontouchend = () => { touching = false; };
+  rail.onclick = (e) => {
+    if (e.target.classList.contains('az-rail-letter') && !e.target.classList.contains('dim')) {
+      jumpTo(e.target.dataset.letter);
+    }
+  };
 }
 
 function renderListTabs() {
@@ -596,22 +730,9 @@ function renderListTabs() {
   container.innerHTML = allBtn + listBtns;
 }
 
-function renderCategoryFilters() {
-  const cats = ['All', ...new Set(allProducts.map(p=>p.category).filter(Boolean))];
-  document.getElementById('libFilterRow').innerHTML = cats.map(c =>
-    `<button class="lib-filter-btn${activeCatFilter===c?' active':''}" onclick="setCatFilter('${c}')">${c}</button>`
-  ).join('');
-}
-
 function setListFilter(id) {
   activeListFilter = id;
   renderListTabs();
-  filterLibrary();
-}
-
-function setCatFilter(cat) {
-  activeCatFilter = cat;
-  document.querySelectorAll('.lib-filter-btn').forEach(b => b.classList.toggle('active', b.textContent===cat));
   filterLibrary();
 }
 
@@ -620,16 +741,19 @@ function filterLibrary() {
   const sort = document.getElementById('libSort').value;
 
   let filtered = allProducts.filter(p => {
+    const matchType = currentTypeFilter === UNCATEGORIZED_KEY
+      ? !p.product_type
+      : p.product_type === currentTypeFilter;
     const matchSearch = !query ||
       p.name?.toLowerCase().includes(query) ||
       p.brand?.toLowerCase().includes(query) ||
       p.category?.toLowerCase().includes(query) ||
       p.product_type?.toLowerCase().includes(query) ||
       p.subcategory?.toLowerCase().includes(query);
-    const matchCat = activeCatFilter === 'All' || p.category === activeCatFilter;
+    const matchSubcat = activeSubcatFilter === 'All' || p.subcategory === activeSubcatFilter;
     const matchList = activeListFilter === 'all' ||
       (productListMembership[p.id]||[]).includes(activeListFilter);
-    return matchSearch && matchCat && matchList;
+    return matchType && matchSearch && matchSubcat && matchList;
   });
 
   // Sort
@@ -642,6 +766,7 @@ function filterLibrary() {
   });
 
   renderLibraryGrid(filtered);
+  renderAZRail('azRailProducts', filtered.map(p=>p.name||''), 'libScroll', '.lib-card');
 }
 
 function renderLibraryGrid(products) {
@@ -665,7 +790,7 @@ function renderLibraryGrid(products) {
     const cheapest = prices.length ? prices.reduce((a,b) => (a.price||999)<(b.price||999)?a:b) : null;
     const priceDisplay = cheapest ? `<span class="lib-card-price">€${Number(cheapest.price).toFixed(2)}</span>${cheapest.url ? `<span class="lib-card-link">${cheapest.url.replace(/^https?:\/\//,'').replace(/\/.*$/,'')}</span>` : ''}` : '';
 
-    return `<div class="lib-card" data-pid="${p.id}" onclick="handleCardClick('${p.id}')">
+    return `<div class="lib-card" data-pid="${p.id}" data-letter="${(p.name?.[0]||'#').toUpperCase()}" onclick="handleCardClick('${p.id}')">
       <div class="lib-card-cover">
         ${p.cover_image_url||p.image_url
           ? `<img src="${p.cover_image_url||p.image_url}" alt="${p.name}">`

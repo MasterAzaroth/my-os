@@ -32,6 +32,30 @@
 .lib-filter-btn.active{background:var(--bg3);color:var(--text);border-color:var(--border2)}
 .lib-sort-select{background:var(--bg2);border:0.5px solid var(--border);color:var(--text2);font-size:11px;padding:4px 8px;border-radius:8px;outline:none;font-family:var(--sans);cursor:pointer}
 .lib-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:4px 12px 20px}
+/* A-Z layout wrapper */
+.az-layout{display:flex;flex:1;min-height:0;overflow:hidden}
+.az-layout .ptr-wrap{flex:1;min-width:0}
+.az-rail{display:flex;flex-direction:column;align-items:center;justify-content:center;width:18px;flex-shrink:0;padding:4px 2px;gap:1px}
+.az-rail-letter{font-size:9px;font-weight:600;color:var(--text3);line-height:1.35;cursor:pointer;-webkit-user-select:none;user-select:none;width:100%;text-align:center}
+.az-rail-letter.active{color:var(--accent)}
+.az-rail-letter.dim{color:var(--border2);pointer-events:none}
+/* TYPE GRID */
+.type-tile{position:relative;background:var(--bg2);border:0.5px solid var(--border);border-radius:16px;overflow:hidden;cursor:pointer;transition:all 0.2s;margin-bottom:10px;display:flex;align-items:center;gap:12px;padding:10px}
+.type-tile:active{transform:scale(0.98);background:var(--bg3)}
+.type-tile-thumb{width:52px;height:52px;border-radius:12px;background:var(--bg3);flex-shrink:0;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--text3)}
+.type-tile-thumb img{width:100%;height:100%;object-fit:contain}
+.type-tile-info{flex:1;min-width:0}
+.type-tile-name{font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.type-tile-count{font-size:11px;color:var(--text3);margin-top:2px}
+.type-tile-chevron{color:var(--text3);font-size:16px;flex-shrink:0;padding-right:4px}
+.type-section-label{font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:var(--text3);font-weight:700;padding:18px 4px 8px}
+.type-grid-pad{padding:4px 12px 28px}
+.type-back-btn{background:var(--bg2);border:0.5px solid var(--border2);color:var(--text2);width:30px;height:30px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--sans);line-height:1}
+.type-back-btn:active{background:var(--bg3)}
+#typeGridView{display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden}
+#typeDetailView{display:none;flex-direction:column;flex:1;min-height:0;overflow:hidden}
+#typeDetailView.active{display:flex}
+#typeGridView.hidden{display:none}
 .lib-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;transition:all 0.2s;position:relative}
 .lib-card:active{transform:scale(0.97);background:var(--bg3)}
 .lib-card-cover{width:100%;aspect-ratio:1/1;background:transparent;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
@@ -168,38 +192,71 @@
 <body>
 <div class="app">
   <div class="page">
-    <div class="page-header" style="padding-bottom:12px;display:flex;align-items:center;justify-content:space-between">
-      <div><div class="page-label">Self Care</div><div class="page-title">Library</div></div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <button class="scan-btn" onclick="toggleCompareMode()" id="compareToggle" style="font-size:12px;font-family:var(--sans);width:auto;padding:0 10px;border-radius:20px">Compare</button>
-        <button class="scan-btn" onclick="openBarcodeScanner()" title="Scan barcode">⌻</button>
-        <button class="add-product-btn" onclick="openProductForm()">+</button>
-      </div>
-    </div>
-    <div class="lib-search-wrap">
-      <div class="lib-search-inner">
-        <span class="lib-search-icon">⌕</span>
-        <input class="lib-search" id="libSearch" placeholder="Search products..." oninput="filterLibrary()">
-      </div>
-    </div>
-    <div class="lib-lists">
-      <div class="lib-lists-inner" id="libLists"></div>
-      <button class="lib-sort-pill" onclick="openLibSortMenu()">
-        <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M1 3h12M3 7h8M5 11h4" stroke="var(--bg)" stroke-width="1.5" stroke-linecap="round"/></svg>
-      </button>
-      <select class="lib-sort-select" id="libSort" onchange="filterLibrary()" style="position:absolute;opacity:0;pointer-events:none;width:1px;height:1px">
-        <option value="name">Name</option><option value="brand">Brand</option><option value="rating">Rating</option><option value="newest">Newest</option>
-      </select>
-    </div>
-    <div class="lib-filter-row" id="libFilterRow"></div>
-    <div class="ptr-wrap" id="libPtrWrap">
-      <div class="ptr-indicator"><div class="ptr-spinner" id="libSpinner"><div class="ptr-spinner-ring"></div></div></div>
-      <div class="scroll" id="libScroll">
-        <div class="lib-grid" id="libGrid">
-          <div style="grid-column:span 3" class="loading"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div>
+
+    <!-- ════════ VIEW 1: PRODUCT TYPE GRID ════════ -->
+    <div id="typeGridView">
+      <div class="page-header" style="padding-bottom:12px;display:flex;align-items:center;justify-content:space-between">
+        <div><div class="page-label">Self Care</div><div class="page-title">Library</div></div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="scan-btn" onclick="openBarcodeScanner()" title="Scan barcode">⌻</button>
+          <button class="add-product-btn" onclick="openProductForm()">+</button>
         </div>
       </div>
+      <div class="az-layout">
+        <div class="ptr-wrap" id="typeGridPtrWrap">
+          <div class="ptr-indicator"><div class="ptr-spinner" id="typeGridSpinner"><div class="ptr-spinner-ring"></div></div></div>
+          <div class="scroll" id="typeGridScroll">
+            <div id="typeGrid" class="type-grid-pad"></div>
+          </div>
+        </div>
+        <div class="az-rail" id="azRailTypes"></div>
+      </div>
     </div>
+
+    <!-- ════════ VIEW 2: PRODUCTS WITHIN A TYPE ════════ -->
+    <div id="typeDetailView">
+      <div class="page-header" style="padding-bottom:12px;display:flex;align-items:center;justify-content:space-between">
+        <div style="display:flex;align-items:center;gap:10px;min-width:0">
+          <button class="type-back-btn" onclick="closeTypeDetail()">‹</button>
+          <div style="min-width:0">
+            <div class="page-label" id="typeDetailLabel">Self Care</div>
+            <div class="page-title" id="typeDetailTitle" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Product Type</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;flex-shrink:0">
+          <button class="scan-btn" onclick="toggleCompareMode()" id="compareToggle" style="font-size:12px;font-family:var(--sans);width:auto;padding:0 10px;border-radius:20px">Compare</button>
+          <button class="add-product-btn" onclick="openProductForm()">+</button>
+        </div>
+      </div>
+      <div class="lib-search-wrap">
+        <div class="lib-search-inner">
+          <span class="lib-search-icon">⌕</span>
+          <input class="lib-search" id="libSearch" placeholder="Search in this type..." oninput="filterLibrary()">
+        </div>
+      </div>
+      <div class="lib-lists">
+        <div class="lib-lists-inner" id="libLists"></div>
+        <button class="lib-sort-pill" onclick="openLibSortMenu()">
+          <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M1 3h12M3 7h8M5 11h4" stroke="var(--bg)" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+        <select class="lib-sort-select" id="libSort" onchange="filterLibrary()" style="position:absolute;opacity:0;pointer-events:none;width:1px;height:1px">
+          <option value="name">Name</option><option value="brand">Brand</option><option value="rating">Rating</option><option value="newest">Newest</option>
+        </select>
+      </div>
+      <div class="lib-filter-row" id="libFilterRow"></div>
+      <div class="az-layout">
+        <div class="ptr-wrap" id="libPtrWrap">
+          <div class="ptr-indicator"><div class="ptr-spinner" id="libSpinner"><div class="ptr-spinner-ring"></div></div></div>
+          <div class="scroll" id="libScroll">
+            <div class="lib-grid" id="libGrid">
+              <div style="grid-column:span 3" class="loading"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="az-rail" id="azRailProducts"></div>
+      </div>
+    </div>
+
   </div>
 
   <!-- PRODUCT DETAIL OVERLAY -->
@@ -318,9 +375,14 @@ function openLibSortMenu() { document.getElementById('libSort').click(); }
 
 (async function init() {
   await initLibrary();
+  setupPTR('typeGridPtrWrap','typeGridScroll','typeGridSpinner', async () => {
+    allProducts=[]; allLists=[]; productListMembership={};
+    await initLibrary();
+  });
   setupPTR('libPtrWrap','libScroll','libSpinner', async () => {
     allProducts=[]; allLists=[]; productListMembership={};
     await initLibrary();
+    if (currentTypeFilter) openTypeDetail(currentTypeFilter);
   });
 })();
 </script>
