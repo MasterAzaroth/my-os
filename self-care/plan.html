@@ -109,6 +109,25 @@
 .kit-flow-body::-webkit-scrollbar{display:none}
 .kit-flow-footer{padding:12px 20px;border-top:0.5px solid var(--border)}
 .kit-save-btn{width:100%;padding:14px;border-radius:14px;border:none;background:var(--accent);color:var(--bg);font-size:14px;font-weight:500;cursor:pointer;font-family:var(--sans)}
+
+/* PRODUCT PICKER (multi-select, Library-style cards) */
+.picker-search-wrap{padding:0 0 12px}
+.picker-search-inner{display:flex;align-items:center;background:var(--bg2);border:0.5px solid var(--border);border-radius:12px;padding:0 14px;gap:10px}
+.picker-search-icon{font-size:16px;color:var(--text3)}
+.picker-search{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-size:14px;padding:10px 0;font-family:var(--sans)}
+.picker-search::placeholder{color:var(--text3)}
+.picker-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.picker-card{position:relative;background:var(--bg2);border:0.5px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;transition:all 0.2s}
+.picker-card:active{transform:scale(0.97);background:var(--bg3)}
+.picker-card-selected{border-color:var(--accent)}
+.picker-card-cover{width:100%;aspect-ratio:1/1;background:transparent;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.picker-card-cover img{width:100%;height:100%;object-fit:contain}
+.picker-card-placeholder{font-size:32px;color:var(--text3)}
+.picker-card-check{position:absolute;top:6px;right:6px;width:20px;height:20px;border-radius:50%;background:var(--accent);color:var(--bg);font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:700}
+.picker-card-info{padding:6px 8px 8px}
+.picker-card-name{font-size:10px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.picker-card-brand{font-size:9px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.picker-done-btn{width:100%;padding:14px;border-radius:14px;border:none;background:var(--accent);color:var(--bg);font-size:14px;font-weight:600;cursor:pointer;font-family:var(--sans)}
 </style>
 </head>
 <body>
@@ -178,6 +197,26 @@
       </div>
       <div class="kit-flow-body" id="stepFormBody"></div>
       <div class="kit-flow-footer"><button class="kit-save-btn" onclick="saveStep()">Save Step</button></div>
+    </div>
+  </div>
+
+  <!-- PRODUCT PICKER (multi-select bottom sheet) -->
+  <div class="kit-flow-overlay" id="productPickerOverlay" style="z-index:550">
+    <div class="kit-flow-sheet" style="max-height:92vh">
+      <div class="kit-flow-header">
+        <div class="kit-flow-title">Link Products</div>
+        <button onclick="closeProductPicker()" style="background:var(--bg3);border:0.5px solid var(--border2);color:var(--text3);width:30px;height:30px;border-radius:50%;font-size:12px;cursor:pointer">✕</button>
+      </div>
+      <div class="kit-flow-body">
+        <div class="picker-search-wrap">
+          <div class="picker-search-inner">
+            <span class="picker-search-icon">⌕</span>
+            <input class="picker-search" id="productPickerSearch" placeholder="Search products..." oninput="renderProductPickerList(this.value)">
+          </div>
+        </div>
+        <div class="picker-grid" id="productPickerGrid"></div>
+      </div>
+      <div class="kit-flow-footer"><button class="picker-done-btn" onclick="closeProductPicker()">Done</button></div>
     </div>
   </div>
 

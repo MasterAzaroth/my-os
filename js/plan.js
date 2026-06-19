@@ -10,6 +10,7 @@ const NTH_LABELS = {1:'1st',2:'2nd',3:'3rd',4:'4th',[-1]:'Last'};
 let planTab = 'steps'; // 'steps' | 'routines' | 'schedule'
 let careSteps = [];
 let allRoutines = [];
+let stepProductLinks = {}; // care_step_id -> [productId, ...]
 let stepFormData = {};
 let routineFormData = {};
 let routineFormSteps = []; // [{care_step_id, name, body_part}]
@@ -24,12 +25,19 @@ async function initPlanner() {
 }
 
 async function loadAllPlanData() {
-  const [steps, routines] = await Promise.all([
+  const [steps, routines, links] = await Promise.all([
     api('care_steps', '?order=body_part.asc,name.asc').catch(()=>[]),
     api('routines', '?order=created_at.desc').catch(()=>[]),
+    api('care_step_products', '?select=care_step_id,product_id').catch(()=>[]),
   ]);
   careSteps = steps || [];
   allRoutines = routines || [];
+  stepProductLinks = {};
+  (links||[]).forEach(l => {
+    if (!stepProductLinks[l.care_step_id]) stepProductLinks[l.care_step_id] = [];
+    stepProductLinks[l.care_step_id].push(l.product_id);
+  });
+  await ensureProductsLoaded();
 }
 
 function switchPlanTab(tab) {
@@ -69,15 +77,21 @@ function renderStepsLibrary() {
   container.innerHTML = bodyParts.map(bp => `
     <div class="step-bp-section">
       <div class="step-bp-label">${bp}</div>
-      ${grouped[bp].map(s => `
+      ${grouped[bp].map(s => {
+        const linkedIds = stepProductLinks[s.id] || [];
+        const linkedText = linkedIds.length
+          ? `<div class="step-row-product">🔗 ${linkedIds.length===1 ? escHtml(getProductName(linkedIds[0])) : linkedIds.length+' products linked'}</div>`
+          : '<div class="step-row-product step-row-noproduct">No product linked</div>';
+        return `
         <div class="step-row" onclick="openStepDetail('${s.id}')">
           <div class="step-row-info">
             <div class="step-row-name">${escHtml(s.name)}</div>
-            ${s.product_id ? `<div class="step-row-product">🔗 ${escHtml(getProductName(s.product_id))}</div>` : '<div class="step-row-product step-row-noproduct">No product linked</div>'}
+            ${linkedText}
           </div>
           <div class="step-row-chevron">›</div>
         </div>
-      `).join('')}
+      `;
+      }).join('')}
     </div>
   `).join('');
 }
@@ -99,14 +113,22 @@ async function ensureProductsLoaded() {
   }
 }
 
+let stepFormLinkedProductIds = [];
+
 function openStepForm(existingId) {
   stepFormData = existingId ? { ...careSteps.find(s=>s.id===existingId) } : {};
-  ensureProductsLoaded().then(() => renderStepForm());
+  stepFormLinkedProductIds = [];
+  ensureProductsLoaded().then(async () => {
+    if (existingId) {
+      const links = await api('care_step_products', `?care_step_id=eq.${existingId}&select=product_id`).catch(()=>[]);
+      stepFormLinkedProductIds = (links||[]).map(l => l.product_id);
+    }
+    renderStepForm();
+  });
   openOverlay('stepFormOverlay');
 }
 
 function renderStepForm() {
-  const products = window._planAllProducts || [];
   document.getElementById('stepFormTitle').textContent = stepFormData.id ? 'Edit Step' : 'New Step';
   document.getElementById('stepFormBody').innerHTML = `
     <div class="form-field">
@@ -120,14 +142,25 @@ function renderStepForm() {
       </div>
     </div>
     <div class="form-field">
-      <div class="form-label">Linked Product (optional)</div>
-      <select class="form-input" id="sf_product">
-        <option value="">None</option>
-        ${products.map(p => `<option value="${p.id}" ${stepFormData.product_id===p.id?'selected':''}>${escHtml(p.name)}${p.brand?' — '+escHtml(p.brand):''}</option>`).join('')}
-      </select>
-      <div class="form-note">Linking a product means when you check this step off in the tracker, this product is pre-selected as what you used.</div>
+      <div class="form-label">Linked Products (optional)</div>
+      <div id="sf_linked_products">${renderLinkedProductChips()}</div>
+      <button class="form-add-price-btn" onclick="openProductPickerForStep()" style="margin-top:8px">+ Link Product</button>
+      <div class="form-note">Linked products will be selectable as "what you used" when checking this step off in the tracker.</div>
     </div>
   `;
+}
+
+function renderLinkedProductChips() {
+  if (!stepFormLinkedProductIds.length) return `<div class="form-note">No products linked yet</div>`;
+  return `<div class="form-chips-wrap">` + stepFormLinkedProductIds.map(pid => {
+    const p = (window._planAllProducts||[]).find(x=>x.id===pid);
+    return `<button class="form-chip selected" onclick="unlinkProductFromStep('${pid}')">${escHtml(p?.name||'Unknown')} ×</button>`;
+  }).join('') + `</div>`;
+}
+
+function unlinkProductFromStep(pid) {
+  stepFormLinkedProductIds = stepFormLinkedProductIds.filter(id => id !== pid);
+  document.getElementById('sf_linked_products').innerHTML = renderLinkedProductChips();
 }
 
 function selectStepBodyPart(bp) {
@@ -140,38 +173,108 @@ function closeStepForm() { closeOverlay('stepFormOverlay'); }
 async function saveStep() {
   const name = document.getElementById('sf_name')?.value.trim();
   const bodyPart = stepFormData.body_part;
-  const productId = document.getElementById('sf_product')?.value || null;
   if (!name) { showToast('Step name is required'); return; }
   if (!bodyPart) { showToast('Pick a body part'); return; }
 
-  const payload = { name, body_part: bodyPart, product_id: productId };
+  const payload = { name, body_part: bodyPart };
+  let stepId = stepFormData.id;
   let ok;
-  if (stepFormData.id) {
-    ok = await apiPatch('care_steps', `?id=eq.${stepFormData.id}`, payload);
+
+  if (stepId) {
+    ok = await apiPatch('care_steps', `?id=eq.${stepId}`, payload);
   } else {
-    ok = await apiPost('care_steps', payload);
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/care_steps`, {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+      body: JSON.stringify(payload)
+    });
+    ok = res.ok;
+    if (ok) {
+      const data = await res.json();
+      stepId = data?.[0]?.id;
+    }
   }
-  if (ok) {
-    showToast(stepFormData.id ? '✓ Step updated' : '✓ Step created');
-    closeStepForm();
-    await loadAllPlanData();
-    renderStepsLibrary();
-  } else {
-    showToast('Something went wrong');
+
+  if (!ok || !stepId) {
+    showToast('Something went wrong saving the step');
+    return;
   }
+
+  // Sync linked products: wipe and re-insert
+  await apiDelete('care_step_products', `?care_step_id=eq.${stepId}`);
+  if (stepFormLinkedProductIds.length) {
+    const rows = stepFormLinkedProductIds.map(pid => ({ care_step_id: stepId, product_id: pid }));
+    await apiPost('care_step_products', rows);
+  }
+
+  showToast(stepFormData.id ? '✓ Step updated' : '✓ Step created');
+  closeStepForm();
+  await loadAllPlanData();
+  renderStepsLibrary();
 }
+
+// ── PRODUCT PICKER (Library-style bottom sheet, multi-select) ───────────────
+
+function openProductPickerForStep() {
+  renderProductPickerList('');
+  openOverlay('productPickerOverlay');
+}
+
+function renderProductPickerList(query) {
+  const products = window._planAllProducts || [];
+  const q = (query||'').toLowerCase();
+  const filtered = products.filter(p => !q || p.name?.toLowerCase().includes(q) || p.brand?.toLowerCase().includes(q));
+
+  const grid = document.getElementById('productPickerGrid');
+  if (!filtered.length) {
+    grid.innerHTML = `<div style="grid-column:span 3" class="empty-state"><div class="empty-glyph">∅</div><div class="empty-title">No products found</div></div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(p => {
+    const isLinked = stepFormLinkedProductIds.includes(p.id);
+    return `<div class="picker-card${isLinked?' picker-card-selected':''}" onclick="toggleProductPick('${p.id}')">
+      <div class="picker-card-cover">
+        ${p.cover_image_url||p.image_url ? `<img src="${p.cover_image_url||p.image_url}" alt="">` : `<div class="picker-card-placeholder">🧴</div>`}
+        ${isLinked ? `<div class="picker-card-check">✓</div>` : ''}
+      </div>
+      <div class="picker-card-info">
+        <div class="picker-card-name">${escHtml(p.name)}</div>
+        <div class="picker-card-brand">${escHtml(p.brand||'')}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleProductPick(pid) {
+  const idx = stepFormLinkedProductIds.indexOf(pid);
+  if (idx >= 0) stepFormLinkedProductIds.splice(idx,1);
+  else stepFormLinkedProductIds.push(pid);
+  renderProductPickerList(document.getElementById('productPickerSearch')?.value || '');
+}
+
+function closeProductPicker() {
+  closeOverlay('productPickerOverlay');
+  document.getElementById('sf_linked_products').innerHTML = renderLinkedProductChips();
+}
+
+
 
 function openStepDetail(stepId) {
   const s = careSteps.find(x=>x.id===stepId);
   if (!s) return;
+  const linkedIds = stepProductLinks[s.id] || [];
+  const linkedHtml = linkedIds.length
+    ? linkedIds.map(pid => `<div class="detail-stat-val">${escHtml(getProductName(pid))}</div>`).join('')
+    : `<div class="detail-stat-val">None</div>`;
   openPlanSubpage(s.name, `
     <div class="detail-stat" style="margin-bottom:10px">
       <div class="detail-stat-label">Body Part</div>
       <div class="detail-stat-val">${s.body_part}</div>
     </div>
     <div class="detail-stat" style="margin-bottom:20px">
-      <div class="detail-stat-label">Linked Product</div>
-      <div class="detail-stat-val">${s.product_id ? escHtml(getProductName(s.product_id)) : 'None'}</div>
+      <div class="detail-stat-label">Linked Products</div>
+      ${linkedHtml}
     </div>
     <button class="form-next-btn" onclick="closePlanSubpage();openStepForm('${s.id}')" style="margin-bottom:10px">Edit Step</button>
     <button class="form-next-btn secondary" onclick="deleteStep('${s.id}')" style="color:var(--red,#c45);border-color:rgba(180,60,60,0.3)">Delete Step</button>
