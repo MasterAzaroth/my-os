@@ -3,13 +3,30 @@
 // ============================================================
 const CATEGORIES = ['🪥 Self Care','🌸 Fragrance','💊 Supplement','🏃 Movement & Exercise','🔧 Tool & Appliance'];
 const BODY_AREAS = ['🦱 Hair','🫧 Face','🧔 Facial Hair','👄 Lips','🦷 Oral','🫁 Body','🪒 Body Hair','🤲 Hands','💅 Nails','🦶 Feet'];
-const SUBCATEGORIES = {
-  '🪥 Self Care': ['Cleanser','Toner','Serum','Moisturizer','Sunscreen','Eye Cream','Mask','Exfoliator','Oil','Treatment','Scrub','Body Wash','Shampoo','Conditioner','Deodorant','Lip Balm','Mouthwash','Toothpaste'],
+const PRODUCT_TYPES = {
+  '🪥 Self Care': ['Cleanser','Toner','Serum','Face Moisturizer','Body Moisturizer','Lip Moisturizer','Sunscreen','Eye Cream','Face Mask','Exfoliator','Oil','Treatment','Scrub','Body Wash','Shampoo','Conditioner','Deodorant','Mouthwash','Toothpaste'],
   '🌸 Fragrance': ['EDP','EDT','Parfum','EDC','Extrait','Body Mist','Hair Mist'],
   '💊 Supplement': ['Vitamin','Mineral','Protein','Capsule','Powder','Tablet','Liquid'],
   '🏃 Movement & Exercise': ['Resistance Band','Weight','Mat','Clothing','Shoes','Equipment','Accessory'],
   '🔧 Tool & Appliance': ['Hair Tool','Skin Tool','Nail Tool','Oral Tool','Body Tool','Electric','Manual']
 };
+// Finer level — keyed by Product Type. Falls back to no subcategory chips if a type has none defined.
+const SUBCATEGORIES_BY_TYPE = {
+  'Cleanser': ['Foaming Cleanser','Gel Cleanser','Oil Cleanser','Micellar Water','Balm Cleanser','Powder Cleanser'],
+  'Toner': ['Hydrating Toner','Exfoliating Toner','Balancing Toner'],
+  'Serum': ['Vitamin C Serum','Hyaluronic Acid Serum','Niacinamide Serum','Retinol Serum','Peptide Serum'],
+  'Face Moisturizer': ['Gel Moisturizer','Cream Moisturizer','Lotion Moisturizer','Oil-Free Moisturizer'],
+  'Body Moisturizer': ['Body Lotion','Body Butter','Body Cream','Body Oil'],
+  'Lip Moisturizer': ['Lip Balm','Lip Mask','Lip Oil'],
+  'Sunscreen': ['Chemical Sunscreen','Mineral Sunscreen','Tinted Sunscreen'],
+  'Eye Cream': ['Hydrating Eye Cream','Brightening Eye Cream','Anti-Aging Eye Cream'],
+  'Face Mask': ['Hydrating Sheet Mask','Clay Mask','Peel-Off Mask','Sleeping Mask','Exfoliating Mask','Cream Mask'],
+  'Exfoliator': ['Physical Scrub','Chemical Exfoliant (AHA/BHA)','Exfoliating Pads'],
+  'Shampoo': ['Daily Shampoo','Clarifying Shampoo','Dry Scalp Shampoo','Volumizing Shampoo'],
+  'Conditioner': ['Daily Conditioner','Deep Conditioner','Leave-In Conditioner'],
+  'Deodorant': ['Stick Deodorant','Spray Deodorant','Roll-On Deodorant','Antiperspirant'],
+};
+
 const STATUSES = ['Owned','Not Owned'];
 const STOCKS = ['Full','Low','Empty'];
 const CONCENTRATIONS = ['Parfum','EDP','EDT','EDC','Body Mist','Hair Mist'];
@@ -123,8 +140,8 @@ function collectStep() {
     if(manualBarcode) formData._barcode = manualBarcode;
   }
   if(formStep === 1) {
-    formData.subcategory = document.getElementById('f_subcat')?.value.trim();
     formData.description = document.getElementById('f_desc')?.value.trim();
+    formData.ingredients = document.getElementById('f_ingredients')?.value.trim();
   }
   if(formStep === 3) {
     formPrices = formPrices; // already updated live
@@ -195,12 +212,18 @@ function renderFormStep() {
   }
 
   else if(formStep === 1) {
-    const subcats = SUBCATEGORIES[formData.category] || [];
     body.innerHTML = `
       <div class="form-field">
+        <div class="form-label">Product Type</div>
+        <div class="form-chips-wrap" id="typeChips">
+          ${getAllTypes(formData.category).map(t => `<button class="form-chip${formData.product_type===t?' selected':''}" onclick="selectType('${t}')">${t}</button>`).join('')}
+          <button class="form-chip" onclick="addCustomType()" style="border-style:dashed">+ Custom</button>
+        </div>
+      </div>
+      <div class="form-field" id="subcatField" style="${formData.product_type ? '' : 'display:none'}">
         <div class="form-label">Subcategory</div>
         <div class="form-chips-wrap" id="subcatChips">
-          ${getAllSubcats(formData.category).map(s => `<button class="form-chip${formData.subcategory===s?' selected':''}" onclick="selectSubcat('${s}')">${s}</button>`).join('')}
+          ${getAllSubcats(formData.product_type).map(s => `<button class="form-chip${formData.subcategory===s?' selected':''}" onclick="selectSubcat('${s}')">${s}</button>`).join('')}
           <button class="form-chip" onclick="addCustomSubcat()" style="border-style:dashed">+ Custom</button>
         </div>
       </div>
@@ -460,6 +483,7 @@ async function submitProduct() {
     name: formData.name,
     brand: formData.brand,
     category: formData.category,
+    product_type: formData.product_type||null,
     subcategory: formData.subcategory||null,
     description: formData.description||null,
     personal_notes: formData.personal_notes||null,
@@ -599,7 +623,9 @@ function filterLibrary() {
     const matchSearch = !query ||
       p.name?.toLowerCase().includes(query) ||
       p.brand?.toLowerCase().includes(query) ||
-      p.category?.toLowerCase().includes(query);
+      p.category?.toLowerCase().includes(query) ||
+      p.product_type?.toLowerCase().includes(query) ||
+      p.subcategory?.toLowerCase().includes(query);
     const matchCat = activeCatFilter === 'All' || p.category === activeCatFilter;
     const matchList = activeListFilter === 'all' ||
       (productListMembership[p.id]||[]).includes(activeListFilter);
@@ -739,7 +765,7 @@ async function openDetail(productId) {
     <div class="detail-hero">
       <div class="detail-hero-img">${heroImg}</div>
       <div class="detail-hero-info">
-        <div class="detail-hero-category">${p.category||''}${p.subcategory?' · '+p.subcategory:''}</div>
+        <div class="detail-hero-category">${p.category||''}${p.product_type?' · '+p.product_type:''}${p.subcategory?' · '+p.subcategory:''}</div>
         <div class="detail-hero-name">${p.name}</div>
         <div class="detail-hero-brand">${p.brand||''}</div>
         <div class="detail-hero-rating" id="detailRatingInline-${p.id}">
@@ -966,6 +992,7 @@ function editProduct() {
     name: p.name,
     brand: p.brand,
     category: p.category,
+    product_type: p.product_type,
     subcategory: p.subcategory,
     status: p.status,
     stock: p.stock,
@@ -1662,14 +1689,56 @@ async function saveNotes(productId) {
 }
 
 // ============================================================
-// CUSTOM SUBCATEGORIES
+// CUSTOM PRODUCT TYPES & SUBCATEGORIES
 // ============================================================
+let customTypes = JSON.parse(localStorage.getItem('customTypes')||'{}');
 let customSubcats = JSON.parse(localStorage.getItem('customSubcats')||'{}');
 
-function getAllSubcats(category) {
-  const defaults = SUBCATEGORIES[category] || [];
-  const custom = customSubcats[category] || [];
+function getAllTypes(category) {
+  const defaults = PRODUCT_TYPES[category] || [];
+  const custom = customTypes[category] || [];
   return [...new Set([...defaults, ...custom])];
+}
+
+function getAllSubcats(productType) {
+  if(!productType) return [];
+  const defaults = SUBCATEGORIES_BY_TYPE[productType] || [];
+  const custom = customSubcats[productType] || [];
+  return [...new Set([...defaults, ...custom])];
+}
+
+function selectType(t) {
+  formData.product_type = t;
+  formData.subcategory = null; // reset finer level when type changes
+  document.querySelectorAll('#typeChips .form-chip').forEach(b => {
+    b.classList.toggle('selected', b.textContent === t);
+  });
+  const field = document.getElementById('subcatField');
+  const wrap = document.getElementById('subcatChips');
+  if(field && wrap) {
+    field.style.display = '';
+    wrap.innerHTML = getAllSubcats(t).map(s =>
+      `<button class="form-chip" onclick="selectSubcat('${s}')">${s}</button>`
+    ).join('') + `<button class="form-chip" onclick="addCustomSubcat()" style="border-style:dashed">+ Custom</button>`;
+  }
+}
+
+function addCustomType() {
+  const val = prompt('Enter custom product type:');
+  if(!val || !val.trim()) return;
+  const cat = formData.category;
+  if(!customTypes[cat]) customTypes[cat] = [];
+  if(!customTypes[cat].includes(val.trim())) {
+    customTypes[cat].push(val.trim());
+    localStorage.setItem('customTypes', JSON.stringify(customTypes));
+  }
+  selectType(val.trim());
+  const wrap = document.getElementById('typeChips');
+  if(wrap) {
+    wrap.innerHTML = getAllTypes(cat).map(t =>
+      `<button class="form-chip${formData.product_type===t?' selected':''}" onclick="selectType('${t}')">${t}</button>`
+    ).join('') + `<button class="form-chip" onclick="addCustomType()" style="border-style:dashed">+ Custom</button>`;
+  }
 }
 
 function selectSubcat(s) {
@@ -1682,17 +1751,17 @@ function selectSubcat(s) {
 function addCustomSubcat() {
   const val = prompt('Enter custom subcategory name:');
   if(!val || !val.trim()) return;
-  const cat = formData.category;
-  if(!customSubcats[cat]) customSubcats[cat] = [];
-  if(!customSubcats[cat].includes(val.trim())) {
-    customSubcats[cat].push(val.trim());
+  const type = formData.product_type;
+  if(!type) { showToast('Pick a product type first'); return; }
+  if(!customSubcats[type]) customSubcats[type] = [];
+  if(!customSubcats[type].includes(val.trim())) {
+    customSubcats[type].push(val.trim());
     localStorage.setItem('customSubcats', JSON.stringify(customSubcats));
   }
   formData.subcategory = val.trim();
-  // Re-render just the subcategory chips
   const wrap = document.getElementById('subcatChips');
   if(wrap) {
-    wrap.innerHTML = getAllSubcats(cat).map(s =>
+    wrap.innerHTML = getAllSubcats(type).map(s =>
       `<button class="form-chip${formData.subcategory===s?' selected':''}" onclick="selectSubcat('${s}')">${s}</button>`
     ).join('') + `<button class="form-chip" onclick="addCustomSubcat()" style="border-style:dashed">+ Custom</button>`;
   }
