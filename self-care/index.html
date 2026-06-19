@@ -165,8 +165,8 @@ async function loadTrackerSteps() {
   trackerSteps=[];
   for(const item of items||[]) {
     if(item.item_type==='routine'&&item.routine_id) {
-      const rs=await api('routine_steps',`?routine_id=eq.${item.routine_id}&order=order_index.asc`).catch(()=>[]);
-      (rs||[]).forEach(s=>trackerSteps.push({name:s.step_name,product_id:s.product_id}));
+      const rcs=await api('routine_care_steps',`?routine_id=eq.${item.routine_id}&order=order_index.asc&select=order_index,care_steps(name,product_id)`).catch(()=>[]);
+      (rcs||[]).forEach(s=>trackerSteps.push({name:s.care_steps?.name, product_id:s.care_steps?.product_id}));
     } else if(item.item_type==='step') trackerSteps.push({name:item.step_name,product_id:item.product_id});
   }
   const dateStr=getDateStr(viewDate);

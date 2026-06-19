@@ -207,8 +207,8 @@ async function loadTodayProgress() {
       const items = await api('session_items', `?session_id=eq.${session.id}&order=order_index.asc`).catch(() => []);
       for (const item of items || []) {
         if (item.item_type === 'routine' && item.routine_id) {
-          const rs = await api('routine_steps', `?routine_id=eq.${item.routine_id}&order=order_index.asc`).catch(() => []);
-          (rs || []).forEach(s => names.push(s.step_name));
+          const rcs = await api('routine_care_steps', `?routine_id=eq.${item.routine_id}&order=order_index.asc&select=order_index,care_steps(name)`).catch(() => []);
+          (rcs || []).forEach(s => names.push(s.care_steps?.name));
         } else if (item.item_type === 'step') { names.push(item.step_name); }
       }
       const log = await api('tracker_log', `?date=eq.${dateStr}&session_id=eq.${session.id}`).catch(() => []);
