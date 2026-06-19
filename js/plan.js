@@ -266,12 +266,16 @@ function openStepDetail(stepId) {
   const linkedIds = stepProductLinks[s.id] || [];
   const products = window._planAllProducts || [];
 
+  const bpParts = s.body_part.split(' ');
+  const bpIcon = bpParts[0];
+  const bpName = bpParts.slice(1).join(' ');
+
   const linkedHtml = linkedIds.length
     ? linkedIds.map(pid => {
         const p = products.find(x => x.id === pid);
         if (!p) return '';
         const thumb = p.cover_image_url || p.image_url;
-        return `<div class="linked-product-card" onclick="location.href='library.html?product=${pid}'">
+        return `<div class="linked-product-card" onclick="openProductPreview('${pid}')">
           <div class="linked-product-thumb">${thumb ? `<img src="${thumb}" alt="">` : '🧴'}</div>
           <div class="linked-product-info">
             <div class="linked-product-name">${escHtml(p.name)}</div>
@@ -284,8 +288,11 @@ function openStepDetail(stepId) {
 
   openPlanSubpage(s.name, `
     <div class="step-detail-hero">
-      <div class="step-detail-icon">${s.body_part.split(' ')[0]}</div>
-      <div class="step-detail-bodypart">${s.body_part.split(' ').slice(1).join(' ')}</div>
+      <div class="step-detail-bp-label">Body Part</div>
+      <div class="step-detail-tag">
+        <span class="step-detail-tag-icon">${bpIcon}</span>
+        <span class="step-detail-tag-text">${bpName}</span>
+      </div>
     </div>
 
     <div class="plan-section-label">Linked Products</div>
@@ -296,6 +303,46 @@ function openStepDetail(stepId) {
       <button class="plan-action-btn plan-action-danger" onclick="deleteStep('${s.id}')">Delete Step</button>
     </div>
   `);
+}
+
+// ── LIGHTWEIGHT PRODUCT PREVIEW (read-only, stays on current page) ──────────
+
+async function openProductPreview(productId) {
+  const products = window._planAllProducts || [];
+  const p = products.find(x => x.id === productId);
+  if (!p) return;
+
+  const prices = await api('product_prices', `?product_id=eq.${productId}&order=price.asc`).catch(()=>[]);
+  const heroImg = (p.cover_image_url || p.image_url)
+    ? `<img src="${p.cover_image_url||p.image_url}" alt="">`
+    : `<div class="preview-hero-placeholder">🧴</div>`;
+  const stars = p.rating ? `★ ${p.rating}/10` : '';
+
+  const priceHtml = (prices||[]).length
+    ? prices.map(pr => `<div class="preview-price-row">
+        <div class="preview-price-source">${escHtml(pr.source_name||'Source')}</div>
+        <div class="preview-price-val">${pr.currency||'€'}${Number(pr.price).toFixed(2)}</div>
+      </div>`).join('')
+    : `<div class="form-note">No prices added yet</div>`;
+
+  document.getElementById('productPreviewBody').innerHTML = `
+    <div class="preview-hero">
+      <div class="preview-hero-img">${heroImg}</div>
+      <div class="preview-hero-info">
+        <div class="preview-hero-category">${p.category||''}${p.product_type?' · '+p.product_type:''}${p.subcategory?' · '+p.subcategory:''}</div>
+        <div class="preview-hero-name">${escHtml(p.name)}</div>
+        <div class="preview-hero-brand">${escHtml(p.brand||'')}</div>
+        ${stars ? `<div class="preview-hero-rating">${stars}</div>` : ''}
+      </div>
+    </div>
+    ${p.description ? `<div class="preview-section"><div class="preview-section-title">Description</div><div class="preview-text">${formatDescription(p.description)}</div></div>` : ''}
+    <div class="preview-section">
+      <div class="preview-section-title">Where to Buy</div>
+      ${priceHtml}
+    </div>
+    <button class="preview-open-library-btn" onclick="location.href='library.html?product=${productId}'">Open in Library →</button>
+  `;
+  openOverlay('productPreviewOverlay');
 }
 
 async function deleteStep(stepId) {
