@@ -28,8 +28,6 @@
 .lib-list-btn.active{background:var(--bg3);color:var(--text);border-color:var(--border2)}
 .lib-filter-row{display:flex;gap:6px;padding:0 20px 8px;overflow-x:auto;flex-shrink:0}
 .lib-filter-row::-webkit-scrollbar{display:none}
-.lib-filter-btn{flex-shrink:0;padding:5px 12px;border-radius:16px;border:0.5px solid var(--border);background:transparent;color:var(--text3);font-size:11px;cursor:pointer;transition:all 0.2s;font-family:var(--sans)}
-.lib-filter-btn.active{background:var(--bg3);color:var(--text);border-color:var(--border2)}
 .lib-sort-select{background:var(--bg2);border:0.5px solid var(--border);color:var(--text2);font-size:11px;padding:4px 8px;border-radius:8px;outline:none;font-family:var(--sans);cursor:pointer}
 .lib-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:4px 12px 20px}
 /* A-Z layout wrapper */
@@ -384,6 +382,11 @@ function openLibSortMenu() { document.getElementById('libSort').click(); }
     await initLibrary();
     if (currentTypeFilter) openTypeDetail(currentTypeFilter);
   });
+
+  // If navigated here with ?product=ID, jump straight to that product's detail
+  const params = new URLSearchParams(window.location.search);
+  const targetProduct = params.get('product');
+  if (targetProduct) openDetail(targetProduct);
 })();
 </script>
 </body>

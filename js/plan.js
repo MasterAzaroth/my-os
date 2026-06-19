@@ -264,20 +264,37 @@ function openStepDetail(stepId) {
   const s = careSteps.find(x=>x.id===stepId);
   if (!s) return;
   const linkedIds = stepProductLinks[s.id] || [];
+  const products = window._planAllProducts || [];
+
   const linkedHtml = linkedIds.length
-    ? linkedIds.map(pid => `<div class="detail-stat-val">${escHtml(getProductName(pid))}</div>`).join('')
-    : `<div class="detail-stat-val">None</div>`;
+    ? linkedIds.map(pid => {
+        const p = products.find(x => x.id === pid);
+        if (!p) return '';
+        const thumb = p.cover_image_url || p.image_url;
+        return `<div class="linked-product-card" onclick="location.href='library.html?product=${pid}'">
+          <div class="linked-product-thumb">${thumb ? `<img src="${thumb}" alt="">` : '🧴'}</div>
+          <div class="linked-product-info">
+            <div class="linked-product-name">${escHtml(p.name)}</div>
+            <div class="linked-product-brand">${escHtml(p.brand||'')}</div>
+          </div>
+          <div class="linked-product-chevron">›</div>
+        </div>`;
+      }).join('')
+    : `<div class="form-note" style="padding:4px 0">No products linked yet</div>`;
+
   openPlanSubpage(s.name, `
-    <div class="detail-stat" style="margin-bottom:10px">
-      <div class="detail-stat-label">Body Part</div>
-      <div class="detail-stat-val">${s.body_part}</div>
+    <div class="step-detail-hero">
+      <div class="step-detail-icon">${s.body_part.split(' ')[0]}</div>
+      <div class="step-detail-bodypart">${s.body_part.split(' ').slice(1).join(' ')}</div>
     </div>
-    <div class="detail-stat" style="margin-bottom:20px">
-      <div class="detail-stat-label">Linked Products</div>
-      ${linkedHtml}
+
+    <div class="plan-section-label">Linked Products</div>
+    <div style="margin-bottom:24px">${linkedHtml}</div>
+
+    <div class="plan-detail-actions">
+      <button class="plan-action-btn" onclick="closePlanSubpage();openStepForm('${s.id}')">Edit Step</button>
+      <button class="plan-action-btn plan-action-danger" onclick="deleteStep('${s.id}')">Delete Step</button>
     </div>
-    <button class="form-next-btn" onclick="closePlanSubpage();openStepForm('${s.id}')" style="margin-bottom:10px">Edit Step</button>
-    <button class="form-next-btn secondary" onclick="deleteStep('${s.id}')" style="color:var(--red,#c45);border-color:rgba(180,60,60,0.3)">Delete Step</button>
   `);
 }
 
@@ -625,11 +642,13 @@ async function openRoutineDetail(id) {
       <div class="form-label">Steps</div>
       ${stepList}
     </div>
-    <button class="form-next-btn" onclick="closePlanSubpage();openRoutineBuilder('${r.id}')" style="margin:16px 0 10px">Edit Routine</button>
-    ${r.is_pushed
-      ? `<button class="form-next-btn secondary" onclick="uncommitRoutines(['${r.id}'])">Uncommit (remove from tracker)</button>`
-      : `<button class="form-next-btn" onclick="pushRoutines(['${r.id}'])" style="margin-bottom:10px">Push to Tracker</button>`}
-    <button class="form-next-btn secondary" onclick="deleteRoutine('${r.id}')" style="color:var(--red,#c45);border-color:rgba(180,60,60,0.3);margin-top:10px">Delete Routine</button>
+    <div class="plan-detail-actions">
+      <button class="plan-action-btn" onclick="closePlanSubpage();openRoutineBuilder('${r.id}')">Edit Routine</button>
+      ${r.is_pushed
+        ? `<button class="plan-action-btn" onclick="uncommitRoutines(['${r.id}'])">Uncommit (remove from tracker)</button>`
+        : `<button class="form-next-btn" onclick="pushRoutines(['${r.id}'])">Push to Tracker</button>`}
+      <button class="plan-action-btn plan-action-danger" onclick="deleteRoutine('${r.id}')">Delete Routine</button>
+    </div>
   `);
 }
 
