@@ -815,430 +815,8 @@ document.getElementById('detailOverlay').addEventListener('click', function(e) {
 });
 
 // ============================================================
-// ============================================================
 // HOME ALERTS
 // ============================================================
-async function openAddToKit(productId) {
-  kitFlowProductId = productId;
-  kitFlowData = { state:'Active', container_size:null, container_unit:'ml', current_amount:null, body_areas:[], opened_date: new Date().toISOString().split('T')[0], price_paid:null, purchased_from:null, piece_amount:null, piece_unit:'ml' };
-  kitFlowLinkedSteps = [];
-
-  // Load routine steps + prices for this product
-  const [am, pm, prices] = await Promise.all([
-    api('routine_tasks','?time_of_day=eq.Morning&order=order.asc'),
-    api('routine_tasks','?time_of_day=eq.Evening&order=order.asc'),
-    api('product_prices',`?product_id=eq.${productId}&order=price.asc`)
-  ]);
-  kitFlowSteps = [...(am||[]), ...(pm||[])];
-  kitFlowPrices = prices||[];
-
-  // If prices exist — show purchase question first
-  if(kitFlowPrices.length) {
-    renderKitPurchaseQuestion();
-  } else {
-    renderKitFlow();
-  }
-  openOverlay('kitFlowOverlay');
-}
-
-let kitFlowPrices = [];
-
-function renderKitPurchaseQuestion() {
-  // Open the kit flow overlay first (empty body), then slide up the purchase overlay on top
-  renderKitFlow();
-  document.getElementById('purchaseBody').innerHTML =
-    kitFlowPrices.map((pr,i) => `
-      <button onclick="selectPurchaseSource(${i})" style="background:var(--bg2);border:0.5px solid var(--border);border-radius:12px;padding:14px 16px;text-align:left;cursor:pointer;font-family:var(--sans);transition:background 0.2s;width:100%;margin-bottom:10px;display:block">
-        <div style="font-size:13px;color:var(--text);font-weight:500">${pr.source_name||'Source'}</div>
-        <div style="font-size:12px;color:var(--text3);margin-top:2px">€${Number(pr.price).toFixed(2)} · ${pr.size_amount||'?'}${pr.size_unit||'ml'}</div>
-      </button>`).join('') +
-    `<button onclick="skipPurchaseSource()" style="background:transparent;border:0.5px solid var(--border2);border-radius:12px;padding:12px 16px;text-align:center;cursor:pointer;font-family:var(--sans);color:var(--text3);font-size:13px;width:100%;margin-top:4px">
-      Not from these sources / fill in manually
-    </button>`;
-  // Small delay so kitFlowOverlay opens first, then purchaseOverlay slides up over it
-  setTimeout(() => openOverlay('purchaseOverlay'), 80);
-}
-
-function closePurchaseOverlay() {
-  closeOverlay('purchaseOverlay');
-}
-
-function selectPurchaseSource(idx) {
-  const pr = kitFlowPrices[idx];
-  kitFlowData.container_size = pr.size_amount || null;
-  kitFlowData.container_unit = pr.size_unit || 'ml';
-  kitFlowData.current_amount = pr.size_amount || null;
-  kitFlowData.price_paid = pr.price || null;
-  kitFlowData.purchased_from = pr.source_name || null;
-  closeOverlay('purchaseOverlay', renderKitFlow);
-}
-
-function skipPurchaseSource() {
-  closeOverlay('purchaseOverlay', renderKitFlow);
-}
-
-function closeKitFlow() {
-  closeOverlay('kitFlowOverlay');
-}
-
-function renderKitFlow() {
-  const pct = kitFlowData.container_size > 0 ? Math.round((kitFlowData.current_amount/kitFlowData.container_size)*100) : 100;
-
-  document.getElementById('kitFlowBody').innerHTML = `
-    <div class="form-field">
-      <div class="form-label">Status</div>
-      <div class="form-chips-wrap">
-        ${KIT_STATES.map(s => `<button class="form-chip${kitFlowData.state===s?' selected':''}" onclick="setKitState('${s}')">${s==='Active'?'🟢':s==='Backup'?'📦':'💤'} ${s}</button>`).join('')}
-      </div>
-    </div>
-
-    <div class="form-field">
-      <div class="form-label">Container Size</div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <input class="form-input" type="number" placeholder="e.g. 200" id="kitContainerSize" value="${kitFlowData.container_size||''}" oninput="kitFlowData.container_size=parseFloat(this.value)||0;updateSliderMax()" style="flex:1">
-        <div class="form-chips-wrap">
-          ${['ml','g','pcs'].map(u=>`<button class="form-chip${kitFlowData.container_unit===u?' selected':''}" onclick="setKitUnit('${u}')">${u}</button>`).join('')}
-        </div>
-      </div>
-      ${kitFlowData.container_unit==='pcs' ? `<div style="margin-top:8px">
-        <div class="form-label" style="font-size:10px;margin-bottom:6px">Amount per piece (optional)</div>
-        <div style="display:flex;gap:8px;align-items:center">
-          <input class="form-input" type="number" placeholder="e.g. 25" value="${kitFlowData.piece_amount||''}" oninput="kitFlowData.piece_amount=parseFloat(this.value)" style="flex:1;padding:9px 12px">
-          <div class="form-chips-wrap">
-            <button class="form-chip${(kitFlowData.piece_unit||'ml')==='ml'?' selected':''}" onclick="kitFlowData.piece_unit='ml';renderKitFlow()">ml</button>
-            <button class="form-chip${(kitFlowData.piece_unit||'ml')==='g'?' selected':''}" onclick="kitFlowData.piece_unit='g';renderKitFlow()">g</button>
-          </div>
-        </div>
-      </div>` : ''}
-    </div>
-
-    <div class="form-field">
-      <div class="form-label">Price Paid (€) <span style="font-size:10px;color:var(--text3);text-transform:none;letter-spacing:0">optional</span></div>
-      <div style="display:flex;gap:8px">
-        <input class="form-input" type="number" placeholder="0.00" value="${kitFlowData.price_paid||''}" oninput="kitFlowData.price_paid=parseFloat(this.value)" style="flex:1">
-        <input class="form-input" placeholder="Where" value="${kitFlowData.purchased_from||''}" oninput="kitFlowData.purchased_from=this.value" style="flex:1">
-      </div>
-    </div>
-
-    <div class="form-field">
-      <div class="form-label">How much is left?</div>
-      <div class="amount-display">
-        <span class="amount-big">${kitFlowData.container_size ? (kitFlowData.current_amount||kitFlowData.container_size) : '—'}</span>
-        <span class="amount-total"> / ${kitFlowData.container_size||'?'} ${kitFlowData.container_unit}</span>
-      </div>
-      <div class="amount-visual" id="amountVisual" style="${!kitFlowData.container_size ? 'opacity:0.3' : ''}">
-        <div class="amount-fill-vis" style="width:${kitFlowData.container_size ? pct : 50}%"></div>
-        <div class="amount-label">${kitFlowData.container_size ? pct+'% remaining' : 'Enter size first'}</div>
-      </div>
-      <input type="range" class="form-slider" id="kitAmountSlider"
-        min="0" max="${kitFlowData.container_size||100}"
-        value="${kitFlowData.container_size ? (kitFlowData.current_amount!==null?kitFlowData.current_amount:kitFlowData.container_size) : 50}"
-        ${!kitFlowData.container_size ? 'disabled' : ''}
-        style="${!kitFlowData.container_size ? 'opacity:0.3' : ''}"
-        oninput="kitFlowData.current_amount=parseFloat(this.value);document.querySelector('.amount-big').textContent=this.value;const p=Math.round(parseFloat(this.value)/parseFloat(this.max)*100);document.querySelector('.amount-fill-vis').style.width=p+'%';document.querySelector('.amount-label').textContent=p+'% remaining'">
-    </div>
-
-    <div class="form-field">
-      <div class="form-label">Body Area <span style="font-size:10px;color:var(--text3);text-transform:none;letter-spacing:0">(optional)</span></div>
-      <div class="form-chips-wrap">
-        ${BODY_AREAS_KIT.map(a=>`<button class="form-chip${kitFlowData.body_areas.includes(a)?' selected':''}" onclick="toggleKitBodyArea('${a}',this)">${a}</button>`).join('')}
-      </div>
-    </div>
-
-    <div class="form-field">
-      <div class="form-label">Link to Routine Steps <span style="font-size:10px;color:var(--text3);text-transform:none;letter-spacing:0">(optional)</span></div>
-      <div style="display:flex;gap:8px">
-        <button class="kit-session-btn${kitFlowLinkedSteps.some(id=>kitFlowSteps.find(s=>s.id===id&&s.time_of_day==='Morning'))?' kit-session-active':''}" onclick="openStepPicker('Morning')">
-          🌅 Morning ${kitFlowLinkedSteps.filter(id=>kitFlowSteps.find(s=>s.id===id&&s.time_of_day==='Morning')).length > 0 ? `<span class="kit-step-count">${kitFlowLinkedSteps.filter(id=>kitFlowSteps.find(s=>s.id===id&&s.time_of_day==='Morning')).length}</span>` : ''}
-        </button>
-        <button class="kit-session-btn${kitFlowLinkedSteps.some(id=>kitFlowSteps.find(s=>s.id===id&&s.time_of_day==='Evening'))?' kit-session-active':''}" onclick="openStepPicker('Evening')">
-          🌙 Evening ${kitFlowLinkedSteps.filter(id=>kitFlowSteps.find(s=>s.id===id&&s.time_of_day==='Evening')).length > 0 ? `<span class="kit-step-count">${kitFlowLinkedSteps.filter(id=>kitFlowSteps.find(s=>s.id===id&&s.time_of_day==='Evening')).length}</span>` : ''}
-        </button>
-      </div>
-    </div>
-
-    <div class="form-field">
-      <div class="form-label">Opened Date</div>
-      <input class="form-input" type="date" value="${kitFlowData.opened_date}" onchange="kitFlowData.opened_date=this.value" style="width:100%;box-sizing:border-box;-webkit-appearance:none;color:var(--text2)">
-    </div>`;
-
-  // Step picker popup lives outside the kit flow body so it doesn't break the template
-  let popup = document.getElementById('stepPickerPopup');
-  if(!popup) {
-    popup = document.createElement('div');
-    popup.id = 'stepPickerPopup';
-    popup.style.cssText = 'display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.6);z-index:999;align-items:flex-end;backdrop-filter:blur(4px)';
-    popup.innerHTML = `<div style="background:var(--bg);border-radius:20px 20px 0 0;position:fixed;bottom:0;left:0;right:0;width:100%;height:70vh;display:flex;flex-direction:column;overflow:hidden;padding-bottom:env(safe-area-inset-bottom,16px)">
-      
-    </div>`;
-    document.body.appendChild(popup);
-  }
-}
-
-function setKitState(state) {
-  kitFlowData.state = state;
-  renderKitFlow();
-}
-
-function toggleKitBodyArea(area, btn) {
-  const idx = kitFlowData.body_areas.indexOf(area);
-  if(idx>-1) { kitFlowData.body_areas.splice(idx,1); btn.classList.remove('selected'); }
-  else { kitFlowData.body_areas.push(area); btn.classList.add('selected'); }
-}
-
-function toggleKitStep(stepId, btn) {
-  const idx = kitFlowLinkedSteps.indexOf(stepId);
-  if(idx>-1) { kitFlowLinkedSteps.splice(idx,1); btn.classList.remove('selected'); }
-  else { kitFlowLinkedSteps.push(stepId); btn.classList.add('selected'); }
-}
-
-async function saveKitItem() {
-  const btn = document.querySelector('.kit-save-btn');
-  btn.disabled=true; btn.textContent='Saving...';
-
-  // Create kit item
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/kit_items`, {
-    method:'POST',
-    headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`,'Content-Type':'application/json','Prefer':'return=representation'},
-    body: JSON.stringify({
-      product_id: kitFlowProductId,
-      state: kitFlowData.state,
-      container_size: kitFlowData.container_size||null,
-      container_unit: kitFlowData.container_unit,
-      current_amount: kitFlowData.current_amount||null,
-      body_areas: kitFlowData.body_areas.length ? kitFlowData.body_areas : null,
-      opened_date: kitFlowData.opened_date,
-      added_date: new Date().toISOString().split('T')[0],
-      price_paid: kitFlowData.price_paid||null,
-      purchased_from: kitFlowData.purchased_from||null,
-      ml_per_piece: kitFlowData.piece_unit==='ml' ? kitFlowData.piece_amount||null : null,
-      g_per_piece: kitFlowData.piece_unit==='g' ? kitFlowData.piece_amount||null : null
-    })
-  });
-
-  if(!res.ok) { showToast('Error saving'); btn.disabled=false; btn.textContent='Add to Kit'; return; }
-  const [kitItem] = await res.json();
-
-  // Link routine steps
-  if(kitFlowLinkedSteps.length && kitItem) {
-    await apiPost('kit_item_steps', kitFlowLinkedSteps.map(sid=>({
-      kit_item_id: kitItem.id,
-      routine_task_id: sid
-    })));
-  }
-
-  showToast('✓ Added to My Kit');
-  closeKitFlow();
-  btn.disabled=false; btn.textContent='Add to Kit';
-
-  // Refresh kit instances shown in detail
-  loadKitInstances(kitFlowProductId);
-}
-
-async function loadKitInstances(productId) {
-  const items = await api('kit_items', `?product_id=eq.${productId}&order=created_at.desc`);
-  const container = document.getElementById(`kitInstancesFor-${productId}`);
-  if(!container || !items?.length) return;
-
-  container.innerHTML = items.map(item => {
-    const pct = item.container_size > 0 ? Math.round((item.current_amount/item.container_size)*100) : 100;
-    const stateClass = item.state==='Active'?'state-active':item.state==='Backup'?'state-backup':'state-passive';
-    const stateIcon = item.state==='Active'?'🟢':item.state==='Backup'?'📦':'💤';
-    return `<div class="kit-instance-card">
-      <div class="kit-instance-state ${stateClass}">${stateIcon} ${item.state}</div>
-      ${item.container_size ? `
-        <div class="kit-instance-amount">${item.current_amount||0} <span style="font-size:13px;color:var(--text3)">/ ${item.container_size} ${item.container_unit||'ml'}</span></div>
-        <div class="kit-amount-bar"><div class="kit-amount-fill" style="width:${pct}%"></div></div>
-      ` : ''}
-      <div class="kit-instance-info">
-        ${item.opened_date ? `Opened ${item.opened_date}` : ''}
-        ${item.body_areas?.length ? ` · ${item.body_areas.join(', ')}` : ''}
-      </div>
-    </div>`;
-  }).join('');
-}
-
-// ============================================================
-// INLINE RATING + NOTES SAVE
-// ============================================================
-window._rate = function(productId, rating) { rateProduct(productId, rating); };
-
-async function rateProduct(productId, rating) {
-  // Update stars visually — use all visible hero stars since there's only one detail open at a time
-  document.querySelectorAll('.detail-hero-star').forEach((s,i) => {
-    s.classList.toggle('filled', i < rating);
-  });
-
-  // Save to DB
-  await fetch(`${SUPABASE_URL}/rest/v1/products?id=eq.${productId}`, {
-    method:'PATCH',
-    headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`,'Content-Type':'application/json'},
-    body: JSON.stringify({rating})
-  });
-
-  const p = allProducts.find(x=>x.id===productId);
-  if(p) p.rating = rating;
-  showToast(`★ ${rating}/10 saved`);
-}
-
-async function saveNotes(productId) {
-  const notes = document.getElementById(`detailNotes-${productId}`)?.value;
-  await fetch(`${SUPABASE_URL}/rest/v1/products?id=eq.${productId}`, {
-    method:'PATCH',
-    headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`,'Content-Type':'application/json'},
-    body: JSON.stringify({personal_notes: notes})
-  });
-  const p = allProducts.find(x=>x.id===productId);
-  if(p) p.personal_notes = notes;
-  showToast('Notes saved');
-}
-
-// ============================================================
-// CUSTOM SUBCATEGORIES
-// ============================================================
-let customSubcats = JSON.parse(localStorage.getItem('customSubcats')||'{}');
-
-function getAllSubcats(category) {
-  const defaults = SUBCATEGORIES[category] || [];
-  const custom = customSubcats[category] || [];
-  return [...new Set([...defaults, ...custom])];
-}
-
-function selectSubcat(s) {
-  formData.subcategory = s;
-  document.querySelectorAll('#subcatChips .form-chip').forEach(b => {
-    b.classList.toggle('selected', b.textContent === s);
-  });
-}
-
-function addCustomSubcat() {
-  const val = prompt('Enter custom subcategory name:');
-  if(!val || !val.trim()) return;
-  const cat = formData.category;
-  if(!customSubcats[cat]) customSubcats[cat] = [];
-  if(!customSubcats[cat].includes(val.trim())) {
-    customSubcats[cat].push(val.trim());
-    localStorage.setItem('customSubcats', JSON.stringify(customSubcats));
-  }
-  formData.subcategory = val.trim();
-  // Re-render just the subcategory chips
-  const wrap = document.getElementById('subcatChips');
-  if(wrap) {
-    wrap.innerHTML = getAllSubcats(cat).map(s =>
-      `<button class="form-chip${formData.subcategory===s?' selected':''}" onclick="selectSubcat('${s}')">${s}</button>`
-    ).join('') + `<button class="form-chip" onclick="addCustomSubcat()" style="border-style:dashed">+ Custom</button>`;
-  }
-}
-
-// ============================================================
-// KIT FLOW HELPERS — fix keyboard + slider
-// ============================================================
-function setKitUnit(unit) {
-  kitFlowData.container_unit = unit;
-  // Preserve typed value before re-render
-  const val = document.getElementById('kitContainerSize')?.value;
-  if(val) kitFlowData.container_size = parseFloat(val)||0;
-  renderKitFlow();
-}
-
-function updateSliderMax() {
-  // Read current typed value directly from input
-  const input = document.getElementById('kitContainerSize');
-  const size = parseFloat(input?.value) || 0;
-  kitFlowData.container_size = size;
-
-  const slider = document.getElementById('kitAmountSlider');
-  const big = document.querySelector('.amount-big');
-  const fill = document.querySelector('.amount-fill-vis');
-  const label = document.querySelector('.amount-label');
-  const total = document.querySelector('.amount-total');
-
-  if(slider) {
-    if(size > 0) {
-      slider.disabled = false;
-      slider.style.opacity = '1';
-      slider.max = size;
-      slider.value = size;
-      kitFlowData.current_amount = size;
-      const pct = 100;
-      if(big) big.textContent = size;
-      if(fill) fill.style.width = '100%';
-      if(label) label.textContent = '100% remaining';
-      if(total) total.textContent = ' / ' + size + ' ' + kitFlowData.container_unit;
-      const visual = document.getElementById('amountVisual');
-      if(visual) visual.style.opacity = '1';
-    } else {
-      slider.disabled = true;
-      slider.style.opacity = '0.3';
-      slider.max = 100;
-      slider.value = 50;
-      if(big) big.textContent = '—';
-      if(total) total.textContent = ' / ? ' + kitFlowData.container_unit;
-      if(fill) fill.style.width = '50%';
-      if(label) label.textContent = 'Enter size first';
-      const visual = document.getElementById('amountVisual');
-      if(visual) visual.style.opacity = '0.3';
-    }
-  }
-}
-
-// ============================================================
-// STEP PICKER
-// ============================================================
-let stepPickerSession = 'Morning';
-
-function openStepPicker(session) {
-  stepPickerSession = session;
-  const overlay = document.getElementById('stepPickerOverlay');
-  const title = document.getElementById('stepPickerTitle');
-  const list = document.getElementById('stepPickerList');
-  if(!overlay || !title || !list) return;
-
-  title.textContent = session === 'Morning' ? '🌅 Morning Steps' : '🌙 Evening Steps';
-  // Deduplicate by name
-  const seen = new Set();
-  const steps = kitFlowSteps.filter(s => {
-    if(s.time_of_day !== session) return false;
-    if(seen.has(s.name)) return false;
-    seen.add(s.name);
-    return true;
-  });
-
-  list.innerHTML = `<div style="display:flex;flex-wrap:wrap;gap:8px;align-content:flex-start">` +
-    steps.map(s => `
-    <button class="form-chip${kitFlowLinkedSteps.includes(s.id)?' selected':''}"
-      onclick="toggleKitStep('${s.id}', this)" style="padding:8px 14px;font-size:12px">
-      ${s.name}
-    </button>`).join('') + `</div>`;
-
-  openOverlay('stepPickerOverlay');
-}
-
-function closeStepPicker() {
-  closeOverlay('stepPickerOverlay');
-  // Clean up orphan popup div if it exists (legacy)
-  const orphan = document.getElementById('stepPickerPopup');
-  if(orphan) orphan.remove();
-  // Re-render kit flow to update button counts
-  const size = document.getElementById('kitContainerSize')?.value;
-  if(size) kitFlowData.container_size = parseFloat(size)||0;
-  renderKitFlow();
-}
-
-initHome();
-// Show home screen on load
-requestAnimationFrame(() => requestAnimationFrame(() => {
-  document.getElementById('screen-home').classList.add('visible');
-}));
-
-
-// ── PLANNER ──────────────────────────────────────────────────────────────────
-
-// planner vars moved to global scope
-
-async function initPlanner() {
-  await loadPlannerData();
-  switchPlannerTab(plannerActiveTab, true);
 async function loadHomeAlerts() {
   const today = new Date();
   const data = await api('products', '?status=eq.Owned&order=name.asc');
@@ -1809,3 +1387,409 @@ let kitFlowSteps = [];
 let kitFlowLinkedSteps = [];
 
 async function openAddToKit(productId) {
+  kitFlowProductId = productId;
+  kitFlowData = { state:'Active', container_size:null, container_unit:'ml', current_amount:null, body_areas:[], opened_date: new Date().toISOString().split('T')[0], price_paid:null, purchased_from:null, piece_amount:null, piece_unit:'ml' };
+  kitFlowLinkedSteps = [];
+
+  // Load routine steps + prices for this product
+  const [am, pm, prices] = await Promise.all([
+    api('routine_tasks','?time_of_day=eq.Morning&order=order.asc'),
+    api('routine_tasks','?time_of_day=eq.Evening&order=order.asc'),
+    api('product_prices',`?product_id=eq.${productId}&order=price.asc`)
+  ]);
+  kitFlowSteps = [...(am||[]), ...(pm||[])];
+  kitFlowPrices = prices||[];
+
+  // If prices exist — show purchase question first
+  if(kitFlowPrices.length) {
+    renderKitPurchaseQuestion();
+  } else {
+    renderKitFlow();
+  }
+  openOverlay('kitFlowOverlay');
+}
+
+let kitFlowPrices = [];
+
+function renderKitPurchaseQuestion() {
+  // Open the kit flow overlay first (empty body), then slide up the purchase overlay on top
+  renderKitFlow();
+  document.getElementById('purchaseBody').innerHTML =
+    kitFlowPrices.map((pr,i) => `
+      <button onclick="selectPurchaseSource(${i})" style="background:var(--bg2);border:0.5px solid var(--border);border-radius:12px;padding:14px 16px;text-align:left;cursor:pointer;font-family:var(--sans);transition:background 0.2s;width:100%;margin-bottom:10px;display:block">
+        <div style="font-size:13px;color:var(--text);font-weight:500">${pr.source_name||'Source'}</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:2px">€${Number(pr.price).toFixed(2)} · ${pr.size_amount||'?'}${pr.size_unit||'ml'}</div>
+      </button>`).join('') +
+    `<button onclick="skipPurchaseSource()" style="background:transparent;border:0.5px solid var(--border2);border-radius:12px;padding:12px 16px;text-align:center;cursor:pointer;font-family:var(--sans);color:var(--text3);font-size:13px;width:100%;margin-top:4px">
+      Not from these sources / fill in manually
+    </button>`;
+  // Small delay so kitFlowOverlay opens first, then purchaseOverlay slides up over it
+  setTimeout(() => openOverlay('purchaseOverlay'), 80);
+}
+
+function closePurchaseOverlay() {
+  closeOverlay('purchaseOverlay');
+}
+
+function selectPurchaseSource(idx) {
+  const pr = kitFlowPrices[idx];
+  kitFlowData.container_size = pr.size_amount || null;
+  kitFlowData.container_unit = pr.size_unit || 'ml';
+  kitFlowData.current_amount = pr.size_amount || null;
+  kitFlowData.price_paid = pr.price || null;
+  kitFlowData.purchased_from = pr.source_name || null;
+  closeOverlay('purchaseOverlay', renderKitFlow);
+}
+
+function skipPurchaseSource() {
+  closeOverlay('purchaseOverlay', renderKitFlow);
+}
+
+function closeKitFlow() {
+  closeOverlay('kitFlowOverlay');
+}
+
+function renderKitFlow() {
+  const pct = kitFlowData.container_size > 0 ? Math.round((kitFlowData.current_amount/kitFlowData.container_size)*100) : 100;
+
+  document.getElementById('kitFlowBody').innerHTML = `
+    <div class="form-field">
+      <div class="form-label">Status</div>
+      <div class="form-chips-wrap">
+        ${KIT_STATES.map(s => `<button class="form-chip${kitFlowData.state===s?' selected':''}" onclick="setKitState('${s}')">${s==='Active'?'🟢':s==='Backup'?'📦':'💤'} ${s}</button>`).join('')}
+      </div>
+    </div>
+
+    <div class="form-field">
+      <div class="form-label">Container Size</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input class="form-input" type="number" placeholder="e.g. 200" id="kitContainerSize" value="${kitFlowData.container_size||''}" oninput="kitFlowData.container_size=parseFloat(this.value)||0;updateSliderMax()" style="flex:1">
+        <div class="form-chips-wrap">
+          ${['ml','g','pcs'].map(u=>`<button class="form-chip${kitFlowData.container_unit===u?' selected':''}" onclick="setKitUnit('${u}')">${u}</button>`).join('')}
+        </div>
+      </div>
+      ${kitFlowData.container_unit==='pcs' ? `<div style="margin-top:8px">
+        <div class="form-label" style="font-size:10px;margin-bottom:6px">Amount per piece (optional)</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input class="form-input" type="number" placeholder="e.g. 25" value="${kitFlowData.piece_amount||''}" oninput="kitFlowData.piece_amount=parseFloat(this.value)" style="flex:1;padding:9px 12px">
+          <div class="form-chips-wrap">
+            <button class="form-chip${(kitFlowData.piece_unit||'ml')==='ml'?' selected':''}" onclick="kitFlowData.piece_unit='ml';renderKitFlow()">ml</button>
+            <button class="form-chip${(kitFlowData.piece_unit||'ml')==='g'?' selected':''}" onclick="kitFlowData.piece_unit='g';renderKitFlow()">g</button>
+          </div>
+        </div>
+      </div>` : ''}
+    </div>
+
+    <div class="form-field">
+      <div class="form-label">Price Paid (€) <span style="font-size:10px;color:var(--text3);text-transform:none;letter-spacing:0">optional</span></div>
+      <div style="display:flex;gap:8px">
+        <input class="form-input" type="number" placeholder="0.00" value="${kitFlowData.price_paid||''}" oninput="kitFlowData.price_paid=parseFloat(this.value)" style="flex:1">
+        <input class="form-input" placeholder="Where" value="${kitFlowData.purchased_from||''}" oninput="kitFlowData.purchased_from=this.value" style="flex:1">
+      </div>
+    </div>
+
+    <div class="form-field">
+      <div class="form-label">How much is left?</div>
+      <div class="amount-display">
+        <span class="amount-big">${kitFlowData.container_size ? (kitFlowData.current_amount||kitFlowData.container_size) : '—'}</span>
+        <span class="amount-total"> / ${kitFlowData.container_size||'?'} ${kitFlowData.container_unit}</span>
+      </div>
+      <div class="amount-visual" id="amountVisual" style="${!kitFlowData.container_size ? 'opacity:0.3' : ''}">
+        <div class="amount-fill-vis" style="width:${kitFlowData.container_size ? pct : 50}%"></div>
+        <div class="amount-label">${kitFlowData.container_size ? pct+'% remaining' : 'Enter size first'}</div>
+      </div>
+      <input type="range" class="form-slider" id="kitAmountSlider"
+        min="0" max="${kitFlowData.container_size||100}"
+        value="${kitFlowData.container_size ? (kitFlowData.current_amount!==null?kitFlowData.current_amount:kitFlowData.container_size) : 50}"
+        ${!kitFlowData.container_size ? 'disabled' : ''}
+        style="${!kitFlowData.container_size ? 'opacity:0.3' : ''}"
+        oninput="kitFlowData.current_amount=parseFloat(this.value);document.querySelector('.amount-big').textContent=this.value;const p=Math.round(parseFloat(this.value)/parseFloat(this.max)*100);document.querySelector('.amount-fill-vis').style.width=p+'%';document.querySelector('.amount-label').textContent=p+'% remaining'">
+    </div>
+
+    <div class="form-field">
+      <div class="form-label">Body Area <span style="font-size:10px;color:var(--text3);text-transform:none;letter-spacing:0">(optional)</span></div>
+      <div class="form-chips-wrap">
+        ${BODY_AREAS_KIT.map(a=>`<button class="form-chip${kitFlowData.body_areas.includes(a)?' selected':''}" onclick="toggleKitBodyArea('${a}',this)">${a}</button>`).join('')}
+      </div>
+    </div>
+
+    <div class="form-field">
+      <div class="form-label">Link to Routine Steps <span style="font-size:10px;color:var(--text3);text-transform:none;letter-spacing:0">(optional)</span></div>
+      <div style="display:flex;gap:8px">
+        <button class="kit-session-btn${kitFlowLinkedSteps.some(id=>kitFlowSteps.find(s=>s.id===id&&s.time_of_day==='Morning'))?' kit-session-active':''}" onclick="openStepPicker('Morning')">
+          🌅 Morning ${kitFlowLinkedSteps.filter(id=>kitFlowSteps.find(s=>s.id===id&&s.time_of_day==='Morning')).length > 0 ? `<span class="kit-step-count">${kitFlowLinkedSteps.filter(id=>kitFlowSteps.find(s=>s.id===id&&s.time_of_day==='Morning')).length}</span>` : ''}
+        </button>
+        <button class="kit-session-btn${kitFlowLinkedSteps.some(id=>kitFlowSteps.find(s=>s.id===id&&s.time_of_day==='Evening'))?' kit-session-active':''}" onclick="openStepPicker('Evening')">
+          🌙 Evening ${kitFlowLinkedSteps.filter(id=>kitFlowSteps.find(s=>s.id===id&&s.time_of_day==='Evening')).length > 0 ? `<span class="kit-step-count">${kitFlowLinkedSteps.filter(id=>kitFlowSteps.find(s=>s.id===id&&s.time_of_day==='Evening')).length}</span>` : ''}
+        </button>
+      </div>
+    </div>
+
+    <div class="form-field">
+      <div class="form-label">Opened Date</div>
+      <input class="form-input" type="date" value="${kitFlowData.opened_date}" onchange="kitFlowData.opened_date=this.value" style="width:100%;box-sizing:border-box;-webkit-appearance:none;color:var(--text2)">
+    </div>`;
+
+  // Step picker popup lives outside the kit flow body so it doesn't break the template
+  let popup = document.getElementById('stepPickerPopup');
+  if(!popup) {
+    popup = document.createElement('div');
+    popup.id = 'stepPickerPopup';
+    popup.style.cssText = 'display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.6);z-index:999;align-items:flex-end;backdrop-filter:blur(4px)';
+    popup.innerHTML = `<div style="background:var(--bg);border-radius:20px 20px 0 0;position:fixed;bottom:0;left:0;right:0;width:100%;height:70vh;display:flex;flex-direction:column;overflow:hidden;padding-bottom:env(safe-area-inset-bottom,16px)">
+      
+    </div>`;
+    document.body.appendChild(popup);
+  }
+}
+
+function setKitState(state) {
+  kitFlowData.state = state;
+  renderKitFlow();
+}
+
+function toggleKitBodyArea(area, btn) {
+  const idx = kitFlowData.body_areas.indexOf(area);
+  if(idx>-1) { kitFlowData.body_areas.splice(idx,1); btn.classList.remove('selected'); }
+  else { kitFlowData.body_areas.push(area); btn.classList.add('selected'); }
+}
+
+function toggleKitStep(stepId, btn) {
+  const idx = kitFlowLinkedSteps.indexOf(stepId);
+  if(idx>-1) { kitFlowLinkedSteps.splice(idx,1); btn.classList.remove('selected'); }
+  else { kitFlowLinkedSteps.push(stepId); btn.classList.add('selected'); }
+}
+
+async function saveKitItem() {
+  const btn = document.querySelector('.kit-save-btn');
+  btn.disabled=true; btn.textContent='Saving...';
+
+  // Create kit item
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/kit_items`, {
+    method:'POST',
+    headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`,'Content-Type':'application/json','Prefer':'return=representation'},
+    body: JSON.stringify({
+      product_id: kitFlowProductId,
+      state: kitFlowData.state,
+      container_size: kitFlowData.container_size||null,
+      container_unit: kitFlowData.container_unit,
+      current_amount: kitFlowData.current_amount||null,
+      body_areas: kitFlowData.body_areas.length ? kitFlowData.body_areas : null,
+      opened_date: kitFlowData.opened_date,
+      added_date: new Date().toISOString().split('T')[0],
+      price_paid: kitFlowData.price_paid||null,
+      purchased_from: kitFlowData.purchased_from||null,
+      ml_per_piece: kitFlowData.piece_unit==='ml' ? kitFlowData.piece_amount||null : null,
+      g_per_piece: kitFlowData.piece_unit==='g' ? kitFlowData.piece_amount||null : null
+    })
+  });
+
+  if(!res.ok) { showToast('Error saving'); btn.disabled=false; btn.textContent='Add to Kit'; return; }
+  const [kitItem] = await res.json();
+
+  // Link routine steps
+  if(kitFlowLinkedSteps.length && kitItem) {
+    await apiPost('kit_item_steps', kitFlowLinkedSteps.map(sid=>({
+      kit_item_id: kitItem.id,
+      routine_task_id: sid
+    })));
+  }
+
+  showToast('✓ Added to My Kit');
+  closeKitFlow();
+  btn.disabled=false; btn.textContent='Add to Kit';
+
+  // Refresh kit instances shown in detail
+  loadKitInstances(kitFlowProductId);
+}
+
+async function loadKitInstances(productId) {
+  const items = await api('kit_items', `?product_id=eq.${productId}&order=created_at.desc`);
+  const container = document.getElementById(`kitInstancesFor-${productId}`);
+  if(!container || !items?.length) return;
+
+  container.innerHTML = items.map(item => {
+    const pct = item.container_size > 0 ? Math.round((item.current_amount/item.container_size)*100) : 100;
+    const stateClass = item.state==='Active'?'state-active':item.state==='Backup'?'state-backup':'state-passive';
+    const stateIcon = item.state==='Active'?'🟢':item.state==='Backup'?'📦':'💤';
+    return `<div class="kit-instance-card">
+      <div class="kit-instance-state ${stateClass}">${stateIcon} ${item.state}</div>
+      ${item.container_size ? `
+        <div class="kit-instance-amount">${item.current_amount||0} <span style="font-size:13px;color:var(--text3)">/ ${item.container_size} ${item.container_unit||'ml'}</span></div>
+        <div class="kit-amount-bar"><div class="kit-amount-fill" style="width:${pct}%"></div></div>
+      ` : ''}
+      <div class="kit-instance-info">
+        ${item.opened_date ? `Opened ${item.opened_date}` : ''}
+        ${item.body_areas?.length ? ` · ${item.body_areas.join(', ')}` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ============================================================
+// INLINE RATING + NOTES SAVE
+// ============================================================
+window._rate = function(productId, rating) { rateProduct(productId, rating); };
+
+async function rateProduct(productId, rating) {
+  // Update stars visually — use all visible hero stars since there's only one detail open at a time
+  document.querySelectorAll('.detail-hero-star').forEach((s,i) => {
+    s.classList.toggle('filled', i < rating);
+  });
+
+  // Save to DB
+  await fetch(`${SUPABASE_URL}/rest/v1/products?id=eq.${productId}`, {
+    method:'PATCH',
+    headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`,'Content-Type':'application/json'},
+    body: JSON.stringify({rating})
+  });
+
+  const p = allProducts.find(x=>x.id===productId);
+  if(p) p.rating = rating;
+  showToast(`★ ${rating}/10 saved`);
+}
+
+async function saveNotes(productId) {
+  const notes = document.getElementById(`detailNotes-${productId}`)?.value;
+  await fetch(`${SUPABASE_URL}/rest/v1/products?id=eq.${productId}`, {
+    method:'PATCH',
+    headers:{'apikey':SUPABASE_KEY,'Authorization':`Bearer ${SUPABASE_KEY}`,'Content-Type':'application/json'},
+    body: JSON.stringify({personal_notes: notes})
+  });
+  const p = allProducts.find(x=>x.id===productId);
+  if(p) p.personal_notes = notes;
+  showToast('Notes saved');
+}
+
+// ============================================================
+// CUSTOM SUBCATEGORIES
+// ============================================================
+let customSubcats = JSON.parse(localStorage.getItem('customSubcats')||'{}');
+
+function getAllSubcats(category) {
+  const defaults = SUBCATEGORIES[category] || [];
+  const custom = customSubcats[category] || [];
+  return [...new Set([...defaults, ...custom])];
+}
+
+function selectSubcat(s) {
+  formData.subcategory = s;
+  document.querySelectorAll('#subcatChips .form-chip').forEach(b => {
+    b.classList.toggle('selected', b.textContent === s);
+  });
+}
+
+function addCustomSubcat() {
+  const val = prompt('Enter custom subcategory name:');
+  if(!val || !val.trim()) return;
+  const cat = formData.category;
+  if(!customSubcats[cat]) customSubcats[cat] = [];
+  if(!customSubcats[cat].includes(val.trim())) {
+    customSubcats[cat].push(val.trim());
+    localStorage.setItem('customSubcats', JSON.stringify(customSubcats));
+  }
+  formData.subcategory = val.trim();
+  // Re-render just the subcategory chips
+  const wrap = document.getElementById('subcatChips');
+  if(wrap) {
+    wrap.innerHTML = getAllSubcats(cat).map(s =>
+      `<button class="form-chip${formData.subcategory===s?' selected':''}" onclick="selectSubcat('${s}')">${s}</button>`
+    ).join('') + `<button class="form-chip" onclick="addCustomSubcat()" style="border-style:dashed">+ Custom</button>`;
+  }
+}
+
+// ============================================================
+// KIT FLOW HELPERS — fix keyboard + slider
+// ============================================================
+function setKitUnit(unit) {
+  kitFlowData.container_unit = unit;
+  // Preserve typed value before re-render
+  const val = document.getElementById('kitContainerSize')?.value;
+  if(val) kitFlowData.container_size = parseFloat(val)||0;
+  renderKitFlow();
+}
+
+function updateSliderMax() {
+  // Read current typed value directly from input
+  const input = document.getElementById('kitContainerSize');
+  const size = parseFloat(input?.value) || 0;
+  kitFlowData.container_size = size;
+
+  const slider = document.getElementById('kitAmountSlider');
+  const big = document.querySelector('.amount-big');
+  const fill = document.querySelector('.amount-fill-vis');
+  const label = document.querySelector('.amount-label');
+  const total = document.querySelector('.amount-total');
+
+  if(slider) {
+    if(size > 0) {
+      slider.disabled = false;
+      slider.style.opacity = '1';
+      slider.max = size;
+      slider.value = size;
+      kitFlowData.current_amount = size;
+      const pct = 100;
+      if(big) big.textContent = size;
+      if(fill) fill.style.width = '100%';
+      if(label) label.textContent = '100% remaining';
+      if(total) total.textContent = ' / ' + size + ' ' + kitFlowData.container_unit;
+      const visual = document.getElementById('amountVisual');
+      if(visual) visual.style.opacity = '1';
+    } else {
+      slider.disabled = true;
+      slider.style.opacity = '0.3';
+      slider.max = 100;
+      slider.value = 50;
+      if(big) big.textContent = '—';
+      if(total) total.textContent = ' / ? ' + kitFlowData.container_unit;
+      if(fill) fill.style.width = '50%';
+      if(label) label.textContent = 'Enter size first';
+      const visual = document.getElementById('amountVisual');
+      if(visual) visual.style.opacity = '0.3';
+    }
+  }
+}
+
+// ============================================================
+// STEP PICKER
+// ============================================================
+let stepPickerSession = 'Morning';
+
+function openStepPicker(session) {
+  stepPickerSession = session;
+  const overlay = document.getElementById('stepPickerOverlay');
+  const title = document.getElementById('stepPickerTitle');
+  const list = document.getElementById('stepPickerList');
+  if(!overlay || !title || !list) return;
+
+  title.textContent = session === 'Morning' ? '🌅 Morning Steps' : '🌙 Evening Steps';
+  // Deduplicate by name
+  const seen = new Set();
+  const steps = kitFlowSteps.filter(s => {
+    if(s.time_of_day !== session) return false;
+    if(seen.has(s.name)) return false;
+    seen.add(s.name);
+    return true;
+  });
+
+  list.innerHTML = `<div style="display:flex;flex-wrap:wrap;gap:8px;align-content:flex-start">` +
+    steps.map(s => `
+    <button class="form-chip${kitFlowLinkedSteps.includes(s.id)?' selected':''}"
+      onclick="toggleKitStep('${s.id}', this)" style="padding:8px 14px;font-size:12px">
+      ${s.name}
+    </button>`).join('') + `</div>`;
+
+  openOverlay('stepPickerOverlay');
+}
+
+function closeStepPicker() {
+  closeOverlay('stepPickerOverlay');
+  // Clean up orphan popup div if it exists (legacy)
+  const orphan = document.getElementById('stepPickerPopup');
+  if(orphan) orphan.remove();
+  // Re-render kit flow to update button counts
+  const size = document.getElementById('kitContainerSize')?.value;
+  if(size) kitFlowData.container_size = parseFloat(size)||0;
+  renderKitFlow();
+}
+

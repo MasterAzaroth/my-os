@@ -554,5 +554,3 @@ async function deletePlannerItem(table, id) {
 
 // ── END PLANNER ───────────────────────────────────────────────────────────────
 
-</script>
-</body>

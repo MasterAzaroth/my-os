@@ -269,16 +269,6 @@ function closeKitEdit() {
 }
 // ─────────────────────────────────────────────────────────────────────────────
 
-function formatRelativeDate(dateStr) {
-  const d = new Date(dateStr);
-  const diff = Math.floor((new Date() - d) / 86400000);
-  if(diff === 0) return 'today';
-  if(diff === 1) return 'yesterday';
-  if(diff < 30) return diff+'d ago';
-  if(diff < 365) return Math.floor(diff/30)+'mo ago';
-  return Math.floor(diff/365)+'y ago';
-}
-
 // SAVE STATE
 function activateSave() {
   hasChanges = true;
